@@ -1,0 +1,19 @@
+#pragma once
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <wrl.h>
+#include <d3d12.h>
+#include <dxgi1_6.h>
+#include <vector>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <d3dcompiler.h>
+#include <DirectXCollision.h>
+#include <d3dx12.h>
+#include <define.h>
+#include <EngineTypes.h>
+#include "Input/Input.h"
+#include "Helper.h"
+
+using Microsoft::WRL::ComPtr;
