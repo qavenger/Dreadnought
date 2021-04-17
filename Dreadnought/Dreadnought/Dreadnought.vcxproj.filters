@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{80c1886f-71e8-4622-93bf-e0e5cb7165b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Entry">
+      <UniqueIdentifier>{ee138249-8a0b-4bf5-b23e-0c5c566cca38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Window">
+      <UniqueIdentifier>{018ef6a4-0f10-4f57-85d8-da690d875eda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Input">
+      <UniqueIdentifier>{adc0f3e7-ae0f-4179-98e2-113ba517bce7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shared">
+      <UniqueIdentifier>{f563375a-59e6-457d-8186-9ab13d4e9415}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Graphics">
+      <UniqueIdentifier>{a6ed0449-02a9-4b2e-94d0-75cc35d077b9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Shared\pch.cpp">
+      <Filter>Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Shared\Timer.cpp">
+      <Filter>Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Entry\Entry.cpp">
+      <Filter>Source\Entry</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Window\Window.cpp">
+      <Filter>Source\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Input\Input.cpp">
+      <Filter>Source\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Graphics.cpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Shared\Helper.cpp">
+      <Filter>Source\Shared</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Shared\pch.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shared\Timer.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shared\d3dx12.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Window\Window.h">
+      <Filter>Source\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shared\define.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shared\EngineTypes.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Input\Input.h">
+      <Filter>Source\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\Graphics.h">
+      <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Shared\Helper.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
