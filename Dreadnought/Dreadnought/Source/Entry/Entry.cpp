@@ -1,8 +1,14 @@
 #include <pch.h>
+#include "Core/Engine.h"
 #include "Window/Window.h"
 #include "Graphics/Graphics.h"
 
 static std::wstring InputBuffer;
+void ProcessInputBuffer()
+{
+	wprintf_s(L"Echo: %s\n", InputBuffer.data());
+}
+
 void KeyChar(TCHAR character, bool isRepeat)
 {
 	if (character == '`')return;
@@ -38,7 +44,7 @@ void KeyChar(TCHAR character, bool isRepeat)
 	}
 	if (needProcessBuffer)
 	{
-		wprintf_s(L"Echo: %s\n", InputBuffer.data());
+		ProcessInputBuffer();
 		InputBuffer.clear();
 	}
 }
@@ -50,32 +56,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 	Wnd.SetWindowMode(EWindowMode::WINDOW);
 	Wnd.Init_Wnd();
 	Input::Start(Wnd.GetHandle());
-	MSG msg = {};
-	if (!Graphics::GetInstance()->Init(&Wnd))
+	if (!Engine::GetInstance()->Init(&Wnd))
 	{
 		return -1;
 	}
+	MSG msg = {};
 	Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::RELEASED, []() {PostQuitMessage(0); });
 	Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::PRESSED, []() {PrintDebugMessage(L"Escape Pressed"); });
 	Input::BindKeyInput(Input::EKeyCode::Tilde, EKeyInputState::RELEASED, []() {
 		if (Input::IsBoundKeyCharEvent(KeyChar)) Input::UnBindKeyCharEvent(KeyChar);
 		else Input::BindKeyCharEvent(KeyChar); 
 		});
-
-
-	Input::BindMouseEvent(Input::EMouseButton::Left, EMouseInputState::DBLCLK, [](int2 pos) {
-		wprintf_s(L"Left Double Clicked At: {%d, %d}\n", pos.x, pos.y);
-		});
-	Input::BindMouseEvent(Input::EMouseButton::Left, EMouseInputState::UP, [](int2 pos) {
-		wprintf_s(L"Left Up At: {%d, %d}\n", pos.x, pos.y);
-		});
-	Input::BindMouseEvent(Input::EMouseButton::Left, EMouseInputState::DOWN, [](int2 pos) {
-		wprintf_s(L"Left Down At: {%d, %d}\n", pos.x, pos.y);
-		});
-	Input::BindMouseMoveEvent([](int2 pos) {
-			if(Input::IsMouseButtonDown(Input::EMouseButton::Left))
-				wprintf_s(L"Left Move At: {%d, %d}\n", pos.x, pos.y);
-		});
+	Input::BindKeyInput(Input::EKeyCode::R, EKeyInputState::PRESSED, []() {Graphics::ReportLiveObject(); });
 
 	while (msg.message != WM_QUIT)
 	{

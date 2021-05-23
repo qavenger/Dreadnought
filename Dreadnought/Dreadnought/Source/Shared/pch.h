@@ -8,6 +8,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <thread>
 #include <d3dcompiler.h>
 #include <DirectXCollision.h>
 #include <d3dx12.h>

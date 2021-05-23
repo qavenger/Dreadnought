@@ -164,13 +164,13 @@ LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void Window::SetDimension(uint width, uint height, EWindowMode mode)
+bool Window::SetDimension(uint width, uint height, EWindowMode mode)
 {
 	bool modeChanged = (uint8)mode != WindowMode;
 	bool resChanged = width != Width || height != Height;
 	if (!modeChanged && !resChanged)
 	{
-		return;
+		return false;
 	}
 	WindowMode = (uint8)mode;
 	Width = width;
@@ -194,8 +194,8 @@ void Window::SetDimension(uint width, uint height, EWindowMode mode)
 		RECT rect = {
 			x,
 			y,
-			x + width,
-			y + height };
+			x + (LONG)width,
+			y + (LONG)height };
 		if(!max)
 			AdjustWindowRect(&rect, dwStyle, mode == EWindowMode::WINDOW);
 		if (modeChanged || max)
@@ -212,11 +212,15 @@ void Window::SetDimension(uint width, uint height, EWindowMode mode)
 			rect.right - rect.left,
 			rect.bottom - rect.top,
 			SWP_SHOWWINDOW | SWP_FRAMECHANGED | (max ? SWP_NOSIZE | SWP_NOMOVE : 0));
+
+
+		OnWindowResized.Broadcast(rect.right - rect.left, rect.bottom - rect.top);
 	}
 	else
 	{
 
 	}
+	return true;
 }
 
 HWND Window::GetConsoleHandle() const

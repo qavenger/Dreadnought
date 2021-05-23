@@ -5,7 +5,7 @@ POINT Input::m_prevMousePos;
 POINT Input::m_mousePos;
 HWND Input::m_hWnd;
 KeyCharEvent Input::OnKeyCharEvent;
-KeyInputEvent Input::OnKeyInputEvent[(uint8)EKeyInputState::NUM][MAX_KEY_NUM];
+KeyInputEvent Input::OnKeyInputEvent[(uint8)EKeyInputState::NUM][(unsigned long long)Input::EKeyCode::NUM_KEYCODE];
 MouseEvent Input::OnMouseButtonEvent[(int)EMouseInputState::NUM][(int)EMouseButton::Invalid];
 MouseEvent Input::OnMouseMoveEvent;
 EMouseInputState Input::MouseInputState[(int)Input::EMouseButton::Invalid] = {EMouseInputState::UP,EMouseInputState::UP,EMouseInputState::UP};

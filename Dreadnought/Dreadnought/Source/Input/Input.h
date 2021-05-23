@@ -22,7 +22,7 @@ public:
 		LMouse = 0x01, RMouse, Cancel, MMouse, XButton1, XButton2,
 		Back = 0x08, Tab,
 		Clear = 0x0C, Return,
-		Shift = 0x10, Control, Menu, Pause, Caps_Lock,
+		Shift = 0x10, Control, Alt, Pause, Caps_Lock,
 		Escape = 0x1B,
 		Space = 0x20, Page_Up, Page_Down, End, Home, Left, Up, Right, Down, Select,
 		Print, Execute, Print_Screen, Insert, Delete, Help,
@@ -38,7 +38,7 @@ public:
 		F21, F22, F23, F24,
 		Num_Lock = 0x90, Scroll,
 		LShift = 0xA0, RShift,
-		LControl, RControl, LMenu, RMenu, Browser_Back,
+		LControl, RControl, LAlt, RAlt, Browser_Back,
 		Browser_Forward, Browser_Refresh, Browser_Stop,
 		Browser_Search, Browser_Favorites, Browser_Home,
 		Volumn_Mute, Volumn_Down, Volumn_Up,
@@ -46,6 +46,13 @@ public:
 		Semicolon = 0xBA, Add , Comma, Subtract, Period, Divide,
 		Tilde = 0xC0,
 		NUM_KEYCODE
+	};
+	enum class ESystemKeyCode
+	{
+		None = 0x00,
+		Shift = 0x10, Control, Alt,
+		LShift = 0xA0, RShift,
+		LControl, RControl, LAlt, RAlt,
 	};
 	static void BindKeyCharEvent(void (*p)(TCHAR, bool));
 	static void UnBindKeyCharEvent(void (*p)(TCHAR, bool));
@@ -74,7 +81,7 @@ public:
 
 private:
 	static KeyCharEvent OnKeyCharEvent;
-	static KeyInputEvent OnKeyInputEvent[(uint8)EKeyInputState::NUM][MAX_KEY_NUM];
+	static KeyInputEvent OnKeyInputEvent[(uint8)EKeyInputState::NUM][(unsigned long long)Input::EKeyCode::NUM_KEYCODE];
 	static MouseEvent OnMouseButtonEvent[(int)EMouseInputState::NUM][(int)EMouseButton::Invalid];
 	static MouseEvent OnMouseMoveEvent;
 	static EMouseInputState MouseInputState[(int)EMouseButton::Invalid];
