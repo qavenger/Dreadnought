@@ -36,11 +36,6 @@ void Graphics::OnResize(uint width, uint height, bool minimized)
 
 void Graphics::OnDestroy()
 {
-	if (Instance)
-	{
-		delete Instance;
-		Instance = nullptr;
-	}
 }
 
 void Graphics::Resize(int resolutionIndex, EWindowMode resizeMode)

@@ -19,6 +19,18 @@
     <Filter Include="Source\Graphics">
       <UniqueIdentifier>{a6ed0449-02a9-4b2e-94d0-75cc35d077b9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Core">
+      <UniqueIdentifier>{9f627ff1-c9a1-41de-b515-3c81d32bfc57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Templates">
+      <UniqueIdentifier>{e9267d8a-403c-4688-ab3a-ea64c5255275}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\D3D12">
+      <UniqueIdentifier>{8937ac99-3bbe-4a6a-898d-b4edde3fe06e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Renderer">
+      <UniqueIdentifier>{9b05d8d4-74b3-4214-a094-f3e647973949}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Shared\pch.cpp">
@@ -41,6 +53,18 @@
     </ClCompile>
     <ClCompile Include="Source\Shared\Helper.cpp">
       <Filter>Source\Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Core\Engine.cpp">
+      <Filter>Source\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3D12\D3D12DeviceResource.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Renderer\SceneRenderer.cpp">
+      <Filter>Source\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\VertexFactory.cpp">
+      <Filter>Source\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -70,6 +94,21 @@
     </ClInclude>
     <ClInclude Include="Source\Shared\Helper.h">
       <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Core\Engine.h">
+      <Filter>Source\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Templates\TemplateClasses.h">
+      <Filter>Source\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3D12\D3D12DeviceResource.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Renderer\SceneRenderer.h">
+      <Filter>Source\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Graphics\VertexFactory.h">
+      <Filter>Source\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
