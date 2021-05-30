@@ -53,3 +53,15 @@ private:\
 std::set<void (*)(ParamType0, ParamType1)> deleg;\
 }
 
+#define DEFINE_DELEGATE_THREE_PARAM(Name, ParamType0, ParamType1, ParamType2) \
+class Name\
+{\
+public:\
+void Bind(void (*f)(ParamType0, ParamType1, ParamType2)){deleg.insert(f);}\
+void UnBind(void (*f)(ParamType0, ParamType1, ParamType2)){deleg.erase(f);}\
+void Broadcast(ParamType0 p0, ParamType1 p1, ParamType2 p2){if(!deleg.empty())for(auto f : deleg){f(p0, p1, p2);}}\
+bool IsBound(void (*f)(ParamType0, ParamType1, ParamType2)){auto it = deleg.find(f);return it!= deleg.end();}\
+private:\
+std::set<void (*)(ParamType0, ParamType1, ParamType2)> deleg;\
+}
+

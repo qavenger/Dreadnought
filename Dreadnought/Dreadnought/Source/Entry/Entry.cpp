@@ -1,12 +1,34 @@
 #include <pch.h>
 #include "Core/Engine.h"
 #include "Window/Window.h"
-#include "Graphics/Graphics.h"
+#include "Renderer/SceneRenderer.h"
 
 static std::wstring InputBuffer;
+void KeyChar(TCHAR character, bool isRepeat);
+
 void ProcessInputBuffer()
 {
-	wprintf_s(L"Echo: %s\n", InputBuffer.data());
+	std::vector<std::wstring> token;
+	size_t head = 0;
+	size_t tail = 0;
+	while (tail < InputBuffer.size())
+	{
+		tail = InputBuffer.find(L' ', head);
+		token.push_back(InputBuffer.substr(head, tail - head));
+		head = tail + 1;
+	}
+	wprintf_s(L"Echo: %d\n", (int)token.size());
+	std::vector<int> params;
+	params.reserve(token.size());
+	for (auto s : token)
+	{
+		params.push_back(_wtoi(s.c_str()));
+	}
+
+	if (params.size() == 2)
+	{
+		Window::GetInstance()->SetDimension(params[0], params[1]);
+	}
 }
 
 void KeyChar(TCHAR character, bool isRepeat)
@@ -36,7 +58,9 @@ void KeyChar(TCHAR character, bool isRepeat)
 	if (needBroadcast)
 	{
 		if (isReturn)
+		{
 			wprintf_s(L"\r\n");
+		}
 		else if (isBackspace)
 			wprintf_s(L"\b \b");
 		else
@@ -49,14 +73,24 @@ void KeyChar(TCHAR character, bool isRepeat)
 	}
 }
 
+//#include <iostream>
+
+//template<typename T>
+//void Print(T&& param)
+//{
+//	std::cout << std::forward<T>(param);
+//}
+//
+//template<typename A, typename ...B>
+//void Print(A&& param, B&&... rest)
+//{
+//	Print(std::forward<A>(param));
+//	Print(std::forward<B>(rest)...);
+//}
+
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	Window Wnd;
-	Wnd.SetTitle(L"Engine");
-	Wnd.SetWindowMode(EWindowMode::WINDOW);
-	Wnd.Init_Wnd();
-	Input::Start(Wnd.GetHandle());
-	if (!Engine::GetInstance()->Init(&Wnd))
+	if (!Engine::GetInstance()->Init())
 	{
 		return -1;
 	}
@@ -67,7 +101,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		if (Input::IsBoundKeyCharEvent(KeyChar)) Input::UnBindKeyCharEvent(KeyChar);
 		else Input::BindKeyCharEvent(KeyChar); 
 		});
-	Input::BindKeyInput(Input::EKeyCode::R, EKeyInputState::PRESSED, []() {Graphics::ReportLiveObject(); });
 
 	while (msg.message != WM_QUIT)
 	{
@@ -76,7 +109,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		Engine::GetInstance()->Run();
 	}
+
 	FreeConsole();
+	Engine::GetInstance()->OnDestroy();
 	return 0;
 }

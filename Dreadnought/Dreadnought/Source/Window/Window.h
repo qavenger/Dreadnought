@@ -1,8 +1,10 @@
 #pragma once
-DEFINE_DELEGATE_TWO_PARAM(WindowResizeEvent, uint, uint);
-class Window
+
+class Window : public INoncopyable
 {
 public:
+	static Window* GetInstance();
+	void OnDestroy();
 	bool Init_Wnd();
 	void SetTitle(const wchar_t* title) { Title = title; }
 	static LRESULT CALLBACK WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam);
@@ -23,7 +25,6 @@ private:
 	uint16 Width;
 	uint16 Height;
 	uint8 WindowMode : 2;
-public:
-	WindowResizeEvent OnWindowResized;
 };
+
 

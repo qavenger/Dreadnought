@@ -1,5 +1,23 @@
 #include "pch.h"
 #include "Window.h"
+#include "Core/Engine.h"
+
+static Window* gWindow = nullptr;
+
+Window* Window::GetInstance()
+{
+	if (!gWindow)
+		gWindow = new Window();
+	return gWindow;
+}
+void Window::OnDestroy()
+{
+	if (gWindow)
+	{
+		delete gWindow;
+		gWindow = nullptr;
+	}
+}
 
 bool Window::Init_Wnd()
 {
@@ -38,7 +56,7 @@ bool Window::Init_Wnd()
 	AspectRatio = (float)width / height;
 	int x = fullScreen ? 0 : CW_USEDEFAULT;
 	int y = fullScreen ? 0 : CW_USEDEFAULT;*/
-	UINT dwStyle = windowed ?   WS_OVERLAPPED | WS_SYSMENU : WS_POPUP;
+	UINT dwStyle = windowed ?   WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX : WS_POPUP;
 	WindowHandle = CreateWindow(wc.lpszClassName, Title.c_str(), dwStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 		NULL, NULL, wc.hInstance, 0);
@@ -61,6 +79,19 @@ LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_SIZE:
 		wprintf_s(L"%u x %u\n", LOWORD(lParam), HIWORD(lParam));
+		//if (Engine::GetInstance()->GetRenderer()->IsInited())
+		{
+		RECT windowRect = {};
+		GetWindowRect(gWindow->GetHandle(), &windowRect);
+
+		RECT clientRect = {};
+		GetClientRect(gWindow->GetHandle(), &clientRect);
+		Engine::GetInstance()->GetRenderer()->OnResize(
+			clientRect.right - clientRect.left,
+			clientRect.bottom - clientRect.top,
+			wParam == SIZE_MINIMIZED
+		);
+		}
 		break;
 	case WM_MOUSEMOVE:
 		//if (wParam & MK_LBUTTON)
@@ -180,15 +211,10 @@ bool Window::SetDimension(uint width, uint height, EWindowMode mode)
 	int scrWidth = GetSystemMetrics(SM_CXSCREEN);
 	int scrHeight = GetSystemMetrics(SM_CYSCREEN);
 	bool max = scrWidth == width;
-	if (max)
-	{
-		if(EWindowMode::WINDOW == mode)
-			width = GetSystemMetrics(SM_CXMAXIMIZED);
-	}
 
 	if (windowMode)
 	{
-		DWORD dwStyle = mode == EWindowMode::WINDOW ? WS_OVERLAPPED | WS_SYSMENU : WS_POPUP;
+		DWORD dwStyle =/* mode == EWindowMode::WINDOW ? */WS_OVERLAPPED | WS_MINIMIZEBOX;
 		int x = (scrWidth - width) / 2;
 		int y = (scrHeight - height) / 2;
 		RECT rect = {
@@ -196,26 +222,24 @@ bool Window::SetDimension(uint width, uint height, EWindowMode mode)
 			y,
 			x + (LONG)width,
 			y + (LONG)height };
-		if(!max)
-			AdjustWindowRect(&rect, dwStyle, mode == EWindowMode::WINDOW);
-		if (modeChanged || max)
+
+		AdjustWindowRect(&rect, dwStyle, false);
+		/*if (modeChanged || max)
 		{
 			DestroyWindow(WindowHandle);
 			dwStyle |= (max ? WS_MAXIMIZE : 0);
 			WindowHandle = CreateWindow(Title.c_str(), Title.c_str(), dwStyle,
 				x, y, rect.right - rect.left, rect.bottom - rect.top,
 				NULL, NULL, GetModuleHandle(0), 0);
-		}
-		SetWindowPos(WindowHandle, HWND_TOP,
+		}*/
+		SetWindowPos(WindowHandle, HWND_TOPMOST,
 			x,
 			y,
 			rect.right - rect.left,
 			rect.bottom - rect.top,
-			SWP_SHOWWINDOW | SWP_FRAMECHANGED | (max ? SWP_NOSIZE | SWP_NOMOVE : 0));
+			SWP_SHOWWINDOW | SWP_FRAMECHANGED | SWP_NOZORDER);
 
-
-		OnWindowResized.Broadcast(rect.right - rect.left, rect.bottom - rect.top);
-	}
+		}
 	else
 	{
 

@@ -1,48 +1,32 @@
 #pragma once
+
+#include "D3D12/D3D12DeviceResource.h"
+
 class Window;
-class Graphics
+#define NUM_FRAMEBUFFER 2
+class Graphics : public IDeviceNotify, public INoncopyable
 {
 public:
-	~Graphics();
+	virtual ~Graphics();
 public:
 	static Graphics* GetInstance();
-	bool Init(Window* Wnd);
-	void PostInit();
+	virtual bool Init() = 0;
+	virtual void OnResize(uint width, uint height, bool minimized) = 0;
+	virtual void OnDestroy() = 0;
 public:
-	static void ReportLiveObject();
-	uint2 GetResolution(int index)const;
-	uint GetNumResolution()const { return (uint)uResolutions.size(); }
 	void Resize(int resolutionIndex, EWindowMode resizeMode = EWindowMode::WINDOW);
 	void Resize(uint width, uint height, EWindowMode resizeMode = EWindowMode::WINDOW);
+	void Tick();
+	virtual void OnRender() = 0;
+public:
+	bool IsInited()const { return IsFullyInited; }
+protected:
+	std::shared_ptr<D3D12DeviceResource> DeviceResources;
+	// Inherited via IDeviceNotify
+	virtual void OnDeviceLost() override;
+	virtual void OnDeviceRestored() override;
+	static void SetInstance(Graphics* instance) { Instance = instance; }
 private:
-	Graphics() {};
-	Graphics(const Graphics&) = delete;
-	Graphics& operator=(const Graphics&) = delete;
-private:
-	HRESULT LogAdapter();
-	HRESULT CreateDeviceAndFence();
-	HRESULT CreateCommandObjects();
-	HRESULT CreateViewDepandentResource(uint Width, uint Height);
-	void ReleaseViewDepandentResource();
-	uint PrevResolution();
-private:
-	UINT DescriptorHandleIncrementSize[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES] = {};
-	UINT BackBufferCount = 2;
-	UINT SelectedAdapter = -1;
-	uint SelectedResolution = -1;
-private:
-	ComPtr<IDXGIFactory7> pFactory;
-	ComPtr<ID3D12Device6> pDevice;
-	ComPtr<ID3D12Fence1> pFence;
-	ComPtr<ID3D12CommandQueue> pRenderCmdQueue;
-	ComPtr<ID3D12CommandAllocator> pDirectCmdListAlloc;
-	ComPtr<ID3D12GraphicsCommandList6> pCommandList;
-	ComPtr<IDXGISwapChain4> pSwapChain;
-private:
-	std::vector<IDXGIAdapter*> pAdapters;
-	std::vector<IDXGIOutput*> pOutputs;
-	std::vector<uint> uResolutions;
-private:
-	Window* pWindow = nullptr;
+	bool IsFullyInited = false;
+	static Graphics* Instance;
 };
-
