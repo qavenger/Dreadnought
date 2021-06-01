@@ -18,8 +18,11 @@ public:
 	void Resize(uint width, uint height, EWindowMode resizeMode = EWindowMode::WINDOW);
 	void Tick();
 	virtual void OnRender() = 0;
+	D3D12DeviceResource* GetDeviceResources() { return DeviceResources.get(); }
 public:
 	bool IsInited()const { return IsFullyInited; }
+	uint GetBackbufferCount()const { return DeviceResources->GetBackBufferCount(); }
+	ID3D12DescriptorHeap* GetGUISRV()const { return SRVDescriptorHeap_GUI.Get(); }
 protected:
 	std::shared_ptr<D3D12DeviceResource> DeviceResources;
 	// Inherited via IDeviceNotify
@@ -29,4 +32,6 @@ protected:
 private:
 	bool IsFullyInited = false;
 	static Graphics* Instance;
+
+	ComPtr<ID3D12DescriptorHeap> SRVDescriptorHeap_GUI;
 };

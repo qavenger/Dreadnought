@@ -1,7 +1,11 @@
 #include "pch.h"
 #include "SceneRenderer.h"
 #include "Timer.h"
+#include "../Core/Engine.h"
 #include "../Graphics/VertexFactory.h"
+#include <imgui_impl_dx12.h>
+#include <imgui_impl_win32.h>
+#include "../UI/Console.h"
 Graphics* SceneRenderer::GetInstance()
 {
     if (!Renderer)
@@ -17,6 +21,7 @@ bool SceneRenderer::Init()
     Graphics::Init();
     ThrowIfFailed(DeviceResources->GetDevice()->QueryInterface(IID_PPV_ARGS(&Device)));
     ThrowIfFailed(DeviceResources->GetCommandList()->QueryInterface(IID_PPV_ARGS(&CommandList)));
+    
     return true;
 }
 
@@ -37,14 +42,30 @@ void SceneRenderer::OnDestroy()
 
 void SceneRenderer::OnRender()
 {
+    OnDrawGUI();
     float color[] = { (float)sin(g_Timer.Elapsed()),0,0,1 };
     CommandList->ClearRenderTargetView(DeviceResources->GetRenderTargetView(),
         color,
         1,
         &WindowRect
     );
-    
-    using namespace DirectX;
+    D3D12_CPU_DESCRIPTOR_HANDLE Handle[] = { GetDeviceResources()->GetRenderTargetView() };
+    CommandList->OMSetRenderTargets(1,
+        Handle,
+        TRUE,
+        nullptr);
+}
+
+void SceneRenderer::OnDrawGUI()
+{
+    if(Engine::GetInstance()->GetShowConsole())
+        Console::GetInstance().Draw("Console", &Engine::GetInstance()->GetShowConsole());
+    ImGui::Render();
+}
+
+
+/*
+  using namespace DirectX;
     VertexFactory::VertexLayout layout;
     layout.AppendElement(VertexFactory::Position3D).
         AppendElement(VertexFactory::TextureCoord).
@@ -61,8 +82,8 @@ void SceneRenderer::OnRender()
         auto& TexCoord = vb[i].Attrtribute<VertexFactory::TextureCoord>();
         PrintDebugMessage(L"Texcoord: [ %f, %f ]", TexCoord.x, TexCoord.y);
         auto& n = vb[i].Attrtribute<VertexFactory::Normal>();
-        PrintDebugMessage(L"Normal: [ %f, %f, %f ]", n.x, n.y, n.z); 
+        PrintDebugMessage(L"Normal: [ %f, %f, %f ]", n.x, n.y, n.z);
 
         Pos.x += g_Timer.DeltaTime();
     }
-}
+*/

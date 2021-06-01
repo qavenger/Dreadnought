@@ -31,6 +31,12 @@
     <Filter Include="Source\Renderer">
       <UniqueIdentifier>{9b05d8d4-74b3-4214-a094-f3e647973949}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Renderer\PostProcessor">
+      <UniqueIdentifier>{f14e2585-bafe-47eb-bb62-d9b0bfaf514b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\UI">
+      <UniqueIdentifier>{85b36ca7-360a-4b78-a0a1-faf9836be28a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Shared\pch.cpp">
@@ -65,6 +71,12 @@
     </ClCompile>
     <ClCompile Include="Source\Graphics\VertexFactory.cpp">
       <Filter>Source\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Renderer\PostProcessor\RPostProcessor.cpp">
+      <Filter>Source\Renderer\PostProcessor</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\UI\Console.cpp">
+      <Filter>Source\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +121,12 @@
     </ClInclude>
     <ClInclude Include="Source\Graphics\VertexFactory.h">
       <Filter>Source\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Renderer\PostProcessor\RPostProcessor.h">
+      <Filter>Source\Renderer\PostProcessor</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\UI\Console.h">
+      <Filter>Source\UI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

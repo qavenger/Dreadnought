@@ -1,7 +1,8 @@
 #include "pch.h"
 #include <Graphics/Graphics.h>
 #include <Window/Window.h>
-
+#include <imgui_impl_dx12.h>
+#include <imgui_impl_win32.h>
 #define THROW_IF_FAILED(rs, msg) { HRESULT hr; if(FAILED(hr = rs)) {PrintDebugMessage(msg); return hr;}}
 #define ASSERT_IF_FAILED(rs) assert(SUCCEEDED(rs));
 
@@ -26,6 +27,13 @@ bool Graphics::Init()
 	DeviceResources->InitDXGIAdapter();
 	DeviceResources->CreateDeviceResources();
 
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		desc.NumDescriptors = 1;
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		ThrowIfFailed(DeviceResources->GetDevice()->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&SRVDescriptorHeap_GUI)));
+	}
 	return true;
 }
 
@@ -46,6 +54,7 @@ void Graphics::Resize(int resolutionIndex, EWindowMode resizeMode)
 	Window::GetInstance()->SetDimension(w, h, resizeMode);
 	GetClientRect(Window::GetInstance()->GetHandle(), &rect);
 	OnResize(rect.right - rect.left, rect.bottom - rect.top, EWindowMode::MINIMIZED == resizeMode);
+
 }
 
 void Graphics::Resize(uint width, uint height, EWindowMode resizeMode)
@@ -61,10 +70,14 @@ void Graphics::Tick()
 	{
 		return;
 	}
-	DeviceResources->BeginFrame();
-	
-	OnRender();
 
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	DeviceResources->BeginFrame();
+	OnRender();
+	DeviceResources->GetCommandList()->SetDescriptorHeaps(1, SRVDescriptorHeap_GUI.GetAddressOf());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DeviceResources->GetCommandList());
 	DeviceResources->EndFrame();
 }
 

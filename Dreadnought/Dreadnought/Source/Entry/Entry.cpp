@@ -90,18 +90,18 @@ void KeyChar(TCHAR character, bool isRepeat)
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	if (!Engine::GetInstance()->Init())
+	try
 	{
-		return -1;
+		Engine::GetInstance()->Init();
+	}
+	catch (HrException& e)
+	{
+		printf("%s", e.what());
 	}
 	MSG msg = {};
 	Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::RELEASED, []() {PostQuitMessage(0); });
 	Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::PRESSED, []() {PrintDebugMessage(L"Escape Pressed"); });
-	Input::BindKeyInput(Input::EKeyCode::Tilde, EKeyInputState::RELEASED, []() {
-		if (Input::IsBoundKeyCharEvent(KeyChar)) Input::UnBindKeyCharEvent(KeyChar);
-		else Input::BindKeyCharEvent(KeyChar); 
-		});
-
+	
 	while (msg.message != WM_QUIT)
 	{
 		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))

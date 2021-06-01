@@ -37,6 +37,7 @@ public:
     RECT GetOutputSize() const { return OutputSize; }
     uint GetSelectedResolution()const { return SupportedResolutions[SelectedResolution]; }
     uint GetSelectedResolutionIndex()const { return SelectedResolution; }
+    uint GetBackBufferCount()const { return NumBackBuffer; }
 public:
     CD3DX12_CPU_DESCRIPTOR_HANDLE GetRenderTargetView()const
     {

@@ -16,6 +16,8 @@ public:
     virtual void OnDestroy() override;
     virtual void OnRender() override;
 private:
+    void OnDrawGUI();
+private:
     RECT WindowRect;
     ComPtr<ID3D12Device8> Device;
     ComPtr<ID3D12GraphicsCommandList6> CommandList;

@@ -77,22 +77,6 @@ LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	case WM_SIZE:
-		wprintf_s(L"%u x %u\n", LOWORD(lParam), HIWORD(lParam));
-		//if (Engine::GetInstance()->GetRenderer()->IsInited())
-		{
-		RECT windowRect = {};
-		GetWindowRect(gWindow->GetHandle(), &windowRect);
-
-		RECT clientRect = {};
-		GetClientRect(gWindow->GetHandle(), &clientRect);
-		Engine::GetInstance()->GetRenderer()->OnResize(
-			clientRect.right - clientRect.left,
-			clientRect.bottom - clientRect.top,
-			wParam == SIZE_MINIMIZED
-		);
-		}
-		break;
 	case WM_MOUSEMOVE:
 		//if (wParam & MK_LBUTTON)
 		{
@@ -192,7 +176,7 @@ LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 		break;
 	}
-	return 0;
+	return Engine::GetInstance()->WndProc(hWnd, msg, wParam, lParam);
 }
 
 bool Window::SetDimension(uint width, uint height, EWindowMode mode)
