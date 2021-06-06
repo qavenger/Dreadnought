@@ -2,13 +2,14 @@
 
 class Window : public INoncopyable
 {
+	friend class Engine;
 public:
 	static Window* GetInstance();
 	void OnDestroy();
 	bool Init_Wnd();
 	void SetTitle(const wchar_t* title) { Title = title; }
 	static LRESULT CALLBACK WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam);
-	bool SetDimension(uint width, uint height, EWindowMode mode = EWindowMode::WINDOW);
+	bool SetDimension(RECT rect, EWindowMode mode = EWindowMode::WINDOW);
 	void GetDimension(uint& width, uint& height)const { width = Width; height = Height; }
 	EWindowMode GetWindowMode()const { return (EWindowMode)WindowMode; }
 	void SetWindowMode(EWindowMode windowMode) { WindowMode = (uint8)windowMode; }
@@ -25,6 +26,7 @@ private:
 	uint16 Width;
 	uint16 Height;
 	uint8 WindowMode : 2;
+	uint8 OutputID : 4;
 };
 
 

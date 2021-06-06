@@ -37,6 +37,28 @@ bool Graphics::Init()
 	return true;
 }
 
+RECT Graphics::FindBestOutput(uint& outputIndex)const
+{
+	RECT coord = {};
+	uint best = 0;
+	uint bestIdx = 0;
+	for (auto output : DeviceResources->Outputs)
+	{
+		DXGI_OUTPUT_DESC desc;
+		ThrowIfFailed(output->GetDesc(&desc));
+		RECT cRect = desc.DesktopCoordinates;
+		uint area = (cRect.right - cRect.left) * (cRect.bottom - cRect.top);
+		if (area > best)
+		{
+			coord = cRect;
+			outputIndex = bestIdx;
+		}
+		++bestIdx;
+	}
+	
+	return coord;
+}
+
 void Graphics::OnResize(uint width, uint height, bool minimized)
 {
 	IsFullyInited = DeviceResources->OnResize(width, height, minimized);
@@ -46,20 +68,11 @@ void Graphics::OnDestroy()
 {
 }
 
-void Graphics::Resize(int resolutionIndex, EWindowMode resizeMode)
+void Graphics::Resize(RECT rect, EWindowMode resizeMode)
 {
-	uint r = DeviceResources->GetSelectedResolution();
-	uint w = r & 0x0000ffff, h = (r >> 16);
-	RECT rect;
-	Window::GetInstance()->SetDimension(w, h, resizeMode);
+	Window::GetInstance()->SetDimension(rect, resizeMode);
 	GetClientRect(Window::GetInstance()->GetHandle(), &rect);
 	OnResize(rect.right - rect.left, rect.bottom - rect.top, EWindowMode::MINIMIZED == resizeMode);
-
-}
-
-void Graphics::Resize(uint width, uint height, EWindowMode resizeMode)
-{
-	Window::GetInstance()->SetDimension(width, height, resizeMode);
 }
 
 #include "Timer.h"
@@ -79,6 +92,33 @@ void Graphics::Tick()
 	DeviceResources->GetCommandList()->SetDescriptorHeaps(1, SRVDescriptorHeap_GUI.GetAddressOf());
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), DeviceResources->GetCommandList());
 	DeviceResources->EndFrame();
+}
+
+RECT Graphics::FindBestOutput(RECT rect, uint& outputIndex) const
+{
+	uint bestIdx = 0;
+	RECT coord = {};
+	for (auto output : DeviceResources->Outputs)
+	{
+		DXGI_OUTPUT_DESC desc;
+		ThrowIfFailed(output->GetDesc(&desc));
+		RECT cRect = desc.DesktopCoordinates;
+		if (rect.left > cRect.left && rect.left < cRect.right && rect.top > cRect.top && rect.top < cRect.bottom)
+		{
+			outputIndex = bestIdx;
+			coord = cRect;
+		}
+		++bestIdx;
+	}
+	return coord;
+}
+
+RECT Graphics::GetOutputRect(uint outputIndex) const
+{
+	assert(outputIndex < DeviceResources->Outputs.size() && outputIndex >= 0);
+	DXGI_OUTPUT_DESC desc;
+	DeviceResources->Outputs[outputIndex]->GetDesc(&desc);
+	return desc.DesktopCoordinates;
 }
 
 void Graphics::OnDeviceLost()

@@ -115,3 +115,7 @@ inline UINT CalculateConstantBufferByteSize(UINT byteSize)
 	return Align(byteSize, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT);
 }
 
+inline bool IsInsideRect(const RECT& in, const RECT& other)
+{
+	return in.left >= other.left && in.right <= other.right && in.top >= other.top && in.bottom <= other.bottom;
+}

@@ -136,13 +136,13 @@ void D3D12DeviceResource::InitDXGIAdapter()
 		ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(&Factory4)));
 	}
 
-	InitAdapter(&Adapter);
+	InitAdapter();
 	CreateDeviceResources();
 }
 
 void D3D12DeviceResource::CreateDeviceResources()
 {
-	ThrowIfFailed(D3D12CreateDevice(Adapter.Get(), MinFeatureLevel, IID_PPV_ARGS(&Device)));
+	ThrowIfFailed(D3D12CreateDevice(Adapters[AdapterID].Get(), MinFeatureLevel, IID_PPV_ARGS(&Device)));
 #ifdef _DEBUG
 	// Configure debug device (if active).
 	ComPtr<ID3D12InfoQueue> d3dInfoQueue;
@@ -229,11 +229,10 @@ void D3D12DeviceResource::CreateDeviceResources()
 void D3D12DeviceResource::CreateWindowDependentResources()
 {
 	WaitForGPU();
-
 	for (uint n = 0; n < NumBackBuffer; ++n)
 	{
 		RenderTargets[n].Reset();
-		FenceValue[n] = FenceValue[BackBufferIndex];
+		FenceValue[n] = FenceValue[BackBufferIndex] - 1;
 	}
 
 	uint backBufferWidth = max(OutputSize.right - OutputSize.left, 1);
@@ -337,6 +336,7 @@ void D3D12DeviceResource::CreateWindowDependentResources()
 	ScreenViewport.MaxDepth = D3D12_MAX_DEPTH;
 
 	ScissorRect = { 0, 0, (LONG)backBufferWidth, (LONG)backBufferHeight };
+	MoveToNextFrame();
 }
 
 void D3D12DeviceResource::WaitForGPU() noexcept
@@ -344,6 +344,7 @@ void D3D12DeviceResource::WaitForGPU() noexcept
 	if (RenderCommandQueue && Fence && FenceEvent.IsValid())
 	{
 		uint64 fenceValue = FenceValue[BackBufferIndex];
+
 		if (SUCCEEDED(RenderCommandQueue->Signal(Fence.Get(), fenceValue)))
 		{
 			if (SUCCEEDED(Fence->SetEventOnCompletion(fenceValue, FenceEvent.Get())))
@@ -384,8 +385,14 @@ void D3D12DeviceResource::HandleDeviceLost()
 	SwapChain.Reset();
 	Device.Reset();
 	Factory4.Reset();
-	Adapter.Reset();
-
+	for (size_t i = 0; i < Adapters.size(); ++i)
+	{
+		Adapters[i].Reset();
+	}
+	for (size_t i = 0; i < Outputs.size(); ++i)
+	{
+		Outputs[i].Reset();
+	}
 #ifdef _DEBUG
 	{
 		ComPtr<IDXGIDebug1> dxgiDebug;
@@ -472,22 +479,27 @@ void D3D12DeviceResource::MoveToNextFrame()
 	FenceValue[BackBufferIndex] = currentFenceValue + 1;
 }
 
-void D3D12DeviceResource::InitAdapter(IDXGIAdapter1** ppAdapter)
+void D3D12DeviceResource::InitAdapter()
 {
-	*ppAdapter = nullptr;
-	ComPtr<IDXGIAdapter1> adapter;
+	IDXGIAdapter1* adapter;
 	ComPtr<IDXGIFactory6> factory6;
 
 	ThrowIfFailed(Factory4.As<IDXGIFactory6>(&factory6));
 
 	for (uint adapterId = 0; DXGI_ERROR_NOT_FOUND != factory6->EnumAdapterByGpuPreference(adapterId, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE, IID_PPV_ARGS(&adapter)); ++adapterId)
 	{
-		if (AdapterIDOverride != UINT_MAX && adapterId != AdapterIDOverride)
+		Adapters.push_back(adapter);
+		adapter->Release();
+	}
+
+	for (size_t i = 0; i < Adapters.size(); ++i)
+	{
+		if (AdapterIDOverride != UINT_MAX && i != AdapterIDOverride)
 		{
 			continue;
 		}
 		DXGI_ADAPTER_DESC1 desc;
-		ThrowIfFailed(adapter->GetDesc1(&desc));
+		ThrowIfFailed(Adapters[i]->GetDesc1(&desc));
 
 		if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
 		{
@@ -495,20 +507,21 @@ void D3D12DeviceResource::InitAdapter(IDXGIAdapter1** ppAdapter)
 		}
 
 		if (SUCCEEDED(D3D12CreateDevice(
-				adapter.Get(), 
-				MinFeatureLevel, 
-				_uuidof(ID3D12Device),
-				nullptr)
+			Adapters[i].Get(),
+			MinFeatureLevel,
+			_uuidof(ID3D12Device),
+			nullptr)
 		))
 		{
-			AdapterID = adapterId;
+			AdapterID = (uint)i;
 			AdapterDescription = desc.Description;
 
-			ComPtr<IDXGIOutput> output;
+			IDXGIOutput* output = nullptr;
 			std::set<uint> uniqueResolutions;
-			for (uint i = 0;  DXGI_ERROR_NOT_FOUND!= adapter->EnumOutputs(i, &output); ++i)
+			std::vector<RECT> coordRects;
+			for (uint outputIdx = 0; DXGI_ERROR_NOT_FOUND != Adapters[i]->EnumOutputs(outputIdx, &output); ++outputIdx)
 			{
-				uint numModes = 0;
+				/*uint numModes = 0;
 				ThrowIfFailed(output->GetDisplayModeList(BackBufferFormat, 0, &numModes, nullptr));
 				std::vector<DXGI_MODE_DESC> modes;
 				modes.resize(numModes);
@@ -517,20 +530,26 @@ void D3D12DeviceResource::InitAdapter(IDXGIAdapter1** ppAdapter)
 				{
 					uniqueResolutions.insert((mode.Width) | (mode.Height << 16));
 				}
+				DXGI_OUTPUT_DESC d;
+				output->GetDesc(&d);
+				coordRects.push_back(d.DesktopCoordinates);*/
+				Outputs.push_back(output);
+				output->Release();
+				output = nullptr;
 			}
 
-			for (auto r : uniqueResolutions)
+			/*for (auto r : uniqueResolutions)
 			{
 				SupportedResolutions.push_back(r);
 			}
-			SelectedResolution = (uint)SupportedResolutions.size() - 1;
+			SelectedResolution = (uint)SupportedResolutions.size() - 1;*/
 
-			PrintDebugMessage(L"Video Card (%u): VRAM: %llu, Name: %ws\n", adapterId, desc.DedicatedVideoMemory, desc.Description);
+			PrintDebugMessage(L"Video Card (%llu): VRAM: %llu, Name: %ws\n", i, desc.DedicatedVideoMemory, desc.Description);
 			break;
 		}
 	}
 
-	if (!adapter)
+	if (AdapterID == UINT_MAX)
 	{
 		if (AdapterIDOverride != UINT_MAX)
 		{
@@ -541,6 +560,4 @@ void D3D12DeviceResource::InitAdapter(IDXGIAdapter1** ppAdapter)
 			throw std::exception("Unavailable adapter.");
 		}
 	}
-
-	*ppAdapter = adapter.Detach();
 }

@@ -31,8 +31,8 @@ bool Window::Init_Wnd()
 #else
 	//AttachConsole(ATTACH_PARENT_PROCESS)
 #endif
-	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
-	
+
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	WNDCLASSEX wc = {};
 	wc.cbSize = sizeof(WNDCLASSEX);
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
@@ -43,7 +43,7 @@ bool Window::Init_Wnd()
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = Title.c_str();
 	wc.lpfnWndProc = WndProc;
-
+	
 	if (!RegisterClassEx(&wc))
 	{
 		MessageBox(NULL, L"Register Window Class Failed", L"ERROR", 0);
@@ -56,7 +56,7 @@ bool Window::Init_Wnd()
 	AspectRatio = (float)width / height;
 	int x = fullScreen ? 0 : CW_USEDEFAULT;
 	int y = fullScreen ? 0 : CW_USEDEFAULT;*/
-	UINT dwStyle = windowed ?   WS_OVERLAPPED | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX : WS_POPUP;
+	UINT dwStyle = windowed ?   WS_OVERLAPPED | WS_MAXIMIZEBOX | WS_MINIMIZEBOX : WS_POPUP;
 	WindowHandle = CreateWindow(wc.lpszClassName, Title.c_str(), dwStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 		NULL, NULL, wc.hInstance, 0);
@@ -64,6 +64,14 @@ bool Window::Init_Wnd()
 	if (!WindowHandle)
 	{
 		MessageBox(NULL, L"Create Window Failed", L"ERROR", 0);
+		return false;
+	}
+
+	RAWINPUTDEVICE rid = {};
+	rid.usUsage = 0x02;
+	rid.usUsagePage = 0x01;
+	if (RegisterRawInputDevices(&rid, 1, sizeof(rid)) == FALSE)
+	{
 		return false;
 	}
 	return true;
@@ -76,7 +84,7 @@ LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 	case WM_CLOSE:
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		break;
+		return 0;
 	case WM_MOUSEMOVE:
 		//if (wParam & MK_LBUTTON)
 		{
@@ -172,15 +180,15 @@ LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 		Input::OnKeyChar(c, isRepeat);
 		break;
 	}
-	default:
-		return DefWindowProc(hWnd, msg, wParam, lParam);
-		break;
 	}
 	return Engine::GetInstance()->WndProc(hWnd, msg, wParam, lParam);
 }
 
-bool Window::SetDimension(uint width, uint height, EWindowMode mode)
+bool Window::SetDimension(RECT rect, EWindowMode mode)
 {
+	float dpi = GetDpiForWindow(GetHandle()) / 96.0f;
+	uint width = (uint)((rect.right - rect.left)*dpi);
+	uint height = (uint)((rect.bottom - rect.top)*dpi);
 	bool modeChanged = (uint8)mode != WindowMode;
 	bool resChanged = width != Width || height != Height;
 	if (!modeChanged && !resChanged)
@@ -192,42 +200,19 @@ bool Window::SetDimension(uint width, uint height, EWindowMode mode)
 	Height = height;
 	AspectRatio = (float)width / height;
 	bool windowMode = mode != EWindowMode::FULLSCREEN;
-	int scrWidth = GetSystemMetrics(SM_CXSCREEN);
-	int scrHeight = GetSystemMetrics(SM_CYSCREEN);
-	bool max = scrWidth == width;
 
 	if (windowMode)
 	{
 		DWORD dwStyle =/* mode == EWindowMode::WINDOW ? */WS_OVERLAPPED | WS_MINIMIZEBOX;
-		int x = (scrWidth - width) / 2;
-		int y = (scrHeight - height) / 2;
-		RECT rect = {
-			x,
-			y,
-			x + (LONG)width,
-			y + (LONG)height };
-
 		AdjustWindowRect(&rect, dwStyle, false);
-		/*if (modeChanged || max)
-		{
-			DestroyWindow(WindowHandle);
-			dwStyle |= (max ? WS_MAXIMIZE : 0);
-			WindowHandle = CreateWindow(Title.c_str(), Title.c_str(), dwStyle,
-				x, y, rect.right - rect.left, rect.bottom - rect.top,
-				NULL, NULL, GetModuleHandle(0), 0);
-		}*/
 		SetWindowPos(WindowHandle, HWND_TOPMOST,
-			x,
-			y,
+			rect.left,
+			rect.top,
 			rect.right - rect.left,
 			rect.bottom - rect.top,
 			SWP_SHOWWINDOW | SWP_FRAMECHANGED | SWP_NOZORDER);
-
-		}
-	else
-	{
-
 	}
+
 	return true;
 }
 

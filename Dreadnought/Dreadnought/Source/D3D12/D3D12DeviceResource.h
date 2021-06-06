@@ -7,6 +7,7 @@ interface IDeviceNotify
 };
 class D3D12DeviceResource
 {
+    friend class Graphics;
 public:
     D3D12DeviceResource(
         DXGI_FORMAT backBufferFormat = DXGI_FORMAT_B8G8R8A8_UNORM,
@@ -50,10 +51,10 @@ public:
     }
 private:
     void MoveToNextFrame();
-    void InitAdapter(IDXGIAdapter1** ppAdapter);
+    void InitAdapter();
 public:
     // Getters
-    IDXGIAdapter1*              GetAdapter()const { return Adapter.Get(); }
+    //IDXGIAdapter1*              GetAdapter()const { return Adapter.Get(); }
     ID3D12Device*               GetDevice()const { return Device.Get(); }
     ID3D12CommandQueue*         GetCommandQueue()const { return RenderCommandQueue.Get(); }
     ID3D12GraphicsCommandList*  GetCommandList()const { return CommandList.Get(); }
@@ -76,7 +77,8 @@ private:
     uint AdapterIDOverride;
     uint AdapterID;
     uint BackBufferIndex;
-    ComPtr<IDXGIAdapter1>               Adapter;
+    std::vector<ComPtr<IDXGIAdapter1>>  Adapters;
+    std::vector<ComPtr<IDXGIOutput>>    Outputs;
     ComPtr<ID3D12Device>                Device;
     ComPtr<ID3D12CommandQueue>          RenderCommandQueue;
     ComPtr<ID3D12GraphicsCommandList>   CommandList;
@@ -97,7 +99,7 @@ private:
 
     D3D12_VIEWPORT                      ScreenViewport = {};
     D3D12_RECT                          ScissorRect = {};
-    RECT                                OutputSize = {};
+    RECT                                OutputSize;
 
     DXGI_FORMAT                         BackBufferFormat;
     DXGI_FORMAT                         DepthStencilBufferFormat;

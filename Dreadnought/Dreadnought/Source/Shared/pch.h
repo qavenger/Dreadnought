@@ -14,6 +14,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <map>
 #include <thread>
 #include <d3dcompiler.h>
 #include <DirectXCollision.h>

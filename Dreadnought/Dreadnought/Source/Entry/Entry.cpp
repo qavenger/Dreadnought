@@ -24,11 +24,6 @@ void ProcessInputBuffer()
 	{
 		params.push_back(_wtoi(s.c_str()));
 	}
-
-	if (params.size() == 2)
-	{
-		Window::GetInstance()->SetDimension(params[0], params[1]);
-	}
 }
 
 void KeyChar(TCHAR character, bool isRepeat)
