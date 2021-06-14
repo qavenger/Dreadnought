@@ -83,30 +83,38 @@ void KeyChar(TCHAR character, bool isRepeat)
 //	Print(std::forward<B>(rest)...);
 //}
 
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	try
 	{
 		Engine::GetInstance()->Init();
-	}
-	catch (HrException& e)
-	{
-		printf("%s", e.what());
-	}
-	MSG msg = {};
-	Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::RELEASED, []() {PostQuitMessage(0); });
-	Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::PRESSED, []() {PrintDebugMessage(L"Escape Pressed"); });
 	
-	while (msg.message != WM_QUIT)
-	{
-		while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		MSG msg = {};
+		Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::RELEASED, []() {PostQuitMessage(0); });
+		Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::PRESSED, []() {PrintDebugMessage(L"Escape Pressed"); });
+	
+		while (msg.message != WM_QUIT)
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			Engine::GetInstance()->Run();
 		}
-		Engine::GetInstance()->Run();
 	}
-
+	catch (const HrException& e)
+	{
+		MessageBox(nullptr, e.GetExceptionMessage(), e.GetType(), 0);
+	}
+	catch (const MsgException& e)
+	{
+		MessageBox(nullptr, e.GetExceptionMessage(), e.GetType(), 0);
+	}
+	catch (...)
+	{
+		MessageBox(nullptr, L"Unknown error", L"Unknown Error", 0);
+	}
 	FreeConsole();
 	Engine::GetInstance()->OnDestroy();
 	return 0;

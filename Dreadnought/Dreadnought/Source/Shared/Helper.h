@@ -10,49 +10,52 @@
 	#define PrintDebugFloat(msg)
 #endif
 
-class HrException : public std::runtime_error
+class ExceptionBase : public std::exception
 {
-	inline std::string HrToString(HRESULT hr)
-	{
-		char str[64] = {};
-		sprintf_s(str, "HRESULT of 0x%08X", static_cast<UINT>(hr));
-		return str;
-	}
 public:
-	HrException(HRESULT hr) : std::runtime_error(HrToString(hr)), Hr(hr) {}
-	HRESULT Error()const { return Hr; }
+	ExceptionBase(int line, const wchar_t* file)noexcept;
+	virtual const wchar_t* GetType()const noexcept;
+	virtual const wchar_t* GetExceptionMessage()const noexcept;
+	int GetLine()const noexcept { return Line; }
+	const std::wstring& GetFile()const noexcept { return File; }
+	std::wstring GetOriginString()const noexcept;
+private:
+	int Line;
+	std::wstring File;
+protected:
+	mutable std::wstring whatBuffer;
+};
+
+class HrException : public ExceptionBase
+{
+public:
+	static std::wstring HrToString(HRESULT hr)noexcept;
+
+	HrException(int line, const wchar_t* file, HRESULT hr)noexcept;
+	virtual const wchar_t* GetType()const noexcept override;
+	virtual const wchar_t* GetExceptionMessage()const noexcept override;
+	HRESULT Error()const noexcept;
+	std::wstring GetErrorString()const noexcept;
 private:
 	HRESULT Hr;
 };
 
+class MsgException : public ExceptionBase
+{
+public:
+	MsgException(int line, const wchar_t* file, const wchar_t* msg)noexcept;
+	virtual const wchar_t* GetType()const noexcept override;
+	virtual const wchar_t* GetExceptionMessage()const noexcept override;
+private:
+	std::wstring Msg;
+};
+
 #define SAFE_RELEASE(x) if(x) (x)->Release()
 
-inline void ThrowIfFailed(HRESULT hr)
-{
-	if(FAILED(hr))
-	{
-		throw HrException(hr);
-	}
-}
+#define ThrowIfFailed(hr) if(FAILED(hr)) throw HrException(__LINE__, __FILEW__, hr)
+#define ThrowIfFalse(value, msg) if(value == false) throw MsgException(__LINE__, __FILEW__, msg)
+#define ThrowLastError(value) if(value == false) throw HrException(__LINE__, __FILEW__, GetLastError())
 
-inline void ThrowIfFailed(HRESULT hr, const wchar_t* msg)
-{
-	if (FAILED(hr))
-	{
-		OutputDebugString(msg);
-		throw HrException(hr);
-	}
-}
-
-inline void ThrowIfFalse(bool value)
-{
-	ThrowIfFailed(value ? S_OK : E_FAIL);
-}
-
-inline void ThrowIfFalse(bool value, const wchar_t* msg)
-{
-	ThrowIfFailed(value ? S_OK : E_FAIL, msg);
-}
 
 inline void GetAssetsPath(_Out_writes_(pathSize) WCHAR* path, UINT pathSize)
 {

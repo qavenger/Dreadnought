@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "Core/Engine.h"
+#include "resource.h"
 
 static Window* gWindow = nullptr;
 
@@ -32,24 +33,6 @@ bool Window::Init_Wnd()
 	//AttachConsole(ATTACH_PARENT_PROCESS)
 #endif
 
-	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-	WNDCLASSEX wc = {};
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	wc.hInstance = GetModuleHandle(NULL);
-	wc.hIcon = LoadIcon(wc.hInstance, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW);
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = Title.c_str();
-	wc.lpfnWndProc = WndProc;
-	
-	if (!RegisterClassEx(&wc))
-	{
-		MessageBox(NULL, L"Register Window Class Failed", L"ERROR", 0);
-		return false;
-	}
-
 	bool windowed = GetWindowMode() == EWindowMode::WINDOW;
 	/*uint16 width, height;
 	GetDimension(width, height);
@@ -57,15 +40,11 @@ bool Window::Init_Wnd()
 	int x = fullScreen ? 0 : CW_USEDEFAULT;
 	int y = fullScreen ? 0 : CW_USEDEFAULT;*/
 	UINT dwStyle = windowed ?   WS_OVERLAPPED | WS_MAXIMIZEBOX | WS_MINIMIZEBOX : WS_POPUP;
-	WindowHandle = CreateWindow(wc.lpszClassName, Title.c_str(), dwStyle,
+	WindowHandle = CreateWindow(WindowClass::GetName(), Title.c_str(), dwStyle,
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
-		NULL, NULL, wc.hInstance, 0);
+		NULL, NULL, WindowClass::GetInstanceHandle(), Engine::GetInstance());
 	
-	if (!WindowHandle)
-	{
-		MessageBox(NULL, L"Create Window Failed", L"ERROR", 0);
-		return false;
-	}
+	ThrowLastError(WindowHandle != nullptr);
 
 	RAWINPUTDEVICE rid = {};
 	rid.usUsage = 0x02;
@@ -77,111 +56,28 @@ bool Window::Init_Wnd()
 	return true;
 }
 
+LRESULT Window::WndProcSetup(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
+{
+	if (msg == WM_NCCREATE)
+	{
+		const CREATESTRUCTW* const pCreate = reinterpret_cast<CREATESTRUCTW*>(lParam);
+		Engine* const pEngine = static_cast<Engine*>(pCreate->lpCreateParams);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pEngine));
+		SetWindowLongPtr(hWnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&Window::WndProc));
+		return pEngine->WndProc(hWnd, msg, wParam, lParam);
+	}
+	return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
 LRESULT Window::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 {
-	switch (msg)
+	if (msg == WM_CLOSE)
 	{
-	case WM_CLOSE:
-	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
-	case WM_MOUSEMOVE:
-		//if (wParam & MK_LBUTTON)
-		{
-			int x, y;
-			x = LOWORD(lParam);
-			y = HIWORD(lParam);
-			Input::OnMouseMove(x,y);
-		}
-		break;
-	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_MBUTTONDOWN:
-	case WM_LBUTTONUP:
-	case WM_RBUTTONUP:
-	case WM_MBUTTONUP:
-	case WM_LBUTTONDBLCLK:
-	case WM_RBUTTONDBLCLK:
-	case WM_MBUTTONDBLCLK:
-	{
-		int x, y;
-		x = LOWORD(lParam);
-		y = HIWORD(lParam);
-		Input::EMouseButton btn = Input::EMouseButton::Invalid;
-		bool bIsDblClk = false;
-		bool bIsMouseUp = false;
-		switch (msg)
-		{
-		case WM_LBUTTONDOWN:
-			btn = Input::EMouseButton::Left;
-			break;
-		case WM_RBUTTONDOWN:
-			btn = Input::EMouseButton::Right;
-			break;
-		case WM_MBUTTONDOWN:
-			btn = Input::EMouseButton::Middle;
-			break;
-		case WM_LBUTTONUP:
-			btn = Input::EMouseButton::Left;
-			bIsMouseUp = true;
-			break;
-		case WM_RBUTTONUP:
-			btn = Input::EMouseButton::Right;
-			bIsMouseUp = true;
-			break;
-		case WM_MBUTTONUP:
-			btn = Input::EMouseButton::Middle;
-			bIsMouseUp = true;
-			break;
-		case WM_LBUTTONDBLCLK:
-			btn = Input::EMouseButton::Left;
-			bIsDblClk = true;
-			break;
-		case WM_RBUTTONDBLCLK:
-			btn = Input::EMouseButton::Right;
-			bIsDblClk = true;
-			break;
-		case WM_MBUTTONDBLCLK:
-			btn = Input::EMouseButton::Middle;
-			bIsDblClk = true;
-			break;
-		}
-		if (bIsDblClk)
-		{
-			Input::OnMouseEvent(btn, EMouseInputState::DBLCLK, x, y);
-		}
-		else if (bIsMouseUp)
-		{
-			Input::OnMouseEvent(btn, EMouseInputState::UP, x, y);
-		}
-		else
-		{
-			Input::OnMouseEvent(btn, EMouseInputState::DOWN, x, y);
-		}
 	}
-		break;
-	case WM_KEYDOWN:
-	{
-		if ((lParam & 0xC0000000) == 0)
-		{
-			Input::OnKeyInput((Input::EKeyCode)(wParam), EKeyInputState::PRESSED);
-		}
-		break;
-	}
-	case WM_KEYUP:
-	{
-		Input::OnKeyInput((Input::EKeyCode)(wParam), EKeyInputState::RELEASED);
-		break;
-	}
-	case WM_CHAR:
-	{
-		const TCHAR c = (TCHAR)wParam;
-		bool isRepeat = lParam & 0xC0000000;
-		Input::OnKeyChar(c, isRepeat);
-		break;
-	}
-	}
-	return Engine::GetInstance()->WndProc(hWnd, msg, wParam, lParam);
+	auto* const pEngine = reinterpret_cast<Engine*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	return pEngine->WndProc(hWnd, msg, wParam, lParam);
 }
 
 bool Window::SetDimension(RECT rect, EWindowMode mode)
@@ -223,4 +119,39 @@ HWND Window::GetConsoleHandle() const
 #else
 	return NULL;
 #endif
+}
+
+Window::~Window()
+{
+	DestroyWindow(WindowHandle);
+}
+
+Window::WindowClass Window::WindowClass::WndClass;
+
+HINSTANCE Window::WindowClass::GetInstanceHandle() noexcept
+{
+	return WndClass.hInstance;
+}
+
+Window::WindowClass::WindowClass() noexcept
+	:hInstance(GetModuleHandle(nullptr))
+{
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	WNDCLASSEX wc = {};
+	wc.cbSize = sizeof(WNDCLASSEX);
+	wc.style = CS_DBLCLKS | CS_OWNDC;
+	wc.hInstance = GetInstanceHandle();
+	wc.hIcon = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_ENGINEICON), IMAGE_ICON, 32, 32, 0));
+	wc.hIconSm = static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(IDI_ENGINEICON), IMAGE_ICON, 16, 16, 0));
+	//wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+	//wc.lpszMenuName = NULL;
+	wc.lpszClassName = GetName();
+	wc.lpfnWndProc = WndProcSetup;
+
+	RegisterClassEx(&wc);
+}
+
+Window::WindowClass::~WindowClass()
+{
+	UnregisterClass(WndClassName, hInstance);
 }

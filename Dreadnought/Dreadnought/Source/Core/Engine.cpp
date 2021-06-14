@@ -110,6 +110,7 @@ bool Engine::InitConsoleCommands()
 void Engine::Run()
 {
 	g_Timer.Tick();
+	Input::Tick();
 	GfxInstance->Tick();
 	Console::GetInstance().ExecCommands();
 }
@@ -142,6 +143,104 @@ LRESULT Engine::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	
+	case WM_MOUSEMOVE:
+		//if (wParam & MK_LBUTTON)
+	{
+		int x, y;
+		x = LOWORD(lParam);
+		y = HIWORD(lParam);
+		Input::OnMouseMove(x, y);
+	}
+	break;
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
+	case WM_MBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONUP:
+	case WM_MBUTTONUP:
+	case WM_LBUTTONDBLCLK:
+	case WM_RBUTTONDBLCLK:
+	case WM_MBUTTONDBLCLK:
+	{
+		int x, y;
+		x = LOWORD(lParam);
+		y = HIWORD(lParam);
+		Input::EMouseButton btn = Input::EMouseButton::Invalid;
+		bool bIsDblClk = false;
+		bool bIsMouseUp = false;
+		switch (msg)
+		{
+		case WM_LBUTTONDOWN:
+			btn = Input::EMouseButton::Left;
+			break;
+		case WM_RBUTTONDOWN:
+			btn = Input::EMouseButton::Right;
+			break;
+		case WM_MBUTTONDOWN:
+			btn = Input::EMouseButton::Middle;
+			break;
+		case WM_LBUTTONUP:
+			btn = Input::EMouseButton::Left;
+			bIsMouseUp = true;
+			break;
+		case WM_RBUTTONUP:
+			btn = Input::EMouseButton::Right;
+			bIsMouseUp = true;
+			break;
+		case WM_MBUTTONUP:
+			btn = Input::EMouseButton::Middle;
+			bIsMouseUp = true;
+			break;
+		case WM_LBUTTONDBLCLK:
+			btn = Input::EMouseButton::Left;
+			bIsDblClk = true;
+			break;
+		case WM_RBUTTONDBLCLK:
+			btn = Input::EMouseButton::Right;
+			bIsDblClk = true;
+			break;
+		case WM_MBUTTONDBLCLK:
+			btn = Input::EMouseButton::Middle;
+			bIsDblClk = true;
+			break;
+		}
+		if (bIsDblClk)
+		{
+			Input::OnMouseEvent(btn, EMouseInputState::DBLCLK, x, y);
+		}
+		else if (bIsMouseUp)
+		{
+			Input::OnMouseEvent(btn, EMouseInputState::UP, x, y);
+		}
+		else
+		{
+			Input::OnMouseEvent(btn, EMouseInputState::DOWN, x, y);
+		}
+	}
+	break;
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	{
+		if ((lParam & 0xC0000000) == 0)
+		{
+			Input::OnKeyInput((Input::EKeyCode)(wParam), EKeyInputState::PRESSED);
+		}
+		break;
+	}
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	{
+		Input::OnKeyInput((Input::EKeyCode)(wParam), EKeyInputState::RELEASED);
+		break;
+	}
+	case WM_CHAR:
+	{
+		const TCHAR c = (TCHAR)wParam;
+		bool isRepeat = lParam & 0xC0000000;
+		Input::OnKeyChar(c, isRepeat);
+		break;
+	}
 	case WM_SIZE:
 	{
 
@@ -157,7 +256,32 @@ LRESULT Engine::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_INPUT:
 	{
-
+		UINT size = 0;
+		if (GetRawInputData(
+			reinterpret_cast<HRAWINPUT>(lParam),
+			RID_INPUT,
+			nullptr,
+			&size,
+			sizeof(RAWINPUTHEADER)) == -1)
+		{
+			break;
+		}
+		Input::RawInputBuffer.resize(size);
+		if (GetRawInputData(
+			reinterpret_cast<HRAWINPUT>(lParam),
+			RID_INPUT,
+			Input::RawInputBuffer.data(),
+			&size,
+			sizeof(RAWINPUTHEADER)) != size)
+		{
+			break;
+		}
+		auto& ri = reinterpret_cast<const RAWINPUT&>(*Input::RawInputBuffer.data());
+		if (ri.header.dwType == RIM_TYPEMOUSE &&
+			(ri.data.mouse.lLastX != 0 || ri.data.mouse.lLastY != 0))
+		{
+			Input::OnMouseRawMove(ri.data.mouse.lLastX, ri.data.mouse.lLastY);
+		}
 		break;
 	}
 	case WM_EXITSIZEMOVE:

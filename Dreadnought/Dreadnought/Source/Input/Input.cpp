@@ -6,26 +6,33 @@ POINT Input::m_mousePos;
 HWND Input::m_hWnd;
 KeyCharEvent Input::OnKeyCharEvent;
 KeyInputEvent Input::OnKeyInputEvent[(uint8)EKeyInputState::NUM][(unsigned long long)Input::EKeyCode::NUM_KEYCODE];
-MouseEvent Input::OnMouseButtonEvent[(int)EMouseInputState::NUM][(int)EMouseButton::Invalid];
-MouseEvent Input::OnMouseMoveEvent;
+MouseInputEvent Input::OnMouseButtonEvent[(int)EMouseInputState::NUM][(int)EMouseButton::Invalid];
+MouseInputEvent Input::OnMouseMoveEvent;
+MouseInputEvent Input::OnMouseRawMoveEvent;
 EMouseInputState Input::MouseInputState[(int)Input::EMouseButton::Invalid] = {EMouseInputState::UP,EMouseInputState::UP,EMouseInputState::UP};
-
+std::vector<char> Input::RawInputBuffer;
+bool Input::bAutoRepeatEnable = true;
+bool Input::bEnableRawInput = true;
+std::queue<TCHAR> Input::CharBuffer;
+std::queue<Input::KeyEvent> Input::KeyBuffer;
+std::queue<Input::MouseEvent> Input::MouseBuffer;
+std::queue<Input::MouseRawEvent> Input::MouseRawBuffer;
 void Input::Start(HWND hWnd)
 {
 	m_hWnd = hWnd;
 }
 
-void Input::BindKeyCharEvent(void (*p)(TCHAR, bool))
+void Input::BindKeyCharEvent(void (*p)(TCHAR))
 {
 	OnKeyCharEvent.Bind(p);
 }
 
-void Input::UnBindKeyCharEvent(void(*p)(TCHAR, bool))
+void Input::UnBindKeyCharEvent(void(*p)(TCHAR))
 {
 	OnKeyCharEvent.UnBind(p);
 }
 
-bool Input::IsBoundKeyCharEvent(void(*p)(TCHAR, bool))
+bool Input::IsBoundKeyCharEvent(void(*p)(TCHAR))
 {
 	return OnKeyCharEvent.IsBound(p);
 }
@@ -40,10 +47,10 @@ void Input::UnBindKeyInput(EKeyCode keyCode, EKeyInputState keyState, void(*p)()
 	OnKeyInputEvent[(uint8)keyState][(uint64)keyCode].UnBind(p);
 }
 
-bool Input::OnKeyInput(EKeyCode keyCode, EKeyInputState keyState)
+void Input::OnKeyInput(EKeyCode keyCode, EKeyInputState keyState)
 {
-	OnKeyInputEvent[(uint8)keyState][(uint64)keyCode].Broadcast();
-	return true;
+	KeyBuffer.push(KeyEvent(keyState, keyCode));
+	//OnKeyInputEvent[(uint8)keyState][(uint64)keyCode].Broadcast();
 }
 
 void Input::BindMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, void(*p)(int2))
@@ -56,14 +63,14 @@ void Input::UnBindMouseEvent(EMouseButton mouseButton, EMouseInputState mouseSta
 	OnMouseButtonEvent[(int)mouseState][(int)mouseButton].UnBind(p);
 }
 
-bool Input::OnMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, int x, int y)
+void Input::OnMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, int x, int y)
 {
 	m_prevMousePos = m_mousePos;
 	m_mousePos.x = x;
 	m_mousePos.y = y;
-	OnMouseButtonEvent[(int)mouseState][(int)mouseButton].Broadcast({x,y});
+	//OnMouseButtonEvent[(int)mouseState][(int)mouseButton].Broadcast({x,y});
 	MouseInputState[(int)mouseButton] = mouseState;
-	return true;
+	MouseBuffer.push(MouseEvent(mouseState, mouseButton, {x, y}));
 }
 
 void Input::BindMouseMoveEvent(void(*p)(int2))
@@ -76,17 +83,84 @@ void Input::UnBindMouseMoveEvent(void(*p)(int2))
 	OnMouseMoveEvent.UnBind(p);
 }
 
-bool Input::OnMouseMove(int x, int y)
+void Input::OnMouseMove(int x, int y)
 {
-	OnMouseMoveEvent.Broadcast({ x,y });
-	return true;
+	//OnMouseMoveEvent.Broadcast({ x,y });
+	MouseBuffer.push(MouseEvent({x, y}));
 }
 
-bool Input::OnKeyChar(const TCHAR character, bool bIsRepeat)
+void Input::ProcessKeyborad()
 {
-	if (character == '\x1b')return false;
-	OnKeyCharEvent.Broadcast(character, bIsRepeat);
-	return true;
+	while (!KeyBuffer.empty())
+	{
+		auto& e = KeyBuffer.front();
+		OnKeyInputEvent[(int)e.GetState()][e.GetKeyCode()].Broadcast();
+		KeyBuffer.pop();
+	}
+	while (!CharBuffer.empty())
+	{
+		OnKeyCharEvent.Broadcast(CharBuffer.front());
+		CharBuffer.pop();
+	}
+}
+
+void Input::ProcessMouse()
+{
+	while (!MouseBuffer.empty())
+	{
+		auto& e = MouseBuffer.front();
+		if (e.GetState() == EMouseInputState::MOVE)
+		{
+			OnMouseMoveEvent.Broadcast(e.GetPosition());
+		}
+		else
+		{
+			OnMouseButtonEvent[(int)e.GetState()][(int)e.GetButton()].Broadcast(e.GetPosition());
+		}
+		MouseBuffer.pop();
+	}
+	while (!MouseRawBuffer.empty())
+	{
+		auto& e = MouseRawBuffer.front();
+		OnMouseRawMoveEvent.Broadcast(e.GetVelocity());
+		MouseRawBuffer.pop();
+	}
+}
+
+void Input::Tick()
+{
+	ProcessKeyborad();
+	ProcessMouse();
+}
+
+void Input::BindMouseRawMoveEvent(void(*p)(int2))
+{
+	OnMouseRawMoveEvent.Bind(p);
+}
+
+void Input::UnBindMouseRawMoveEvent(void(*p)(int2))
+{
+	OnMouseRawMoveEvent.UnBind(p);
+}
+
+void Input::OnMouseRawMove(int x, int y)
+{
+	//RawMoveVel = { x,y };
+	//OnMouseRawMoveEvent.Broadcast({ x,y });
+	if (bEnableRawInput)
+	{
+		MouseRawBuffer.push(MouseRawEvent({ x, y }));
+	}
+}
+
+void Input::OnKeyChar(const TCHAR character, bool bIsRepeat)
+{
+	//OnKeyCharEvent.Broadcast(character, bIsRepeat);
+	if (bIsRepeat && !bAutoRepeatEnable)
+	{
+		return;
+	}
+	CharBuffer.push(character);
 }
 
 bool Input::IsKeyDown(EKeyCode keyCode)
@@ -119,9 +193,56 @@ int2 Input::GetMouseRelativePosition()
 	);
 }
 
-void Input::UpdateMouse( Input::EMouseButton keyCode, EMouseInputState mouseState, int x, int y)
+void Input::ClearKeyEvent()
 {
-	m_prevMousePos = m_mousePos;
-	m_mousePos.x = x;
-	m_mousePos.y = y;
+	KeyBuffer = std::queue<KeyEvent>();
+}
+
+void Input::ClearCharEvent()
+{
+	CharBuffer = std::queue<TCHAR>();
+}
+
+void Input::ClearKeyboardEvents()
+{
+	ClearKeyEvent();
+	ClearCharEvent();
+}
+
+void Input::EnableAutoRepeat()
+{
+	bAutoRepeatEnable = true;
+}
+
+void Input::DisableAutoRepeat()
+{
+	bAutoRepeatEnable = false;
+}
+
+bool Input::IsAutoRepeatEnabled()
+{
+	return bAutoRepeatEnable;
+}
+
+Input::KeyEvent::KeyEvent(EKeyInputState state, EKeyCode keyCode)
+	:
+	State(state),
+	KeyCode((unsigned char)keyCode)
+{
+}
+
+Input::MouseEvent::MouseEvent(EMouseInputState state, EMouseButton button, int2 loc)
+	:
+	State(state),
+	Button(button),
+	Loc(loc)
+{
+}
+
+Input::MouseEvent::MouseEvent(int2 loc)
+	:
+	State(EMouseInputState::MOVE),
+	Button(EMouseButton::Invalid),
+	Loc(loc)
+{
 }

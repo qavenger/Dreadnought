@@ -53,7 +53,7 @@ bool D3D12DeviceResource::OnResize(int w, int h, bool minimized)
 		return false;
 	}
 
-	RECT newRect = { 0, 0, max(1,w), max(1,h) };
+	RECT newRect = { 0, 0, std::max(1,w), std::max(1,h) };
 	if (
 		newRect.left == OutputSize.left &&
 		newRect.right == OutputSize.right &&
@@ -220,10 +220,8 @@ void D3D12DeviceResource::CreateDeviceResources()
 	ThrowIfFailed(Device->CreateFence(FenceValue[BackBufferIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence)));
 	++FenceValue[BackBufferIndex];
 	FenceEvent.Attach(CreateEvent(nullptr, FALSE, FALSE, nullptr));
-	if (!FenceEvent.IsValid())
-	{
-		ThrowIfFailed(E_FAIL, L"Create fence event failed\n");
-	}
+
+	ThrowLastError(FenceEvent.IsValid());
 }
 
 void D3D12DeviceResource::CreateWindowDependentResources()
@@ -235,8 +233,8 @@ void D3D12DeviceResource::CreateWindowDependentResources()
 		FenceValue[n] = FenceValue[BackBufferIndex] - 1;
 	}
 
-	uint backBufferWidth = max(OutputSize.right - OutputSize.left, 1);
-	uint backBufferHeight = max(OutputSize.bottom - OutputSize.top, 1);
+	uint backBufferWidth = std::max((int)(OutputSize.right - OutputSize.left), 1);
+	uint backBufferHeight = std::max((int)(OutputSize.bottom - OutputSize.top), 1);
 	DXGI_FORMAT backBufferFormat = NoSRGB(BackBufferFormat);
 
 	if (SwapChain)

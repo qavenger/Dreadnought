@@ -37,6 +37,9 @@
     <Filter Include="Source\UI">
       <UniqueIdentifier>{85b36ca7-360a-4b78-a0a1-faf9836be28a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{c13cafd1-6d32-44b6-99dd-14f653859806}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Shared\pch.cpp">
@@ -128,5 +131,18 @@
     <ClInclude Include="Source\UI\Console.h">
       <Filter>Source\UI</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Window\resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Dreadnought.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Source\Window\Resource\Dreadnought.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

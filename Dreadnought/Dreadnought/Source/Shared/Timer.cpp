@@ -70,7 +70,7 @@ void Timer::Reset()
 void Timer::Tick()
 {
 	QueryPerformanceCounter((LARGE_INTEGER*)&m_currTime);
-	__int64 dt = max(0,m_currTime - m_prevTime);
+	__int64 dt = std::max(0ll,m_currTime - m_prevTime);
 
 	m_unscaledTotalTime += dt;
 	m_unscaledDeltaTime = dt * m_secondPerCount;

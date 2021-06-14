@@ -21,7 +21,7 @@ bool SceneRenderer::Init()
     Graphics::Init();
     ThrowIfFailed(DeviceResources->GetDevice()->QueryInterface(IID_PPV_ARGS(&Device)));
     ThrowIfFailed(DeviceResources->GetCommandList()->QueryInterface(IID_PPV_ARGS(&CommandList)));
-    
+
     return true;
 }
 
@@ -60,6 +60,13 @@ void SceneRenderer::OnDrawGUI()
 {
     if(Engine::GetInstance()->GetShowConsole())
         Console::GetInstance().Draw("Console", &Engine::GetInstance()->GetShowConsole());
+
+ /*   if (ImGui::Begin("Raw Input"))
+    {
+        ImGui::Text("Raw Input: (%d, %d)", Input::RawMoveVel.x, Input::RawMoveVel.y);
+    }
+    ImGui::End();*/
+
     ImGui::Render();
 }
 
