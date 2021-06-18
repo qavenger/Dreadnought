@@ -23,7 +23,6 @@ namespace
 
 D3D12DeviceResource::D3D12DeviceResource(DXGI_FORMAT backBufferFormat, DXGI_FORMAT depthStencilBufferFormat, UINT numBackBuffer, D3D_FEATURE_LEVEL minFeatureLevel, UINT flag, UINT adapterIDOverride)
 	:
-	FenceValue{},
 	AdapterIDOverride(adapterIDOverride),
 	AdapterID(UINT_MAX),
 	BackBufferIndex(0),
@@ -212,13 +211,13 @@ void D3D12DeviceResource::CreateDeviceResources()
 
 	for (uint i = 0; i < NumBackBuffer; ++i)
 	{
-		ThrowIfFailed(Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&CommandAllocator[i])));
+		ThrowIfFailed(Device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&FrameResources[i].CommandAllocator)));
 	}
 
-	ThrowIfFailed(Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, CommandAllocator[0].Get(),nullptr, IID_PPV_ARGS(&CommandList)));
+	ThrowIfFailed(Device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, FrameResources[0].CommandAllocator.Get(),nullptr, IID_PPV_ARGS(&CommandList)));
 	ThrowIfFailed(CommandList->Close());
-	ThrowIfFailed(Device->CreateFence(FenceValue[BackBufferIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence)));
-	++FenceValue[BackBufferIndex];
+	ThrowIfFailed(Device->CreateFence(FrameResources[BackBufferIndex].FenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&Fence)));
+	++FrameResources[BackBufferIndex].FenceValue;
 	FenceEvent.Attach(CreateEvent(nullptr, FALSE, FALSE, nullptr));
 
 	ThrowLastError(FenceEvent.IsValid());
@@ -229,8 +228,8 @@ void D3D12DeviceResource::CreateWindowDependentResources()
 	WaitForGPU();
 	for (uint n = 0; n < NumBackBuffer; ++n)
 	{
-		RenderTargets[n].Reset();
-		FenceValue[n] = FenceValue[BackBufferIndex] - 1;
+		FrameResources[n].ResetWindowDependentResources();
+		FrameResources[n].FenceValue = FrameResources[BackBufferIndex].FenceValue - 1;
 	}
 
 	uint backBufferWidth = std::max((int)(OutputSize.right - OutputSize.left), 1);
@@ -281,12 +280,13 @@ void D3D12DeviceResource::CreateWindowDependentResources()
 
 	for (uint bufferIdx = 0; bufferIdx < NumBackBuffer; ++bufferIdx)
 	{
-		ThrowIfFailed(SwapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&RenderTargets[bufferIdx])));
+		ThrowIfFailed(SwapChain->GetBuffer(bufferIdx, IID_PPV_ARGS(&FrameResources[bufferIdx].RenderTarget)));
+		auto* currentRT = FrameResources[bufferIdx].RenderTarget.Get();
 
 #ifdef _DEBUG
 		std::wstring name = L"Render Target ";
 		name += bufferIdx;
-		ThrowIfFailed(RenderTargets[bufferIdx]->SetName(name.c_str()));
+		ThrowIfFailed(currentRT->SetName(name.c_str()));
 #endif
 
 		D3D12_RENDER_TARGET_VIEW_DESC viewDesc = {};
@@ -294,7 +294,7 @@ void D3D12DeviceResource::CreateWindowDependentResources()
 		viewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(RTVDescriptorHeap->GetCPUDescriptorHandleForHeapStart(), bufferIdx, rtvDescriptorSize);
-		Device->CreateRenderTargetView(RenderTargets[bufferIdx].Get(), &viewDesc, handle);
+		Device->CreateRenderTargetView(currentRT, &viewDesc, handle);
 	}
 	BackBufferIndex = SwapChain->GetCurrentBackBufferIndex();
 
@@ -341,14 +341,14 @@ void D3D12DeviceResource::WaitForGPU() noexcept
 {
 	if (RenderCommandQueue && Fence && FenceEvent.IsValid())
 	{
-		uint64 fenceValue = FenceValue[BackBufferIndex];
+		uint64 fenceValue = FrameResources[BackBufferIndex].FenceValue;
 
 		if (SUCCEEDED(RenderCommandQueue->Signal(Fence.Get(), fenceValue)))
 		{
 			if (SUCCEEDED(Fence->SetEventOnCompletion(fenceValue, FenceEvent.Get())))
 			{
 				WaitForSingleObjectEx(FenceEvent.Get(), INFINITE, FALSE);
-				++FenceValue[BackBufferIndex];
+				++FrameResources[BackBufferIndex].FenceValue;
 			}
 		}
 	}
@@ -370,8 +370,7 @@ void D3D12DeviceResource::HandleDeviceLost()
 
 	for (uint n = 0; n < NumBackBuffer; ++n)
 	{
-		CommandAllocator[n].Reset();
-		RenderTargets[n].Reset();
+		FrameResources[n].ResetOnDeviceLost();
 	}
 
 	DepthStencil.Reset();
@@ -412,13 +411,14 @@ void D3D12DeviceResource::HandleDeviceLost()
 
 void D3D12DeviceResource::BeginFrame(D3D12_RESOURCE_STATES beforeState)
 {
-	ThrowIfFailed(CommandAllocator[BackBufferIndex]->Reset());
-	ThrowIfFailed(CommandList->Reset(CommandAllocator[BackBufferIndex].Get(), nullptr));
+	auto Alloc = FrameResources[BackBufferIndex].CommandAllocator.Get();
+	ThrowIfFailed(Alloc->Reset());
+	ThrowIfFailed(CommandList->Reset(Alloc, nullptr));
 	if (D3D12_RESOURCE_STATE_RENDER_TARGET != beforeState)
 	{
 		D3D12_RESOURCE_BARRIER barrier =
 			CD3DX12_RESOURCE_BARRIER::Transition(
-				RenderTargets[BackBufferIndex].Get(),
+				FrameResources[BackBufferIndex].RenderTarget.Get(),
 				beforeState,
 				D3D12_RESOURCE_STATE_RENDER_TARGET
 			);
@@ -435,7 +435,7 @@ void D3D12DeviceResource::EndFrame(D3D12_RESOURCE_STATES beforeState)
 	{
 		D3D12_RESOURCE_BARRIER barrier =
 			CD3DX12_RESOURCE_BARRIER::Transition(
-				RenderTargets[BackBufferIndex].Get(),
+				FrameResources[BackBufferIndex].RenderTarget.Get(),
 				beforeState,
 				D3D12_RESOURCE_STATE_PRESENT
 			);
@@ -463,18 +463,18 @@ void D3D12DeviceResource::EndFrame(D3D12_RESOURCE_STATES beforeState)
 
 void D3D12DeviceResource::MoveToNextFrame()
 {
-	const uint64 currentFenceValue = FenceValue[BackBufferIndex];
+	const uint64 currentFenceValue = FrameResources[BackBufferIndex].FenceValue;
 	ThrowIfFailed(RenderCommandQueue->Signal(Fence.Get(), currentFenceValue));
 
 	BackBufferIndex = SwapChain->GetCurrentBackBufferIndex();
 
-	if (Fence->GetCompletedValue() < FenceValue[BackBufferIndex])
+	if (Fence->GetCompletedValue() < FrameResources[BackBufferIndex].FenceValue)
 	{
-		ThrowIfFailed(Fence->SetEventOnCompletion(FenceValue[BackBufferIndex], FenceEvent.Get()));
+		ThrowIfFailed(Fence->SetEventOnCompletion(FrameResources[BackBufferIndex].FenceValue, FenceEvent.Get()));
 		WaitForSingleObjectEx(FenceEvent.Get(), INFINITE, FALSE);
 	}
 
-	FenceValue[BackBufferIndex] = currentFenceValue + 1;
+	FrameResources[BackBufferIndex].FenceValue = currentFenceValue + 1;
 }
 
 void D3D12DeviceResource::InitAdapter()

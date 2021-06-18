@@ -81,6 +81,15 @@
     <ClCompile Include="Source\UI\Console.cpp">
       <Filter>Source\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\D3D12\D3D12FrameResource.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3D12\D3D12Texture.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\D3D12\D3D12Resource.cpp">
+      <Filter>Source\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Shared\pch.h">
@@ -133,6 +142,15 @@
     </ClInclude>
     <ClInclude Include="Source\Window\resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3D12\D3D12FrameResource.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3D12\D3D12Texture.h">
+      <Filter>Source\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\D3D12\D3D12Resource.h">
+      <Filter>Source\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

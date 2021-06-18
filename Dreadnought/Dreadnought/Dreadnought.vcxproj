@@ -19,8 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\D3D12\D3D12FrameResource.cpp" />
     <ClCompile Include="Source\Core\Engine.cpp" />
     <ClCompile Include="Source\D3D12\D3D12DeviceResource.cpp" />
+    <ClCompile Include="Source\D3D12\D3D12Resource.cpp" />
+    <ClCompile Include="Source\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="Source\Entry\Entry.cpp" />
     <ClCompile Include="Source\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\Graphics\VertexFactory.cpp" />
@@ -34,6 +37,9 @@
     <ClCompile Include="Source\Window\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\D3D12\D3D12FrameResource.h" />
+    <ClInclude Include="Source\D3D12\D3D12Resource.h" />
+    <ClInclude Include="Source\D3D12\D3D12Texture.h" />
     <ClInclude Include="Source\Window\resource.h" />
     <ClInclude Include="Source\Core\Engine.h" />
     <ClInclude Include="Source\D3D12\D3D12DeviceResource.h" />

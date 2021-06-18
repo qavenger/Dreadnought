@@ -1,5 +1,6 @@
 #pragma once
 #include "../Templates/TemplateClasses.h"
+#include "D3D12FrameResource.h"
 interface IDeviceNotify
 {
     virtual void OnDeviceLost() = 0;
@@ -58,11 +59,11 @@ public:
     ID3D12Device*               GetDevice()const { return Device.Get(); }
     ID3D12CommandQueue*         GetCommandQueue()const { return RenderCommandQueue.Get(); }
     ID3D12GraphicsCommandList*  GetCommandList()const { return CommandList.Get(); }
-    ID3D12CommandAllocator*     GetCommandAllocator() { return CommandAllocator[BackBufferIndex].Get(); };
+    ID3D12CommandAllocator*     GetCommandAllocator() { return FrameResources[BackBufferIndex].CommandAllocator.Get(); };
 
     IDXGIFactory4*              GetFactory()const { return Factory4.Get(); }
     IDXGISwapChain3*            GetSwapChain()const { return SwapChain.Get(); }
-    ID3D12Resource*             GetRenderTarget() const{ return RenderTargets[BackBufferIndex].Get(); }
+    ID3D12Resource*             GetRenderTarget() const{ return FrameResources[BackBufferIndex].RenderTarget.Get(); }
     ID3D12Resource*             GetDepthStencil()const { return DepthStencil.Get(); }
     D3D12_VIEWPORT              GetViewport()const { return ScreenViewport; }
     D3D12_RECT                  GetScissorRect()const { return ScissorRect; }
@@ -82,15 +83,16 @@ private:
     ComPtr<ID3D12Device>                Device;
     ComPtr<ID3D12CommandQueue>          RenderCommandQueue;
     ComPtr<ID3D12GraphicsCommandList>   CommandList;
-    ComPtr<ID3D12CommandAllocator>      CommandAllocator[MAX_BACK_BUFFER_COUNT];
+    D3D12FrameResource                  FrameResources[MAX_BACK_BUFFER_COUNT];
+    //ComPtr<ID3D12CommandAllocator>      CommandAllocator[MAX_BACK_BUFFER_COUNT];
 
     ComPtr<IDXGIFactory4>               Factory4;
     ComPtr<IDXGISwapChain3>             SwapChain;
-    ComPtr<ID3D12Resource>              RenderTargets[MAX_BACK_BUFFER_COUNT];
+    //ComPtr<ID3D12Resource>              RenderTargets[MAX_BACK_BUFFER_COUNT];
     ComPtr<ID3D12Resource>              DepthStencil;
 
     ComPtr<ID3D12Fence>                 Fence;
-    UINT64                              FenceValue[MAX_BACK_BUFFER_COUNT];
+   // UINT64                              FenceValue[MAX_BACK_BUFFER_COUNT];
     Microsoft::WRL::Wrappers::Event     FenceEvent;
 
     ComPtr<ID3D12DescriptorHeap>        RTVDescriptorHeap;
