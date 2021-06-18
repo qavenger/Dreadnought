@@ -83,6 +83,55 @@ void KeyChar(TCHAR character, bool isRepeat)
 //	Print(std::forward<B>(rest)...);
 //}
 
+
+//TMulticastDelegate<int, float> f;
+//f.Bind([](int a, float b) {wprintf_s(L"%d  %f  ", a, b); });
+//f.Broadcast(1, 2.5f);
+
+/*
+template<typename... Vars>
+class TTest
+{
+
+};
+
+template<typename Var, typename... Vars>
+class TTest<Var, Vars...> : public TTest<Vars...>
+{
+public:
+	TTest(Var v, Vars... vs) : TTest<Vars...>(vs...), var(v) {}
+	Var var;
+};
+
+TTest<float, int, char> test(1.4f, 3, 'v');
+
+template<size_t, typename> struct elem_type_holder;
+
+template<typename T, typename... Ts>
+struct elem_type_holder<0, TTest<T, Ts...>>
+{
+	typedef T type;
+};
+
+template<size_t k, typename T, typename... Ts>
+struct elem_type_holder<k, TTest<T, Ts...>>
+{
+	typedef typename elem_type_holder<k - 1, TTest<Ts...>>::type type;
+};
+
+template<size_t k, typename... Ts>
+typename std::enable_if<k == 0, typename elem_type_holder<0, TTest<Ts...>>::type&>::type
+get(TTest<Ts...>& t) { return t.var; }
+
+template<size_t k, typename T, typename... Ts>
+typename std::enable_if<k != 0, typename elem_type_holder<k, TTest<T, Ts...>>::type&>::type
+get(TTest<T, Ts...>& t) {
+	TTest<Ts...>& base = t;
+	return get<k - 1>(base);
+}
+#include <iostream>
+	get<1>(test);
+*/
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	try
@@ -92,7 +141,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		MSG msg = {};
 		Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::RELEASED, []() {PostQuitMessage(0); });
 		Input::BindKeyInput(Input::EKeyCode::Escape, EKeyInputState::PRESSED, []() {PrintDebugMessage(L"Escape Pressed"); });
-	
+
 		while (msg.message != WM_QUIT)
 		{
 			while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
@@ -115,6 +164,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		MessageBox(nullptr, L"Unknown error", L"Unknown Error", 0);
 	}
+
 	FreeConsole();
 	Engine::GetInstance()->OnDestroy();
 	return 0;

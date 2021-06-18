@@ -1,4 +1,5 @@
 #pragma once
+#include "Templates/TemplateClasses.h"
 typedef unsigned char uint8;
 typedef char int8;
 typedef unsigned int uint;
@@ -17,51 +18,13 @@ typedef DirectX::XMUINT3 uint3;
 typedef DirectX::XMUINT4 uint4;
 
 #define DEFINE_DELEGATE_NO_PARAM(Name) \
-class Name\
-{\
-public:\
-void Bind(void (*f)()){deleg.insert(f);}\
-void UnBind(void (*f)()){deleg.erase(f);}\
-void Broadcast(){if(!deleg.empty())for(auto f : deleg){f();}}\
-bool IsBound(void (*f)()){auto it = deleg.find(f);return it!= deleg.end();}\
-private:\
-std::set<void (*)()> deleg;\
-}
-
+typedef TMulticastDelegate<> Name;
 
 #define DEFINE_DELEGATE_ONE_PARAM(Name, ParamType0) \
-class Name\
-{\
-public:\
-void Bind(void (*f)(ParamType0)){deleg.insert(f);}\
-void UnBind(void (*f)(ParamType0)){deleg.erase(f);}\
-void Broadcast(ParamType0 p0){if(!deleg.empty())for(auto f : deleg){f(p0);}}\
-bool IsBound(void (*f)(ParamType0)){auto it = deleg.find(f);return it!= deleg.end();}\
-private:\
-std::set<void (*)(ParamType0)> deleg;\
-}
+typedef TMulticastDelegate<ParamType0> Name;
 
 #define DEFINE_DELEGATE_TWO_PARAM(Name, ParamType0, ParamType1) \
-class Name\
-{\
-public:\
-void Bind(void (*f)(ParamType0, ParamType1)){deleg.insert(f);}\
-void UnBind(void (*f)(ParamType0, ParamType1)){deleg.erase(f);}\
-void Broadcast(ParamType0 p0, ParamType1 p1){if(!deleg.empty())for(auto f : deleg){f(p0, p1);}}\
-bool IsBound(void (*f)(ParamType0, ParamType1)){auto it = deleg.find(f);return it!= deleg.end();}\
-private:\
-std::set<void (*)(ParamType0, ParamType1)> deleg;\
-}
+typedef TMulticastDelegate<ParamType0, ParamType1> Name;
 
 #define DEFINE_DELEGATE_THREE_PARAM(Name, ParamType0, ParamType1, ParamType2) \
-class Name\
-{\
-public:\
-void Bind(void (*f)(ParamType0, ParamType1, ParamType2)){deleg.insert(f);}\
-void UnBind(void (*f)(ParamType0, ParamType1, ParamType2)){deleg.erase(f);}\
-void Broadcast(ParamType0 p0, ParamType1 p1, ParamType2 p2){if(!deleg.empty())for(auto f : deleg){f(p0, p1, p2);}}\
-bool IsBound(void (*f)(ParamType0, ParamType1, ParamType2)){auto it = deleg.find(f);return it!= deleg.end();}\
-private:\
-std::set<void (*)(ParamType0, ParamType1, ParamType2)> deleg;\
-}
-
+typedef TMulticastDelegate<ParamType0, ParamType1, ParamType2> Name;
