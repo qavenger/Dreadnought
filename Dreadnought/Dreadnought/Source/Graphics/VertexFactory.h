@@ -12,68 +12,34 @@ namespace
 
 namespace VertexFactory
 {
+	
+#define ETYPE\
+	X(Position2D		,	DirectX::XMFLOAT2	, DXGI_FORMAT_R32G32_FLOAT		, Position		) \
+	X(Position3D		,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Position		) \
+	X(TextureCoord		,	DirectX::XMFLOAT2	, DXGI_FORMAT_R32G32_FLOAT		, Texcoord		) \
+	X(Normal			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Normal		) \
+	X(Tangent			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Tangent		) \
+	X(Float3Color		,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Color			) \
+	X(Float4Color		,	DirectX::XMFLOAT4	, DXGI_FORMAT_R32G32B32A32_FLOAT, Color			) \
+	X(Color				,	::BGRAColor			, DXGI_FORMAT_R8G8B8A8_UNORM	, Color			) \
+	X(Count				,	DirectX::XMFLOAT4	, DXGI_FORMAT_UNKNOWN			, Unknown		)
+
 	enum ElementType
 	{
-		Position2D,
-		Position3D,
-		TextureCoord,
-		Normal,
-		Tangent,
-		Float3Color,
-		Float4Color,
-		Color,
-		Count,
+#define X(a, b, c, d) a,
+		ETYPE
+#undef X
 	};
 
 	template<ElementType> struct Map;
-	template<> struct Map<Position2D>
-	{
-		using SysType = DirectX::XMFLOAT2;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32_FLOAT;
-		static constexpr const char* Semantic = "Position";
+#define X(a, b, c, d)\
+	template<> struct Map<a>{ \
+	using SysType = b; \
+	static constexpr DXGI_FORMAT Format = c; \
+	static constexpr const char* Semantic = #d; \
 	};
-	template<> struct Map<Position3D>
-	{
-		using SysType = DirectX::XMFLOAT3;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		static constexpr const char* Semantic = "Position";
-	};
-	template<> struct Map<TextureCoord>
-	{
-		using SysType = DirectX::XMFLOAT2;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32_FLOAT;
-		static constexpr const char* Semantic = "Texcoord";
-	};
-	template<> struct Map<Normal>
-	{
-		using SysType = DirectX::XMFLOAT3;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		static constexpr const char* Semantic = "Normal";
-	};
-	template<> struct Map<Tangent>
-	{
-		using SysType = DirectX::XMFLOAT3;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		static constexpr const char* Semantic = "Tangent";
-	};
-	template<> struct Map<Float3Color>
-	{
-		using SysType = DirectX::XMFLOAT3;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32B32_FLOAT;
-		static constexpr const char* Semantic = "Color";
-	};
-	template<> struct Map<Float4Color>
-	{
-		using SysType = DirectX::XMFLOAT4;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-		static constexpr const char* Semantic = "Color";
-	};
-	template<> struct Map<Color>
-	{
-		using SysType = ::BGRAColor;
-		static constexpr DXGI_FORMAT Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		static constexpr const char* Semantic = "Color";
-	};
+	ETYPE
+#undef X
 
 	class VertexLayout
 	{
@@ -105,22 +71,10 @@ namespace VertexFactory
 				using namespace DirectX;
 				switch (type)
 				{
-				case Position2D:
-					return sizeof(Map<Position2D>::SysType);
-				case TextureCoord:
-					return sizeof(Map<TextureCoord>::SysType);
-				case Position3D:
-					return sizeof(Map<Position3D>::SysType);
-				case Normal:
-					return sizeof(Map<Normal>::SysType);
-				case Tangent:
-					return sizeof(Map<Tangent>::SysType);
-				case Float3Color:
-					return sizeof(Map<Float3Color>::SysType);
-				case Float4Color:
-					return sizeof(Map<Float4Color>::SysType);
-				case Color:
-					return sizeof(Map<Color>::SysType);
+				#define X(a, b, c, d) \
+				case a: return sizeof(Map<a>::SysType);
+					ETYPE
+				#undef X
 				}
 				ThrowIfFalse(false, L"Invalid Element Type");
 				return 0;
@@ -132,22 +86,10 @@ namespace VertexFactory
 			{
 				switch (Type)
 				{
-				case Position2D:
-					return GenerateDesc<Position2D>(GetOffset());
-				case Position3D:
-					return GenerateDesc<Position3D>(GetOffset());
-				case TextureCoord:
-					return GenerateDesc<TextureCoord>(GetOffset());
-				case Normal:
-					return GenerateDesc<Normal>(GetOffset());
-				case Tangent:
-					return GenerateDesc<Tangent>(GetOffset());
-				case Float3Color:
-					return GenerateDesc<Float3Color>(GetOffset());
-				case Float4Color:
-					return GenerateDesc<Float4Color>(GetOffset());
-				case Color:
-					return GenerateDesc<Color>(GetOffset());
+				#define X(a, b, c, d) \
+					case a: return GenerateDesc<a>(GetOffset()); 
+				ETYPE
+				#undef X
 				}
 				ThrowIfFalse(false, L"Invalid element type");
 				return { "INVALID", 0, DXGI_FORMAT_UNKNOWN, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -233,7 +175,7 @@ namespace VertexFactory
 			using namespace DirectX;
 			const auto& element = Layout.Resolve<Type>();
 			auto pAttribute = pData + element.GetOffset();
-			return *reinterpret_cast<Map<Type>::SysType*>(pAttribute);
+			return *reinterpret_cast<typename Map<Type>::SysType*>(pAttribute);
 		}
 		template<typename T>
 		void SetAttributeByIndex(size_t index, T&& value)noexcept(!_DEBUG)
@@ -243,30 +185,11 @@ namespace VertexFactory
 			auto pAttribute = pData + element.GetOffset();
 			switch (element.GetType())
 			{
-			case Position2D:
-				SetAttribute<Position2D>(pAttribute, std::forward<T>(value));
-				break;
-			case TextureCoord:
-				SetAttribute<TextureCoord>(pAttribute, std::forward<T>(value));
-				break;
-			case Position3D:
-				SetAttribute<Position3D>(pAttribute, std::forward<T>(value));
-				break;
-			case Normal:
-				SetAttribute<Normal>(pAttribute, std::forward<T>(value));
-				break;
-			case Tangent:
-				SetAttribute<Tangent>(pAttribute, std::forward<T>(value));
-				break;
-			case Float3Color:
-				SetAttribute<Float3Color>(pAttribute, std::forward<T>(value));
-				break;
-			case Float4Color:
-				SetAttribute<Float4Color>(pAttribute, std::forward<T>(value));
-				break;
-			case Color:
-				SetAttribute<Color>(pAttribute, std::forward<T>(value));
-				break;
+			#define X(a,b,c,d)\
+				case a: SetAttribute<a>(pAttribute, std::forward<T>(value));break;
+			ETYPE
+			#undef X
+			
 			default:
 				ThrowIfFalse(false, L"Invalid element type");
 			}

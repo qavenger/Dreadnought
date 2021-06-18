@@ -83,7 +83,7 @@ bool Engine::InitConsoleCommands()
 			uint h = atoi(params[2].c_str());
 			if (w == 0 || h == 0)
 			{
-				newRect = rect;\
+				newRect = rect;
 			}
 			else
 			{

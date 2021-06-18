@@ -58,6 +58,9 @@
   <ItemGroup>
     <Image Include="Source\Window\Resource\Dreadnought.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{CCD35F0E-6003-4668-9D4C-B8C339BEF889}</ProjectGuid>

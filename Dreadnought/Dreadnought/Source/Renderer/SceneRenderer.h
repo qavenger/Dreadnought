@@ -19,7 +19,7 @@ private:
     void OnDrawGUI();
 private:
     RECT WindowRect;
-    ComPtr<ID3D12Device8> Device;
-    ComPtr<ID3D12GraphicsCommandList6> CommandList;
+    ComPtr<ID3D12Device5> Device;
+    ComPtr<ID3D12GraphicsCommandList5> CommandList;
 };
 

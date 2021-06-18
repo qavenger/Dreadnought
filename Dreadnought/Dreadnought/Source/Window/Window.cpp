@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Window.h"
 #include "Core/Engine.h"
-#include "resource.h"
+#include "../resource.h"
 
 static Window* gWindow = nullptr;
 
