@@ -6,6 +6,7 @@
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
 #include "../UI/Console.h"
+#include "D3D12/D3D12Shader.h"
 Graphics* SceneRenderer::GetInstance()
 {
     if (!Renderer)
@@ -21,6 +22,8 @@ bool SceneRenderer::Init()
     Graphics::Init();
     ThrowIfFailed(DeviceResources->GetDevice()->QueryInterface(IID_PPV_ARGS(&Device)));
     ThrowIfFailed(DeviceResources->GetCommandList()->QueryInterface(IID_PPV_ARGS(&CommandList)));
+
+    D3D12Shader testVS(L"Shaders/test_vs.hlsl");
 
     return true;
 }

@@ -23,6 +23,7 @@
     <ClCompile Include="Source\Core\Engine.cpp" />
     <ClCompile Include="Source\D3D12\D3D12DeviceResource.cpp" />
     <ClCompile Include="Source\D3D12\D3D12Resource.cpp" />
+    <ClCompile Include="Source\D3D12\D3D12Shader.cpp" />
     <ClCompile Include="Source\D3D12\D3D12Texture.cpp" />
     <ClCompile Include="Source\Entry\Entry.cpp" />
     <ClCompile Include="Source\Graphics\Graphics.cpp" />
@@ -39,6 +40,7 @@
   <ItemGroup>
     <ClInclude Include="Source\D3D12\D3D12FrameResource.h" />
     <ClInclude Include="Source\D3D12\D3D12Resource.h" />
+    <ClInclude Include="Source\D3D12\D3D12Shader.h" />
     <ClInclude Include="Source\D3D12\D3D12Texture.h" />
     <ClInclude Include="Source\Window\resource.h" />
     <ClInclude Include="Source\Core\Engine.h" />
@@ -153,7 +155,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>Source\;Source\Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Source\;Source\Shared;Shaders\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -195,7 +197,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>Source\;Source\Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Source\;Source\Shared;Shaders\</AdditionalIncludeDirectories>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
