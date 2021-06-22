@@ -4,7 +4,7 @@ struct VS_IN
 	float2 UV		: Texcoord0;
 	float3 Normal	: Normal;
 	float3 Tangent	: Tangent;
-	float3 VertexColor : Color0;
+	float4 VertexColor : Color0;
 };
 
 

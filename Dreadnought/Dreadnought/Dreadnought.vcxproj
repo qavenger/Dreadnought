@@ -29,6 +29,8 @@
     <ClCompile Include="Source\Graphics\Graphics.cpp" />
     <ClCompile Include="Source\Graphics\VertexFactory.cpp" />
     <ClCompile Include="Source\Input\Input.cpp" />
+    <ClCompile Include="Source\Mesh\Mesh.cpp" />
+    <ClCompile Include="Source\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Source\Renderer\PostProcessor\RPostProcessor.cpp" />
     <ClCompile Include="Source\Renderer\SceneRenderer.cpp" />
     <ClCompile Include="Source\Shared\Helper.cpp" />
@@ -42,6 +44,8 @@
     <ClInclude Include="Source\D3D12\D3D12Resource.h" />
     <ClInclude Include="Source\D3D12\D3D12Shader.h" />
     <ClInclude Include="Source\D3D12\D3D12Texture.h" />
+    <ClInclude Include="Source\Mesh\Mesh.h" />
+    <ClInclude Include="Source\Mesh\MeshLoader.h" />
     <ClInclude Include="Source\Window\resource.h" />
     <ClInclude Include="Source\Core\Engine.h" />
     <ClInclude Include="Source\D3D12\D3D12DeviceResource.h" />

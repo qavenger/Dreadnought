@@ -23,7 +23,7 @@ bool SceneRenderer::Init()
     ThrowIfFailed(DeviceResources->GetDevice()->QueryInterface(IID_PPV_ARGS(&Device)));
     ThrowIfFailed(DeviceResources->GetCommandList()->QueryInterface(IID_PPV_ARGS(&CommandList)));
 
-    D3D12Shader testVS(L"Shaders/test_vs.hlsl");
+    D3D12VertexShader testVS(L"Shaders/test_vs.hlsl");
     return true;
 }
 
@@ -45,6 +45,7 @@ void SceneRenderer::OnDestroy()
 void SceneRenderer::OnRender()
 {
     OnDrawGUI();
+
     float color[] = { (float)sin(g_Timer.Elapsed()),0,0,1 };
     CommandList->ClearRenderTargetView(DeviceResources->GetRenderTargetView(),
         color,

@@ -12,31 +12,42 @@ namespace
 
 namespace VertexFactory
 {
-	
+	//Element Type			System Type			  Format						  Semantic    NumComponents		  SlotIndex
 #define ETYPE\
-	X(Position2D		,	DirectX::XMFLOAT2	, DXGI_FORMAT_R32G32_FLOAT		, Position		) \
-	X(Position3D		,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Position		) \
-	X(TextureCoord		,	DirectX::XMFLOAT2	, DXGI_FORMAT_R32G32_FLOAT		, Texcoord		) \
-	X(Normal			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Normal		) \
-	X(Tangent			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Tangent		) \
-	X(Float3Color		,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Color			) \
-	X(Float4Color		,	DirectX::XMFLOAT4	, DXGI_FORMAT_R32G32B32A32_FLOAT, Color			) \
-	X(Color				,	::BGRAColor			, DXGI_FORMAT_R8G8B8A8_UNORM	, Color			) \
-	X(Count				,	DirectX::XMFLOAT4	, DXGI_FORMAT_UNKNOWN			, Unknown		)
+	X(Position2			,	DirectX::XMFLOAT2	, DXGI_FORMAT_R32G32_FLOAT		, Position	, 2					, 0			) \
+	X(Position3			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Position	, 3					, 0			) \
+	X(TextureCoord		,	DirectX::XMFLOAT2	, DXGI_FORMAT_R32G32_FLOAT		, Texcoord	, 2					, 0			) \
+	X(TextureCoord2		,	DirectX::XMFLOAT4	, DXGI_FORMAT_R32G32B32A32_FLOAT, Texcoord	, 4					, 0			) \
+	X(Normal			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Normal	, 3					, 0			) \
+	X(Tangent			,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Tangent	, 3					, 0			) \
+	X(FloatColor3		,	DirectX::XMFLOAT3	, DXGI_FORMAT_R32G32B32_FLOAT	, Color		, 3					, 0			) \
+	X(Color				,	::BGRAColor			, DXGI_FORMAT_R8G8B8A8_UNORM	, Color		, 4					, 0			) \
+	X(FloatColor4		,	DirectX::XMFLOAT4	, DXGI_FORMAT_R32G32B32A32_FLOAT, Color		, 4					, 0			) \
+	X(Count				,	DirectX::XMFLOAT4	, DXGI_FORMAT_UNKNOWN			, Unknown	, 0					, 0			)
 
 	enum ElementType
 	{
-#define X(a, b, c, d) a,
+#define X(a, b, c, d, e, f) a,
 		ETYPE
 #undef X
 	};
 
+	static int GetElementTypeIDByName(std::string name, int numComps)
+	{
+		if (name == "Unknown")	return -1;
+#define X(a, b, c, d, e, f) else if( (name == #d) && (numComps == e) ) return (int)a;
+		ETYPE
+#undef X
+			return -1;
+	};
+
 	template<ElementType> struct Map;
-#define X(a, b, c, d)\
+#define X(a, b, c, d, e, f)\
 	template<> struct Map<a>{ \
 	using SysType = b; \
 	static constexpr DXGI_FORMAT Format = c; \
 	static constexpr const char* Semantic = #d; \
+	static constexpr const uint Type = (uint)a; \
 	};
 	ETYPE
 #undef X
@@ -47,8 +58,8 @@ namespace VertexFactory
 		class Element
 		{
 		public:
-			Element(ElementType type, size_t offset)
-				:Type(type), Offset(offset)
+			Element(ElementType type, size_t offset, uint semanticIndex = 0)
+				:Type(type), SemanticIndex(semanticIndex), Offset(offset)
 			{}
 
 			size_t Size()const noexcept(!_DEBUG)
@@ -71,7 +82,7 @@ namespace VertexFactory
 				using namespace DirectX;
 				switch (type)
 				{
-				#define X(a, b, c, d) \
+				#define X(a, b, c, d, e, f) \
 				case a: return sizeof(Map<a>::SysType);
 					ETYPE
 				#undef X
@@ -82,12 +93,12 @@ namespace VertexFactory
 
 			ElementType GetType()const noexcept { return Type; }
 
-			D3D12_INPUT_ELEMENT_DESC GetDesc() const noexcept(!_DEBUG)
+			D3D12_INPUT_ELEMENT_DESC GetDesc(uint InputSlot) const noexcept(!_DEBUG)
 			{
 				switch (Type)
 				{
-				#define X(a, b, c, d) \
-					case a: return GenerateDesc<a>(GetOffset()); 
+				#define X(a, b, c, d, e, f) \
+					case a: return GenerateDesc<a>(GetOffset(), SemanticIndex, InputSlot); 
 				ETYPE
 				#undef X
 				}
@@ -97,13 +108,13 @@ namespace VertexFactory
 
 		private:
 			template<ElementType T>
-			static constexpr D3D12_INPUT_ELEMENT_DESC GenerateDesc(size_t offset) noexcept(!_DEBUG)
+			static constexpr D3D12_INPUT_ELEMENT_DESC GenerateDesc(size_t offset, uint semanticIndex = 0, uint InputSlot = 0) noexcept(!_DEBUG)
 			{
 				return { 
 					Map<T>::Semantic,							// Semantic Name
-					0,											// Semantic Index
+					semanticIndex,								// Semantic Index
 					Map<T>::Format,								// DXGI_Format
-					0,											// Input slot
+					InputSlot,									// Input slot
 					(uint)offset,								// ByteOffset
 					D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, // InputSlotClass
 					0											// InstanceDataStepRate 
@@ -111,10 +122,18 @@ namespace VertexFactory
 			}
 		private:
 			ElementType Type;
+			uint   SemanticIndex;
 			size_t Offset;
 		};
 
+		VertexLayout() :InputSlot(0) {  }
+		VertexLayout(uint slot):InputSlot(slot){}
+
 	public:
+		/// <summary>
+		/// Get element type
+		/// </summary>
+		/// <returns></returns>
 		template<ElementType Type>
 		const Element& Resolve() const noexcept(!_DEBUG)
 		{
@@ -135,9 +154,9 @@ namespace VertexFactory
 			return Elements[Index];
 		}
 
-		VertexLayout& AppendElement(ElementType type)noexcept(!_DEBUG)
+		VertexLayout& AppendElement(ElementType type, uint semanticIndex = 0)noexcept(!_DEBUG)
 		{
-			Elements.emplace_back(type, Size());
+			Elements.emplace_back(type, Size(), semanticIndex);
 			return *this;
 		}
 
@@ -157,12 +176,13 @@ namespace VertexFactory
 			desc.reserve(ElementCount());
 			for (const auto& e : Elements)
 			{
-				desc.push_back(e.GetDesc());
+				desc.push_back(e.GetDesc(InputSlot));
 			}
 			return desc;
 		}
 	private:
 		std::vector<Element> Elements;
+		uint InputSlot;
 	};
 
 	class Vertex
@@ -185,7 +205,7 @@ namespace VertexFactory
 			auto pAttribute = pData + element.GetOffset();
 			switch (element.GetType())
 			{
-			#define X(a,b,c,d)\
+			#define X(a,b,c,d, e,f)\
 				case a: SetAttribute<a>(pAttribute, std::forward<T>(value));break;
 			ETYPE
 			#undef X
@@ -308,6 +328,29 @@ namespace VertexFactory
 		VertexLayout Layout;
 	};
 
+
+	class FVertexFactory : public INoncopyable
+	{
+	public:
+		static FVertexFactory& GetInstance() { return VertexFactory; }
+	public:
+		/// <summary>
+		/// Must be called before finalize the vertex layout
+		/// </summary>
+		/// <param name="layoutFlag">Element flags</param>
+		/// <param name="output">output vertex layout</param>
+		/// <returns>true if is newly created</returns>
+		bool GetOrCreateCPUVertexLayout(uint layoutFlag, VertexLayout*& output);
+		// must be called after creating cpu vertex layout
+		const std::vector<D3D12_INPUT_ELEMENT_DESC>* Finalize(uint layoutFlag);
+		const std::vector<D3D12_INPUT_ELEMENT_DESC>* GetGPUVertexLayout(uint layoutFlag)const;
+		//std::vector<D3D12_INPUT_ELEMENT_DESC>* AddLayout(uint layoutFlag);
+	private:
+		static FVertexFactory VertexFactory;
+		std::vector<VertexLayout> CPUVertexLayoutArray;
+		std::vector<std::vector<D3D12_INPUT_ELEMENT_DESC>> GPUVertexLayoutArray;
+		std::map<uint, size_t> VertexLayoutMap;
+	};
 }
 /*
 struct SimpleVertex
