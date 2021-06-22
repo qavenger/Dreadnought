@@ -107,7 +107,14 @@ bool Engine::InitConsoleCommands()
 	return true;
 }
 
-void Engine::Run()
+void Engine::PreTick()
+{
+	Input::PreTick();
+}
+
+
+
+void Engine::Tick()
 {
 	g_Timer.Tick();
 	Input::Tick();
@@ -143,7 +150,16 @@ LRESULT Engine::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
-	
+	case WM_MOUSEWHEEL:
+	{
+		int x, y;
+		x = LOWORD(lParam);
+		y = HIWORD(lParam);
+		auto delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		if (delta != 0)
+			Input::OnMouseWheel(delta > 0 ? 1.0f:-1.0f);
+	}
+		break;
 	case WM_MOUSEMOVE:
 		//if (wParam & MK_LBUTTON)
 	{
@@ -207,15 +223,15 @@ LRESULT Engine::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 		}
 		if (bIsDblClk)
 		{
-			Input::OnMouseEvent(btn, EMouseInputState::DBLCLK, x, y);
+			Input::OnMouseEvent(btn, EMouseInputState::DBLCLK);
 		}
 		else if (bIsMouseUp)
 		{
-			Input::OnMouseEvent(btn, EMouseInputState::UP, x, y);
+			Input::OnMouseEvent(btn, EMouseInputState::UP);
 		}
 		else
 		{
-			Input::OnMouseEvent(btn, EMouseInputState::DOWN, x, y);
+			Input::OnMouseEvent(btn, EMouseInputState::DOWN);
 		}
 	}
 	break;
@@ -243,7 +259,6 @@ LRESULT Engine::WndProc(HWND hWnd, uint msg, WPARAM wParam, LPARAM lParam)
 	}
 	case WM_SIZE:
 	{
-
 		GfxInstance->GetDeviceResources()->WaitForGPU();
 		ImGui_ImplDX12_InvalidateDeviceObjects();
 		RECT rect;

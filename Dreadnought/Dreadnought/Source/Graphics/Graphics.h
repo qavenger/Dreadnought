@@ -25,6 +25,7 @@ public:
 	ID3D12DescriptorHeap* GetGUISRV()const { return SRVDescriptorHeap_GUI.Get(); }
 	RECT FindBestOutput(RECT rect, uint& outputIndex)const;
 	RECT GetOutputRect(uint outputIndex)const;
+	
 protected:
 	std::shared_ptr<D3D12DeviceResource> DeviceResources;
 	// Inherited via IDeviceNotify

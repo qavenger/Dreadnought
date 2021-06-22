@@ -144,12 +144,13 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 		while (msg.message != WM_QUIT)
 		{
+			Engine::GetInstance()->PreTick();
 			while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
-			Engine::GetInstance()->Run();
+			Engine::GetInstance()->Tick();
 		}
 	}
 	catch (const HrException& e)

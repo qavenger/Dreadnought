@@ -24,7 +24,6 @@ bool SceneRenderer::Init()
     ThrowIfFailed(DeviceResources->GetCommandList()->QueryInterface(IID_PPV_ARGS(&CommandList)));
 
     D3D12Shader testVS(L"Shaders/test_vs.hlsl");
-
     return true;
 }
 
@@ -64,11 +63,14 @@ void SceneRenderer::OnDrawGUI()
     if(Engine::GetInstance()->GetShowConsole())
         Console::GetInstance().Draw("Console", &Engine::GetInstance()->GetShowConsole());
 
- /*   if (ImGui::Begin("Raw Input"))
+    static float total = 0;
+    total+= Input::GetMouseWheelDelta();
+    if (ImGui::Begin("Mouse Stats"))
     {
-        ImGui::Text("Raw Input: (%d, %d)", Input::RawMoveVel.x, Input::RawMoveVel.y);
+        ImGui::Text("Mouse Position: (%d, %d)", Input::GetScreenMousePosition().x, Input::GetScreenMousePosition().y);
+        ImGui::Text("Mouse Wheel: %f", Input::GetMouseWheelDelta());
     }
-    ImGui::End();*/
+    ImGui::End();
 
     ImGui::Render();
 }

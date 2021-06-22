@@ -2,6 +2,7 @@
 #define MAX_KEY_NUM 256
 
 DEFINE_DELEGATE_ONE_PARAM(KeyCharEvent, TCHAR);
+DEFINE_DELEGATE_ONE_PARAM(MouseWheelEvent, float);
 DEFINE_DELEGATE_ONE_PARAM(MouseInputEvent, int2);
 DEFINE_DELEGATE_ONE_PARAM(ProcessBufferEvent, std::wstring);
 DEFINE_DELEGATE_NO_PARAM(KeyInputEvent);
@@ -106,21 +107,29 @@ public:
 
 	static void BindKeyCharEvent(void (*p)(TCHAR));
 	static void UnBindKeyCharEvent(void (*p)(TCHAR));
+
 	static bool IsBoundKeyCharEvent(void (*p)(TCHAR));
+
 	static void BindKeyInput(EKeyCode keyCode, EKeyInputState keyState, void (*p)());
 	static void UnBindKeyInput(EKeyCode keyCode, EKeyInputState keyState, void (*p)());
+
 	static void BindMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, void (*p)(int2));
 	static void UnBindMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, void (*p)(int2));
+
 	static void BindMouseMoveEvent(void (*p)(int2));
 	static void UnBindMouseMoveEvent(void (*p)(int2));
+
 	static void BindMouseRawMoveEvent(void (*p)(int2));
 	static void UnBindMouseRawMoveEvent(void (*p)(int2));
+
+	static void BindMouseWheelEvent(void (*p)(float));
+	static void UnBindMouseWheelEvent(void (*p)(float));
 
 	static bool IsKeyDown(EKeyCode keyCode);
 	static bool IsKeyUp(EKeyCode keyCode);
 	static bool IsMouseButtonDown(EMouseButton button) { return MouseInputState[(int)button] != EMouseInputState::UP; }
 	static bool IsMouseButtonUp(EMouseButton button) { return MouseInputState[(int)button] == EMouseInputState::UP; }
-
+	static float GetMouseWheelDelta() { return MouseWheelDelta; }
 	static int2 GetMousePosition();
 	static int2 GetScreenMousePosition();
 	static int2 GetMouseRelativePosition();
@@ -134,9 +143,10 @@ public:
 private:
 	static void OnKeyInput(EKeyCode keyCode, EKeyInputState keyState);
 	static void OnKeyChar(const TCHAR character, bool bIsRepeat); 
-	static void OnMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, int x, int y);
+	static void OnMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState);
 	static void OnMouseMove(int x, int y);
 	static void OnMouseRawMove(int x, int y);
+	static void OnMouseWheel(float delta);
 	template<typename T>
 	void TrimBuffer(std::queue<T>& buffer)
 	{
@@ -147,11 +157,13 @@ private:
 	static void ProcessKeyborad();
 	static void ProcessMouse();
 private:
+	static void PreTick();
 	static void Tick();
 private:
 	static KeyCharEvent OnKeyCharEvent;
 	static KeyInputEvent OnKeyInputEvent[(uint8)EKeyInputState::NUM][(unsigned long long)Input::EKeyCode::NUM_KEYCODE];
 	static MouseInputEvent OnMouseButtonEvent[(int)EMouseInputState::NUM][(int)EMouseButton::Invalid];
+	static MouseWheelEvent OnMouseWheelEvent;
 	static MouseInputEvent OnMouseMoveEvent;
 	static MouseInputEvent OnMouseRawMoveEvent;
 	static EMouseInputState MouseInputState[(int)EMouseButton::Invalid];
@@ -164,6 +176,7 @@ private:
 	static std::queue<MouseEvent> MouseBuffer;
 	static std::queue<TCHAR> CharBuffer;
 	static std::queue<MouseRawEvent> MouseRawBuffer;
+	static float MouseWheelDelta;
 	static bool bAutoRepeatEnable;
 	static bool bEnableRawInput;
 };

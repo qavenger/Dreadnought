@@ -7,7 +7,8 @@ public:
 	static Engine* GetInstance();
 	bool Init();
 	bool InitConsoleCommands();
-	void Run();
+	void PreTick();
+	void Tick();
 	void OnDestroy();
 	bool& GetShowConsole() { return ShowConsole; }
 	void Resize(RECT& rect);

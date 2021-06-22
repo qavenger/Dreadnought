@@ -9,10 +9,12 @@ KeyInputEvent Input::OnKeyInputEvent[(uint8)EKeyInputState::NUM][(unsigned long 
 MouseInputEvent Input::OnMouseButtonEvent[(int)EMouseInputState::NUM][(int)EMouseButton::Invalid];
 MouseInputEvent Input::OnMouseMoveEvent;
 MouseInputEvent Input::OnMouseRawMoveEvent;
+MouseWheelEvent Input::OnMouseWheelEvent;
 EMouseInputState Input::MouseInputState[(int)Input::EMouseButton::Invalid] = {EMouseInputState::UP,EMouseInputState::UP,EMouseInputState::UP};
 std::vector<char> Input::RawInputBuffer;
 bool Input::bAutoRepeatEnable = true;
 bool Input::bEnableRawInput = true;
+float Input::MouseWheelDelta = 0;
 std::queue<TCHAR> Input::CharBuffer;
 std::queue<Input::KeyEvent> Input::KeyBuffer;
 std::queue<Input::MouseEvent> Input::MouseBuffer;
@@ -63,14 +65,11 @@ void Input::UnBindMouseEvent(EMouseButton mouseButton, EMouseInputState mouseSta
 	OnMouseButtonEvent[(int)mouseState][(int)mouseButton].UnBind(p);
 }
 
-void Input::OnMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState, int x, int y)
+void Input::OnMouseEvent(EMouseButton mouseButton, EMouseInputState mouseState)
 {
-	m_prevMousePos = m_mousePos;
-	m_mousePos.x = x;
-	m_mousePos.y = y;
 	//OnMouseButtonEvent[(int)mouseState][(int)mouseButton].Broadcast({x,y});
 	MouseInputState[(int)mouseButton] = mouseState;
-	MouseBuffer.push(MouseEvent(mouseState, mouseButton, {x, y}));
+	MouseBuffer.push(MouseEvent(mouseState, mouseButton, { m_mousePos.x, m_mousePos.y }));
 }
 
 void Input::BindMouseMoveEvent(void(*p)(int2))
@@ -87,6 +86,8 @@ void Input::OnMouseMove(int x, int y)
 {
 	//OnMouseMoveEvent.Broadcast({ x,y });
 	MouseBuffer.push(MouseEvent({x, y}));
+	m_mousePos.x = x;
+	m_mousePos.y = y;
 }
 
 void Input::ProcessKeyborad()
@@ -125,6 +126,16 @@ void Input::ProcessMouse()
 		OnMouseRawMoveEvent.Broadcast(e.GetVelocity());
 		MouseRawBuffer.pop();
 	}
+	if (MouseWheelDelta != 0)
+	{
+		OnMouseWheelEvent.Broadcast(MouseWheelDelta);
+	}
+}
+
+void Input::PreTick()
+{
+	MouseWheelDelta = 0;
+	m_prevMousePos = m_mousePos;
 }
 
 void Input::Tick()
@@ -143,6 +154,16 @@ void Input::UnBindMouseRawMoveEvent(void(*p)(int2))
 	OnMouseRawMoveEvent.UnBind(p);
 }
 
+void Input::BindMouseWheelEvent(void(*p)(float))
+{
+	OnMouseWheelEvent.Bind(p);
+}
+
+void Input::UnBindMouseWheelEvent(void(*p)(float))
+{
+	OnMouseWheelEvent.UnBind(p);
+}
+
 void Input::OnMouseRawMove(int x, int y)
 {
 	//RawMoveVel = { x,y };
@@ -151,6 +172,11 @@ void Input::OnMouseRawMove(int x, int y)
 	{
 		MouseRawBuffer.push(MouseRawEvent({ x, y }));
 	}
+}
+
+void Input::OnMouseWheel(float delta)
+{
+	MouseWheelDelta = delta;
 }
 
 void Input::OnKeyChar(const TCHAR character, bool bIsRepeat)
