@@ -155,7 +155,7 @@
     <ClInclude Include="Source\UI\Console.h">
       <Filter>Source\UI</Filter>
     </ClInclude>
-    <ClInclude Include="Source\Window\resource.h">
+    <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="Source\D3D12\D3D12FrameResource.h">

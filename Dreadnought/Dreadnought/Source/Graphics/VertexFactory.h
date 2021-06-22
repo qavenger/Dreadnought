@@ -332,7 +332,7 @@ namespace VertexFactory
 	class FVertexFactory : public INoncopyable
 	{
 	public:
-		static FVertexFactory& GetInstance() { return VertexFactory; }
+		static FVertexFactory& GetInstance();
 	public:
 		/// <summary>
 		/// Must be called before finalize the vertex layout
@@ -346,7 +346,6 @@ namespace VertexFactory
 		const std::vector<D3D12_INPUT_ELEMENT_DESC>* GetGPUVertexLayout(uint layoutFlag)const;
 		//std::vector<D3D12_INPUT_ELEMENT_DESC>* AddLayout(uint layoutFlag);
 	private:
-		static FVertexFactory VertexFactory;
 		std::vector<VertexLayout> CPUVertexLayoutArray;
 		std::vector<std::vector<D3D12_INPUT_ELEMENT_DESC>> GPUVertexLayoutArray;
 		std::map<uint, size_t> VertexLayoutMap;

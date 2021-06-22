@@ -12,5 +12,5 @@ class D3D12VertexShader : public D3D12Shader
 public:
 	D3D12VertexShader(std::wstring fileName);
 private:
-	const std::vector<D3D12_INPUT_ELEMENT_DESC>* pInputLayout;
+	const std::vector<D3D12_INPUT_ELEMENT_DESC>* pInputLayout = nullptr;
 };

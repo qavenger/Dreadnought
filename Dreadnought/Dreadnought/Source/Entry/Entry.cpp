@@ -140,11 +140,10 @@ get(TTest<T, Ts...>& t) {
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 #if defined(DEBUG) || defined(_DEBUG)
-	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) |
-		_CRTDBG_LEAK_CHECK_DF);
-	long lBreakAlloc = 0;
-	_CrtSetBreakAlloc(lBreakAlloc);
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
+	//_CrtSetBreakAlloc(1529);
+
 	try
 	{
 		Engine::GetInstance()->Init();
@@ -179,9 +178,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	FreeConsole();
 	Engine::GetInstance()->OnDestroy();
-
-#if defined(DEBUG) || defined(_DEBUG)
 	_CrtDumpMemoryLeaks();
-#endif
 	return 0;
 }

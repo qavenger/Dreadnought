@@ -46,7 +46,7 @@
     <ClInclude Include="Source\D3D12\D3D12Texture.h" />
     <ClInclude Include="Source\Mesh\Mesh.h" />
     <ClInclude Include="Source\Mesh\MeshLoader.h" />
-    <ClInclude Include="Source\Window\resource.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Source\Core\Engine.h" />
     <ClInclude Include="Source\D3D12\D3D12DeviceResource.h" />
     <ClInclude Include="Source\Graphics\Graphics.h" />

@@ -3,7 +3,11 @@
 
 using namespace VertexFactory;
 
-FVertexFactory FVertexFactory::VertexFactory;
+FVertexFactory& FVertexFactory::GetInstance()
+{
+	static FVertexFactory instance;
+	return instance;
+}
 
 bool FVertexFactory::GetOrCreateCPUVertexLayout(uint layoutFlag, VertexLayout*& output)
 {
@@ -14,7 +18,7 @@ bool FVertexFactory::GetOrCreateCPUVertexLayout(uint layoutFlag, VertexLayout*& 
 	}
 	if (VertexLayoutMap.find(layoutFlag) == VertexLayoutMap.end())
 	{
-		CPUVertexLayoutArray.push_back(VertexLayout());
+		CPUVertexLayoutArray.push_back(std::move(VertexLayout()));
 		output = &CPUVertexLayoutArray.back();
 		return true;
 	}
@@ -29,7 +33,7 @@ const std::vector<D3D12_INPUT_ELEMENT_DESC>* FVertexFactory::Finalize(uint layou
 
 	ThrowIfFalse(CPUVertexLayoutArray.size() - GPUVertexLayoutArray.size() == 1, L"Vertex Layout GetOrCreate() and Finalize() call number mismatched");
 	
-	GPUVertexLayoutArray.push_back(CPUVertexLayoutArray.back().GetD3DInputLayout());
+	GPUVertexLayoutArray.push_back(std::move(CPUVertexLayoutArray.back().GetD3DInputLayout()));
 
 	return &GPUVertexLayoutArray.back();
 }
