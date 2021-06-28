@@ -173,7 +173,7 @@ void InternalMesh::GenerateSphereInternalMesh(std::vector<uint16>& Indices, std:
 	const int NumSlices = 11;
 	const int NumVerticesPerSlices = 64;
 	const int TotalVertices = NumSlices * NumVerticesPerSlices + 2; // 2 means two pole
-	const int NumIndices = 128;
+	const int NumIndices = 6*NumVerticesPerSlices*NumSlices;
 
 	Indices.resize(NumIndices);
 	Vertices.resize(TotalVertices);
@@ -184,22 +184,64 @@ void InternalMesh::GenerateSphereInternalMesh(std::vector<uint16>& Indices, std:
 	// generate vertices
 	Vertices[0] = float3(0.f, 1.f, 0.f);
 	Normals[0] = float3(0.f, 1.f, 0.f);
-	UVs1[0] = float2(0.f, 1.f); 
+	UVs1[0] = float2(0.f, 0.f); 
 	UVs2[0] = UVs1[0]; // same as uvs1
 
+	const float PI = 3.14159265358f;
+	const float TWOPI = PI * 2.f;
 	for (int Slice = 0; Slice < NumSlices; ++Slice)
 	{
+		float Theta = PI / (NumSlices + 1) * (Slice + 1);
 		for (int VertexId = 0; VertexId < NumVerticesPerSlices; ++VertexId)
 		{
-
+			int Index = Slice * NumVerticesPerSlices + VertexId + 1;
+			float Phi = TWOPI / NumVerticesPerSlices * VertexId;
+			float3 Vertex(sin(Theta) * cos(Phi), cos(Theta), sin(Theta) * sin(Phi));
+			Vertices[Index] = Vertex;
+			Normals[Index] = Vertex;
+			UVs1[Index] = float2(Phi / TWOPI, Theta / PI);
+			UVs2[Index] = UVs1[Index];
 		}
 	}
 
 	Vertices[TotalVertices - 1] = float3(0.f, -1.f, 0.f);
 	Normals[TotalVertices - 1] = float3(0.f, -1.f, 0.f);
-	UVs1[TotalVertices - 1] = float2(0.f, 0.f);
+	UVs1[TotalVertices - 1] = float2(0.f, 1.f);
 	UVs2[TotalVertices - 1] = UVs1[TotalVertices - 1];
 
 	// generate indices
+	for (int Index = 0; Index < NumVerticesPerSlices; ++Index)
+	{
+		Indices[3 * Index + 0] = 0;
+		Indices[3 * Index + 1] = Index + 1;
+		Indices[3 * Index + 2] = Index == NumVerticesPerSlices - 1 ? 1 : Index + 2;
+	}
 
+	for (int Slice = 0; Slice < NumSlices - 1; ++Slice)
+	{
+		int FirstBaseIndex = 1 + Slice * NumVerticesPerSlices;
+		int SecondBaseIndex = 1 + (Slice + 1) * NumVerticesPerSlices;
+		for (int Index = 0; Index < NumVerticesPerSlices; ++Index)
+		{
+			int Triangle = (2 * Slice + 1) * NumVerticesPerSlices + Index * 2;
+			bool Recyle = Index == NumVerticesPerSlices - 1;
+			Indices[3 * Triangle + 0] = FirstBaseIndex + Index;
+			Indices[3 * Triangle + 1] = SecondBaseIndex + Index;
+			Indices[3 * Triangle + 2] = Recyle ? FirstBaseIndex : FirstBaseIndex + Index + 1;
+
+			Indices[3 * Triangle + 3] = Recyle ? FirstBaseIndex : FirstBaseIndex + Index + 1;
+			Indices[3 * Triangle + 4] = SecondBaseIndex + Index;
+			Indices[3 * Triangle + 5] = Recyle ? SecondBaseIndex : SecondBaseIndex + Index + 1;
+		}
+	}
+
+	int TriangleIndex = 2 * NumVerticesPerSlices * (NumSlices - 1) + NumVerticesPerSlices;
+	for (int Index = 0; Index < NumVerticesPerSlices; ++Index)
+	{
+		int Triangle = TriangleIndex + Index;
+		int BaseIndex = 1 + (NumSlices - 1) * NumVerticesPerSlices;
+		Indices[3 * Triangle + 0] = TotalVertices - 1;
+		Indices[3 * Triangle + 1] = Index == NumVerticesPerSlices - 1 ? BaseIndex : BaseIndex + Index + 1;
+		Indices[3 * Triangle + 2] = BaseIndex + Index;
+	}
 }
