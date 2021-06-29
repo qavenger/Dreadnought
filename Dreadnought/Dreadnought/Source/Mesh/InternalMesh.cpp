@@ -305,19 +305,23 @@ void InternalMesh::GenerateConeInternalMesh(std::vector<uint16>& Indices, std::v
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
 		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		Vertices[VertexId + 1] = float3(cos(Phi), 0.f, sin(Phi));
+		float CosPhi = cos(Phi);
+		float SinPhi = sin(Phi);
+		Vertices[VertexId + 1] = float3(CosPhi, 0.f, SinPhi);
 		Normals[VertexId + 1] = Vertices[VertexId + 1];
-		UVs1[VertexId + 1] = float2(cos(Phi) * 0.5f + 0.5f, sin(Phi) * 0.5f + 0.5f);
-		UVs2[VertexId + 1] = float2(cos(Phi) * 0.25f + 0.25f, sin(Phi) * 0.25f + 0.25f);
+		UVs1[VertexId + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
+		UVs2[VertexId + 1] = float2(CosPhi * 0.25f + 0.25f, SinPhi * 0.25f + 0.25f);
 	}
 
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
 		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		Vertices[VertexId + NumVerticesOfCircle + 1] = float3(cos(Phi), 0.f, sin(Phi));
+		float CosPhi = cos(Phi);
+		float SinPhi = sin(Phi);
+		Vertices[VertexId + NumVerticesOfCircle + 1] = float3(CosPhi, 0.f, SinPhi);
 		Normals[VertexId + NumVerticesOfCircle + 1] = float3(0.f, -1.f, 0.f);
-		UVs1[VertexId + NumVerticesOfCircle + 1] = float2(cos(Phi) * 0.5f + 0.5f, sin(Phi) * 0.5f + 0.5f);
-		UVs2[VertexId + NumVerticesOfCircle + 1] = float2(cos(Phi) * 0.25f + 0.75f, sin(Phi) * 0.25f + 0.75f);
+		UVs1[VertexId + NumVerticesOfCircle + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
+		UVs2[VertexId + NumVerticesOfCircle + 1] = float2(CosPhi * 0.25f + 0.75f, SinPhi * 0.25f + 0.75f);
 	}
 
 	Vertices[NumVertices - 1] = float3(0.f, 0.f, 0.f);
@@ -343,5 +347,102 @@ void InternalMesh::GenerateConeInternalMesh(std::vector<uint16>& Indices, std::v
 
 void InternalMesh::GenerateCylinderInternalMesh(std::vector<uint16>& Indices, std::vector<float3>& Vertices, std::vector<float3>& Normals, std::vector<float2>& UVs1, std::vector<float2>& UVs2)
 {
+	const int NumVerticesOfCircle = 64;
+	const int NumVertices = 4 * NumVerticesOfCircle + 2;
+	const int NumIndices = 12 * NumVertices;
 
+	Indices.resize(NumIndices);
+	Vertices.resize(NumVertices);
+	Normals.resize(NumVertices);
+	UVs1.resize(NumVertices);
+	UVs2.resize(NumVertices);
+
+	const float PI = 3.14159265358f;
+	const float TWOPI = 2.f * PI;
+
+	Vertices[0] = float3(0.f, 1.f, 0.f);
+	Normals[0] = float3(0.f, 1.f, 0.f);
+	UVs1[0] = float2(0.5f, 0.5f);
+	UVs2[0] = float2(0.f, 0.f);
+
+	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
+	{
+		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
+		float CosPhi = cos(Phi);
+		float SinPhi = sin(Phi);
+		Vertices[VertexId + 1] = float3(CosPhi, 1.f, SinPhi);
+		Normals[VertexId + 1] = float3(0.f, 1.f, 0.f);
+		UVs1[VertexId + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
+		UVs2[VertexId + 1] = float2(CosPhi * 0.25f + 0.25f, SinPhi * 0.25f + 0.25f);
+	}
+
+	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
+	{
+		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
+		float CosPhi = cos(Phi);
+		float SinPhi = sin(Phi);
+		int Base = NumVerticesOfCircle + VertexId;
+		Vertices[Base + 1] = float3(CosPhi, 1.f, SinPhi);
+		Normals[Base + 1] = float3(CosPhi, 0.f, SinPhi);
+		UVs1[Base + 1] = float2(Phi / TWOPI, 1.f);
+		UVs2[Base + 1] = float2(Phi / TWOPI, 1.f);
+	}
+
+	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
+	{
+		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
+		float CosPhi = cos(Phi);
+		float SinPhi = sin(Phi);
+		int Base = 2 * NumVerticesOfCircle + VertexId;
+		Vertices[Base + 1] = float3(CosPhi, -1.f, SinPhi);
+		Normals[Base + 1] = float3(CosPhi, 0.f, SinPhi);
+		UVs1[Base + 1] = float2(Phi / TWOPI, 0.f);
+		UVs2[Base + 1] = float2(Phi / TWOPI, 0.5f);
+	}
+
+	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
+	{
+		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
+		float CosPhi = cos(Phi);
+		float SinPhi = sin(Phi);
+		int Base = 3 * NumVerticesOfCircle + VertexId;
+		Vertices[Base + 1] = float3(CosPhi, -1.f, SinPhi);
+		Normals[Base + 1] = float3(0.f, -1.f, 0.f);
+		UVs1[Base + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
+		UVs2[Base + 1] = float2(CosPhi * 0.25f + 0.75f, SinPhi * 0.25f + 0.25f);
+	}
+
+	Vertices[NumVertices - 1] = float3(0.f, -1.f, 0.f);
+	Normals[NumVertices - 1] = float3(0.f, -1.f, 0.f);
+	UVs1[NumVertices - 1] = float2(0.5f, 0.5f);
+	UVs2[NumVertices - 1] = float2(0.f, 0.f);
+
+	for (int TriangleId = 0; TriangleId < NumVerticesOfCircle; ++TriangleId)
+	{
+		Indices[3 * TriangleId + 0] = 0;
+		Indices[3 * TriangleId + 1] = TriangleId + 1;
+		Indices[3 * TriangleId + 2] = TriangleId == NumVerticesOfCircle - 1 ? 1 : TriangleId + 2;
+	}
+
+	for (int TriangleId = 0; TriangleId < NumVerticesOfCircle; ++TriangleId)
+	{
+		int Base = NumVerticesOfCircle + 2 * TriangleId;
+		int SecondRowBase = 2 * NumVerticesOfCircle;
+		bool Recyle = TriangleId == NumVerticesOfCircle - 1;
+		Indices[3 * Base + 0] = NumVerticesOfCircle + TriangleId;
+		Indices[3 * Base + 1] = SecondRowBase + TriangleId;
+		Indices[3 * Base + 2] = Recyle ? NumVerticesOfCircle : NumVerticesOfCircle + TriangleId + 1;
+
+		Indices[3 * Base + 3] = Recyle ? NumVerticesOfCircle : NumVerticesOfCircle + TriangleId + 1;
+		Indices[3 * Base + 4] = SecondRowBase + TriangleId;
+		Indices[3 * Base + 5] = Recyle ? 2 * NumVerticesOfCircle : SecondRowBase + TriangleId + 1;
+	}
+
+	for (int TriangleId = 0; TriangleId < NumVerticesOfCircle; ++TriangleId)
+	{
+		int Base = 3 * NumVerticesOfCircle + TriangleId;
+		Indices[3 * Base + 0] = NumVertices - 1;
+		Indices[3 * Base + 1] = 4 * NumVerticesOfCircle - TriangleId;
+		Indices[3 * Base + 2] = TriangleId == NumVerticesOfCircle - 1 ? 4 * NumVerticesOfCircle : 4 * NumVerticesOfCircle - TriangleId - 1;
+	}
 }
