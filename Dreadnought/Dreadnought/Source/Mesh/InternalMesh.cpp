@@ -163,7 +163,7 @@ void InternalMesh::GenerateCubeInternalMesh(std::vector<uint16>& Indices, std::v
 	UVs2[23] = float2(0.66666f, 0.5f);
 
 	// triangle 10
-	Indices[30] = 20; Indices[31] = 23; Indices[31] = 22;
+	Indices[30] = 20; Indices[31] = 23; Indices[32] = 22;
 	// triangle 11
 	Indices[33] = 20; Indices[34] = 22; Indices[35] = 21;
 }
