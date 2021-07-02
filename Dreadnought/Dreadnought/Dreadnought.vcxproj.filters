@@ -108,6 +108,9 @@
     <ClCompile Include="Source\Mesh\InternalMesh.cpp">
       <Filter>Source\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Mesh\MeshExporter.cpp">
+      <Filter>Source\Mesh</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\Shared\pch.h">
@@ -180,6 +183,9 @@
       <Filter>Source\Mesh</Filter>
     </ClInclude>
     <ClInclude Include="Source\Mesh\InternalMesh.h">
+      <Filter>Source\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\Mesh\MeshExporter.h">
       <Filter>Source\Mesh</Filter>
     </ClInclude>
   </ItemGroup>

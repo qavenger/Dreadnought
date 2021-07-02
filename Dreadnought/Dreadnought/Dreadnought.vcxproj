@@ -31,6 +31,7 @@
     <ClCompile Include="Source\Input\Input.cpp" />
     <ClCompile Include="Source\Mesh\InternalMesh.cpp" />
     <ClCompile Include="Source\Mesh\Mesh.cpp" />
+    <ClCompile Include="Source\Mesh\MeshExporter.cpp" />
     <ClCompile Include="Source\Mesh\MeshLoader.cpp" />
     <ClCompile Include="Source\Renderer\PostProcessor\RPostProcessor.cpp" />
     <ClCompile Include="Source\Renderer\SceneRenderer.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Source\D3D12\D3D12Texture.h" />
     <ClInclude Include="Source\Mesh\InternalMesh.h" />
     <ClInclude Include="Source\Mesh\Mesh.h" />
+    <ClInclude Include="Source\Mesh\MeshExporter.h" />
     <ClInclude Include="Source\Mesh\MeshLoader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Source\Core\Engine.h" />

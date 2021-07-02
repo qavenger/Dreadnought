@@ -18,6 +18,7 @@ bool FVertexFactory::GetOrCreateCPUVertexLayout(uint layoutFlag, VertexLayout*& 
 	}
 	if (VertexLayoutMap.find(layoutFlag) == VertexLayoutMap.end())
 	{
+		VertexLayoutMap[layoutFlag] = CPUVertexLayoutArray.size();
 		CPUVertexLayoutArray.push_back(std::move(VertexLayout()));
 		output = &CPUVertexLayoutArray.back();
 		return true;
