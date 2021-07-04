@@ -1,193 +1,100 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
     <Filter Include="Source">
-      <UniqueIdentifier>{80c1886f-71e8-4622-93bf-e0e5cb7165b8}</UniqueIdentifier>
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source\Entry">
-      <UniqueIdentifier>{ee138249-8a0b-4bf5-b23e-0c5c566cca38}</UniqueIdentifier>
+      <UniqueIdentifier>{8972e162-c2a6-4c2a-bbc1-5ace17053bb3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Window">
-      <UniqueIdentifier>{018ef6a4-0f10-4f57-85d8-da690d875eda}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Input">
-      <UniqueIdentifier>{adc0f3e7-ae0f-4179-98e2-113ba517bce7}</UniqueIdentifier>
+    <Filter Include="Source\Engine">
+      <UniqueIdentifier>{b22cc4e3-9117-4e46-a91e-dd3083b1f2a0}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Shared">
-      <UniqueIdentifier>{f563375a-59e6-457d-8186-9ab13d4e9415}</UniqueIdentifier>
+      <UniqueIdentifier>{4c6f1064-ddce-4289-a4d1-38ee2297b6a0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Graphics">
-      <UniqueIdentifier>{a6ed0449-02a9-4b2e-94d0-75cc35d077b9}</UniqueIdentifier>
+    <Filter Include="Source\Windows">
+      <UniqueIdentifier>{8329b5ad-d2d9-42ba-a64d-da0534970c9b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Core">
-      <UniqueIdentifier>{9f627ff1-c9a1-41de-b515-3c81d32bfc57}</UniqueIdentifier>
+    <Filter Include="Source\Engine\Abstract">
+      <UniqueIdentifier>{69bfdfba-f870-4052-8e94-3fcfb79e1a45}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Templates">
-      <UniqueIdentifier>{e9267d8a-403c-4688-ab3a-ea64c5255275}</UniqueIdentifier>
+    <Filter Include="Source\Engine\Core">
+      <UniqueIdentifier>{f4f2039d-bd76-4c0a-81b9-e8e6677c9fe9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\D3D12">
-      <UniqueIdentifier>{8937ac99-3bbe-4a6a-898d-b4edde3fe06e}</UniqueIdentifier>
+    <Filter Include="Source\Engine\Rendering">
+      <UniqueIdentifier>{9b51fc58-c91c-419e-99d8-08c5f31693b0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Renderer">
-      <UniqueIdentifier>{9b05d8d4-74b3-4214-a094-f3e647973949}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Renderer\PostProcessor">
-      <UniqueIdentifier>{f14e2585-bafe-47eb-bb62-d9b0bfaf514b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\UI">
-      <UniqueIdentifier>{85b36ca7-360a-4b78-a0a1-faf9836be28a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{c13cafd1-6d32-44b6-99dd-14f653859806}</UniqueIdentifier>
+    <Filter Include="Source\UserInterface">
+      <UniqueIdentifier>{1c6aff4e-16c4-472d-becd-1a912ece7b33}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\Mesh">
-      <UniqueIdentifier>{8943f2a1-c6cb-4906-a4f8-3f60ee5d97a8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Renderer\RenderResources">
-      <UniqueIdentifier>{1bfd89b1-1a79-4cd8-930c-94b0f2a84a11}</UniqueIdentifier>
+      <UniqueIdentifier>{f71975f9-16c8-44e2-adca-b78faa089ed7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Shared\pch.cpp">
-      <Filter>Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Shared\Timer.cpp">
-      <Filter>Source\Shared</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Entry\Entry.cpp">
+    <ClCompile Include="..\Source\Entry\Entry.cpp">
       <Filter>Source\Entry</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Window\Window.cpp">
-      <Filter>Source\Window</Filter>
+    <ClCompile Include="..\Source\Windows\Window.cpp">
+      <Filter>Source\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Input\Input.cpp">
-      <Filter>Source\Input</Filter>
+    <ClCompile Include="..\Source\Engine\Abstract\InterfaceBase.cpp">
+      <Filter>Source\Engine\Abstract</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Graphics.cpp">
-      <Filter>Source\Graphics</Filter>
+    <ClCompile Include="..\Source\Engine\Abstract\Object.cpp">
+      <Filter>Source\Engine\Abstract</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Shared\Helper.cpp">
+    <ClCompile Include="..\Source\Engine\Core\Engine.cpp">
+      <Filter>Source\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Engine\Core\Input.cpp">
+      <Filter>Source\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Shared\Timer.cpp">
       <Filter>Source\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Core\Engine.cpp">
-      <Filter>Source\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3D12\D3D12DeviceResource.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\SceneRenderer.cpp">
-      <Filter>Source\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Graphics\VertexFactory.cpp">
-      <Filter>Source\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Renderer\PostProcessor\RPostProcessor.cpp">
-      <Filter>Source\Renderer\PostProcessor</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\UI\Console.cpp">
-      <Filter>Source\UI</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3D12\D3D12FrameResource.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3D12\D3D12Texture.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3D12\D3D12Resource.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\D3D12\D3D12Shader.cpp">
-      <Filter>Source\D3D12</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Mesh\MeshLoader.cpp">
-      <Filter>Source\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Mesh\Mesh.cpp">
-      <Filter>Source\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Mesh\InternalMesh.cpp">
-      <Filter>Source\Mesh</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\Mesh\MeshExporter.cpp">
-      <Filter>Source\Mesh</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Source\Shared\pch.h">
+    <ClCompile Include="..\Source\Shared\Error.cpp">
       <Filter>Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Shared\Timer.h">
-      <Filter>Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Shared\d3dx12.h">
-      <Filter>Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Window\Window.h">
-      <Filter>Source\Window</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Shared\define.h">
-      <Filter>Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Shared\EngineTypes.h">
-      <Filter>Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Input\Input.h">
-      <Filter>Source\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Graphics\Graphics.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Shared\Helper.h">
-      <Filter>Source\Shared</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Core\Engine.h">
-      <Filter>Source\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Templates\TemplateClasses.h">
-      <Filter>Source\Templates</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3D12\D3D12DeviceResource.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\SceneRenderer.h">
-      <Filter>Source\Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Graphics\VertexFactory.h">
-      <Filter>Source\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Renderer\PostProcessor\RPostProcessor.h">
-      <Filter>Source\Renderer\PostProcessor</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\UI\Console.h">
-      <Filter>Source\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3D12\D3D12FrameResource.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3D12\D3D12Texture.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3D12\D3D12Resource.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\D3D12\D3D12Shader.h">
-      <Filter>Source\D3D12</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh\MeshLoader.h">
+    </ClCompile>
+    <ClCompile Include="..\Source\Engine\Rendering\VertexFactory.cpp">
+      <Filter>Source\Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Windows\D3D12DeviceResource.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Windows\D3D12FrameResource.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Windows\D3D12ViewResource.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Windows\D3D12RenderResource.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Engine\Rendering\RHIDevice.cpp">
+      <Filter>Source\Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\UserInterface\Console.cpp">
+      <Filter>Source\UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Mesh\InternalMesh.cpp">
       <Filter>Source\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh\Mesh.h">
+    </ClCompile>
+    <ClCompile Include="..\Source\Mesh\Mesh.cpp">
       <Filter>Source\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh\InternalMesh.h">
+    </ClCompile>
+    <ClCompile Include="..\Source\Mesh\MeshExporter.cpp">
       <Filter>Source\Mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Source\Mesh\MeshExporter.h">
+    </ClCompile>
+    <ClCompile Include="..\Source\Mesh\MeshLoader.cpp">
       <Filter>Source\Mesh</Filter>
-    </ClInclude>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Dreadnought.rc">
@@ -195,11 +102,77 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Source\Window\Resource\Dreadnought.ico">
+    <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
+    </ClInclude>
+    <ClInclude Include="..\Source\Shared\stdafx.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Abstract\InterfaceBase.h">
+      <Filter>Source\Engine\Abstract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Abstract\TemplatedBase.h">
+      <Filter>Source\Engine\Abstract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\Window.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Shared\Define.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Abstract\Object.h">
+      <Filter>Source\Engine\Abstract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Core\Engine.h">
+      <Filter>Source\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Core\Input.h">
+      <Filter>Source\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Shared\Error.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Shared\Timer.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Core\EngineType.h">
+      <Filter>Source\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Rendering\VertexFactory.h">
+      <Filter>Source\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\d3dx12.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\D3D12DeviceResource.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\D3D12FrameResource.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\D3D12ViewResource.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\D3D12RenderResource.h">
+      <Filter>Source\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Rendering\RHIDevice.h">
+      <Filter>Source\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\UserInterface\Console.h">
+      <Filter>Source\UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Mesh\InternalMesh.h">
+      <Filter>Source\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Mesh\Mesh.h">
+      <Filter>Source\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Mesh\MeshExporter.h">
+      <Filter>Source\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Mesh\MeshLoader.h">
+      <Filter>Source\Mesh</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
