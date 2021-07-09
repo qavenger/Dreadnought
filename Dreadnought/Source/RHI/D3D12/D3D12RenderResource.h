@@ -1,16 +1,16 @@
 #pragma once
-class D3D12RenderResource
-{
-public:
-	//D3D12RenderResource();
-	//virtual ~D3D12RenderResource();
-	virtual void Reset() = 0;
-private:
-#if defined(_DEBUG) || defined(DEBUG)
-	std::wstring Name;
-#endif
-
-};
+//class D3D12RenderResource
+//{
+//public:
+//	D3D12RenderResource();
+//	virtual ~D3D12RenderResource();
+//	virtual void Reset() = 0;
+//private:
+//#if defined(_DEBUG) || defined(DEBUG)
+//	std::wstring Name;
+//#endif
+//
+//};
 //
 //class D3D12RenderResourcePool
 //{

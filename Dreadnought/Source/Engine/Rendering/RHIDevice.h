@@ -1,6 +1,6 @@
 #pragma once
 #ifdef PLATFORM_WINDOWS
-#define HEADER "Windows/D3D12DeviceResource.h"
+#define HEADER "RHI/D3D12/D3D12DeviceResource.h"
 #endif
 #ifdef HEADER
 #include HEADER
