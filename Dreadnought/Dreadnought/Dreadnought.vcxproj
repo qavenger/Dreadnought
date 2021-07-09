@@ -172,6 +172,7 @@
     <ClCompile Include="..\Source\Windows\D3D12DeviceResource.cpp" />
     <ClCompile Include="..\Source\Windows\D3D12FrameResource.cpp" />
     <ClCompile Include="..\Source\Windows\D3D12RenderResource.cpp" />
+    <ClCompile Include="..\Source\Windows\D3D12Shader.cpp" />
     <ClCompile Include="..\Source\Windows\Window.cpp" />
     <ClCompile Include="..\Source\Windows\D3D12ViewResource.cpp" />
   </ItemGroup>
@@ -196,6 +197,7 @@
     <ClInclude Include="..\Source\Windows\D3D12DeviceResource.h" />
     <ClInclude Include="..\Source\Windows\D3D12FrameResource.h" />
     <ClInclude Include="..\Source\Windows\D3D12RenderResource.h" />
+    <ClInclude Include="..\Source\Windows\D3D12Shader.h" />
     <ClInclude Include="..\Source\Windows\d3dx12.h" />
     <ClInclude Include="..\Source\Windows\Window.h" />
     <ClInclude Include="..\Source\Windows\D3D12ViewResource.h" />

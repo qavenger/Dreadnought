@@ -95,6 +95,9 @@
     <ClCompile Include="..\Source\Mesh\MeshLoader.cpp">
       <Filter>Source\Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Windows\D3D12Shader.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Dreadnought.rc">
@@ -173,6 +176,9 @@
     </ClInclude>
     <ClInclude Include="..\Source\Mesh\MeshLoader.h">
       <Filter>Source\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Windows\D3D12Shader.h">
+      <Filter>Source\Windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
