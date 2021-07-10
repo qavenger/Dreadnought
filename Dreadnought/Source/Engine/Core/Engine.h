@@ -17,6 +17,8 @@ public:
 	LRESULT WindowProc(HWND hWnd, uint32 msg, WPARAM wParam, LPARAM lParam);
 	bool& GetShowConsole() { return bShowConsole; }
 private:
+	void ToggleShowConsole() { bShowConsole = !bShowConsole; }
+private:
 	void PreTick(float dt);
 	void Tick(float dt);
 	void PostTick(float dt);

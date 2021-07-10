@@ -37,7 +37,7 @@ void Engine::OnInit()
 	}
 
 	Input::BindKeyInputEvent(EKeyCode::Escape, EKeyInputState::RELEASED, []() {PostQuitMessage(0); });
-	Input::BindKeyInputEvent(EKeyCode::Tilde, EKeyInputState::RELEASED, []() {gEngine->GetShowConsole() = !gEngine->GetShowConsole(); });
+	Input::BindKeyInputEvent(EKeyCode::Tilde, EKeyInputState::RELEASED, this, &Engine::ToggleShowConsole );
 	ImGuiIO& io = ImGui::GetIO();
 	ImGui::StyleColorsDark();
 	pConsole = std::make_unique<Console>();
