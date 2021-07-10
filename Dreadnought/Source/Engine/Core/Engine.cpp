@@ -85,6 +85,7 @@ void Engine::OnDestroy()
 	}
 	SystemLookup.clear();
 	Systems.clear();
+	pConsole.reset();
 	ImGui::DestroyContext();
 }
 
@@ -97,14 +98,18 @@ void Engine::Run()
 		GlobalTimer.Tick();
 		try {
 			gEngine->PreTick(GlobalTimer.DeltaTime());
-			while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+			while(PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
+				if (msg.message == WM_QUIT) break;
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			}
+			
 			gEngine->Tick(GlobalTimer.DeltaTime());
 
 			gEngine->PostTick(GlobalTimer.DeltaTime());
+			
+			
 		}
 		catch (HrException e)
 		{
