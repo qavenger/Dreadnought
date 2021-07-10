@@ -36,6 +36,12 @@
     <Filter Include="Source\Mesh">
       <UniqueIdentifier>{f71975f9-16c8-44e2-adca-b78faa089ed7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\RHI">
+      <UniqueIdentifier>{498bf45e-0555-4d02-9906-b62aa0384186}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\RHI\D3D12">
+      <UniqueIdentifier>{d6c6320c-6858-4b28-8181-e2ab19b8273a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Entry\Entry.cpp">
@@ -65,18 +71,6 @@
     <ClCompile Include="..\Source\Engine\Rendering\VertexFactory.cpp">
       <Filter>Source\Engine\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Windows\D3D12DeviceResource.cpp">
-      <Filter>Source\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Windows\D3D12FrameResource.cpp">
-      <Filter>Source\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Windows\D3D12ViewResource.cpp">
-      <Filter>Source\Windows</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Source\Windows\D3D12RenderResource.cpp">
-      <Filter>Source\Windows</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Engine\Rendering\RHIDevice.cpp">
       <Filter>Source\Engine\Rendering</Filter>
     </ClCompile>
@@ -94,6 +88,21 @@
     </ClCompile>
     <ClCompile Include="..\Source\Mesh\MeshLoader.cpp">
       <Filter>Source\Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\D3D12\D3D12DeviceResource.cpp">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\D3D12\D3D12FrameResource.cpp">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\D3D12\D3D12RenderResource.cpp">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\D3D12\D3D12ViewResource.cpp">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\D3D12\D3D12Shader.cpp">
+      <Filter>Source\RHI\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -141,21 +150,6 @@
     <ClInclude Include="..\Source\Engine\Rendering\VertexFactory.h">
       <Filter>Source\Engine\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Windows\d3dx12.h">
-      <Filter>Source\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Windows\D3D12DeviceResource.h">
-      <Filter>Source\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Windows\D3D12FrameResource.h">
-      <Filter>Source\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Windows\D3D12ViewResource.h">
-      <Filter>Source\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Source\Windows\D3D12RenderResource.h">
-      <Filter>Source\Windows</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Engine\Rendering\RHIDevice.h">
       <Filter>Source\Engine\Rendering</Filter>
     </ClInclude>
@@ -173,6 +167,24 @@
     </ClInclude>
     <ClInclude Include="..\Source\Mesh\MeshLoader.h">
       <Filter>Source\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\D3D12DeviceResource.h">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\D3D12FrameResource.h">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\D3D12RenderResource.h">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\D3D12ViewResource.h">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\d3dx12.h">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\D3D12Shader.h">
+      <Filter>Source\RHI\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

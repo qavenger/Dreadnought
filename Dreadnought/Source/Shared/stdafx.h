@@ -30,7 +30,7 @@
 #include <future>
 #include <d3dcompiler.h>
 #include <DirectXCollision.h>
-#include <../Windows/d3dx12.h>
+#include <../RHI/D3D12/d3dx12.h>
 #include <EngineType.h>
 //#include <Input.h>
 #include "Timer.h"
