@@ -200,7 +200,6 @@
     <ClInclude Include="..\Source\Engine\Math\Vector2D.h" />
     <ClInclude Include="..\Source\Engine\Math\Vector4D.h" />
     <ClInclude Include="..\Source\Engine\Math\VectorSSE.h" />
-    <ClInclude Include="..\Source\Engine\Rendering\RHIDevice.h" />
     <ClInclude Include="..\Source\Engine\Rendering\VertexFactory.h" />
     <ClInclude Include="..\Source\Mesh\InternalMesh.h" />
     <ClInclude Include="..\Source\Mesh\Mesh.h" />

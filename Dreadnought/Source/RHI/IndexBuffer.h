@@ -3,6 +3,7 @@
 class IIndexBuffer
 {
 public:
+	virtual ~IIndexBuffer() {}
 	void SetData(std::vector<uint32>& Data);
 	void SetData(std::vector<uint16>& Data);
 

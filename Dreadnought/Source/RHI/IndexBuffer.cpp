@@ -4,7 +4,7 @@
 
 void IIndexBuffer::SetData(std::vector<uint32>& Data)
 {
-	IndexCount = Data.size();
+	IndexCount = (uint32)Data.size();
 	SizeInBytes = IndexCount * sizeof(uint32);
 	IsHalf = false;
 
@@ -13,7 +13,7 @@ void IIndexBuffer::SetData(std::vector<uint32>& Data)
 
 void IIndexBuffer::SetData(std::vector<uint16>& Data)
 {
-	IndexCount = Data.size();
+	IndexCount = (uint32)Data.size();
 	SizeInBytes = IndexCount * sizeof(uint16);
 	IsHalf = true;
 

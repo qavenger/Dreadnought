@@ -11,3 +11,8 @@ void RHIDeviceCreator::Init()
 	Device = new OpenglDevice();
 #endif
 }
+
+void RHIDeviceCreator::Destroy()
+{
+	delete Device;
+}

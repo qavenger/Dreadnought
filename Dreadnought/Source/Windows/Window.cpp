@@ -94,6 +94,7 @@ void WindowPool::OnDestroy()
 	WindowLookup.clear();
 	EmptySlots.clear();
 	ImGui_ImplWin32_Shutdown();
+	RHIDeviceCreator::Destroy();
 }
 
 void WindowPool::PendingKill(int16 index)

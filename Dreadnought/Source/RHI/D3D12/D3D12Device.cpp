@@ -430,7 +430,7 @@ void D3D12Device::SetViewport(float X, float Y, float Width, float Height, float
 
 void D3D12Device::SetScissor(float Left, float Top, float Right, float Bottom) const
 {
-	tagRECT ScissorRect = { Left, Top, Right, Bottom };
+	tagRECT ScissorRect = { (int32)Left, (int32)Top, (int32)Right, (int32)Bottom };
 	CommandList->RSSetScissorRects(1, &ScissorRect);
 }
 
@@ -483,7 +483,7 @@ void D3D12Device::BeginFrame()
 	ThrowIfFailed(CommandList->Reset(CommandAllocator.Get(), nullptr));
 
 	float Color[] = { 1.f, 0.f, 0.f, 0.f };
-	D3D12_RECT Rect = { 0, 0, WindowWidth, WindowHeight };
+	D3D12_RECT Rect = { 0, 0, (int32)WindowWidth, (int32)WindowHeight };
 	CommandList->ClearRenderTargetView(CurrentBackBufferView(), Color, 1, &Rect);
 }
 
@@ -605,7 +605,7 @@ void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
 	PSODesc.RasterizerState.CullMode = CullModeMap[D3DPSO->CullMode];
 	PSODesc.RasterizerState.FillMode = FillModeMap[D3DPSO->FillMode];
 	PSODesc.RasterizerState.FrontCounterClockwise = false;
-	PSODesc.RasterizerState.DepthBias = 0.f;
+	PSODesc.RasterizerState.DepthBias = 0;
 	PSODesc.RasterizerState.DepthBiasClamp = 0.f;
 	PSODesc.RasterizerState.SlopeScaledDepthBias = 0.f;
 	PSODesc.RasterizerState.DepthClipEnable = true;
@@ -630,7 +630,7 @@ void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
 			ColorSrc, ColorDest, ColorOP,
 			AlphaSrc, AlphaDest, AlphaOP,
 			D3D12_LOGIC_OP_NOOP,
-			WriteMask,
+			(uint8)WriteMask,
 		};
 		PSODesc.BlendState.RenderTarget[Index] = RenderTargetBlendDesc;
 	}

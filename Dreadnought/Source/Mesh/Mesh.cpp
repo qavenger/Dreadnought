@@ -12,3 +12,11 @@ void Mesh::Draw(IRHIDevice* Device) const
 {
 	Device->DrawIndexedInstanced(IndexBuffer, VertexBuffer);
 }
+
+void Mesh::Destroy()
+{
+	if(VertexBuffer)
+		delete VertexBuffer;
+	if (IndexBuffer)
+		delete IndexBuffer;
+}

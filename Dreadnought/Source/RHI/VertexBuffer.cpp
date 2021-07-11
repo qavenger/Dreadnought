@@ -4,7 +4,7 @@
 void IVertexBuffer::SetData(uint32 Count, std::vector<float>& Data, std::vector<ETextureFormat>& Layout)
 {
 	VertexCount = Count;
-	SizeInBytes = Data.size() * sizeof(float);
+	SizeInBytes = (uint32)Data.size() * sizeof(float);
 
 	VertexData = Data;
 	VertexLayout = Layout;

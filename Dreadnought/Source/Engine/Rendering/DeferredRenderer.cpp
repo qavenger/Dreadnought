@@ -18,13 +18,14 @@ void DeferredRenderer::OnInit()
 	SubMesh.IndexBuffer = gDevice->CreateIndexBuffer();
 	SubMesh.VertexBuffer = gDevice->CreateVertexBuffer();
 	SubMesh.IndexBuffer->SetData(Index);
-	SubMesh.VertexBuffer->SetData(Positions.size(), Vertex, Layout);
+	SubMesh.VertexBuffer->SetData((uint32)Positions.size(), Vertex, Layout);
 	SubMesh.Build(gDevice);
 }
 
 void DeferredRenderer::OnDestroy()
 {
 	ImGui_ImplDX12_Shutdown();
+	SubMesh.Destroy();
 }
 
 void DeferredRenderer::OnPostTick(float dt)
