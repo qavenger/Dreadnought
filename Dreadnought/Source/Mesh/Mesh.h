@@ -1,8 +1,13 @@
 #pragma once
 class Mesh
 {
+public:
+	void Build(IRHIDevice* Device) const;
+	void Draw(IRHIDevice* Device) const;
 
-private:
-	class VertexBuffer* Data;
+
+public:
+	IVertexBuffer*        VertexBuffer;
+	IIndexBuffer*         IndexBuffer;
 };
 

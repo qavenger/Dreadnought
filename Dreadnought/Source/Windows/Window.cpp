@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Window.h"
 #include <Engine.h>
+#include "RHI/RHIDevice.h"
+#include "RHI/RHIDeviceCreator.h"
 
 static LRESULT CALLBACK WndProcSetup(HWND hWnd, uint32 msg, WPARAM wParam, LPARAM lParam);
 
@@ -68,10 +70,17 @@ void WindowPool::OnInit()
 
 	Windows.push_back(std::move(Window()));
 	WindowLookup[Windows[0].hWnd] = 0;
+
+	RHIDeviceCreator::Init();
+	gDevice->Init();
+	gDevice->CreateSwapChain(GetMainWindow(), 1024, 720, 2, ETextureFormat::TF_R8G8B8A8, ETextureFormat::TF_D32S8);
+	gDevice->Resize(1024, 720);
 }
 
 void WindowPool::OnDestroy()
 {
+	gDevice->Destroy();
+
 	for (auto itr = WindowLookup.begin(); itr != WindowLookup.end(); ++itr)
 	{
 		if (itr->first)

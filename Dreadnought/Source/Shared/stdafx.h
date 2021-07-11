@@ -44,6 +44,9 @@
 #include <Engine/Abstract/TemplatedBase.h>
 #include <Engine/Abstract/Object.h>
 #include <Engine.h>
+#include <RHI/CommonEnums.h>
+#include "RHI/RHIDeviceCreator.h"
+#include "RHI/RHIDevice.h"
 #pragma comment (lib, "dxgi.lib")
 #pragma comment (lib, "d3d12.lib")
 #pragma comment (lib, "dxguid.lib")
@@ -61,3 +64,5 @@
 #endif
 
 using Microsoft::WRL::ComPtr;
+
+#define USE_DX12_RHI

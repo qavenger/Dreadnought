@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include "Windows/Window.h"
 #include "Input.h"
-#include "Engine/Rendering/RHIDevice.h"
+#include "Engine/Rendering/DeferredRenderer.h"
 
 #define IMPLEMENT_SUBSYSTEM(s) s* s##Var = new s(); RegisterSubsystem(#s, s##Var)
 
@@ -12,7 +12,8 @@ Engine::Engine()
 {
 	IMPLEMENT_SUBSYSTEM(Input);
 	IMPLEMENT_SUBSYSTEM(WindowPool);
-	IMPLEMENT_SUBSYSTEM(RHIDevice);
+//	IMPLEMENT_SUBSYSTEM(RHIDevice);
+	IMPLEMENT_SUBSYSTEM(DeferredRenderer);
 	RawInputBuffer.clear();
 }
 
@@ -46,6 +47,8 @@ void Engine::OnInit()
 
 void Engine::PreTick(float dt)
 {
+	gDevice->BeginFrame();
+
 	for (auto* i : Systems)
 	{  
 		i->OnPreTick(dt);
@@ -58,6 +61,8 @@ void Engine::PostTick(float dt)
 	{
 		i->OnPostTick(dt);
 	}
+
+	gDevice->EndFrame();
 }
 
 void Engine::Tick(float dt)
@@ -70,7 +75,6 @@ void Engine::Tick(float dt)
 
 void Engine::OnDestroy()
 {
-
 	for (auto* i : Systems)
 	{
 		i->OnDestroy();

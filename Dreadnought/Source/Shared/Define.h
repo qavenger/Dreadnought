@@ -44,6 +44,7 @@ typedef TMulticastDelegate<ParamType0, ParamType1, ParamType2> Name;
 #define NewObject(T, Name) gEngine->NewObject<T>(Name)
 
 #define gEngine Engine::s_Engine
+#define gDevice RHIDeviceCreator::Device
 
 #define NOENDBG noexcept(!_DEBUG)
 
