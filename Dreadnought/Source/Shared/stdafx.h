@@ -21,6 +21,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <StringUtil.h>
 #include <unordered_map>
 #include <queue>
 #include <map>
@@ -43,6 +44,7 @@
 #include <Engine/Abstract/InterfaceBase.h>
 #include <Engine/Abstract/TemplatedBase.h>
 #include <Engine/Abstract/Object.h>
+#include <EngineMath.h>
 #include <Engine.h>
 #pragma comment (lib, "dxgi.lib")
 #pragma comment (lib, "d3d12.lib")

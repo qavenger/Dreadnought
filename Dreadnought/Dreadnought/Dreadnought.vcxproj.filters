@@ -189,5 +189,26 @@
     <ClInclude Include="..\Source\RHI\D3D12\D3D12Shader.h">
       <Filter>Source\RHI\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\Vector.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\Vector2D.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\Vector4D.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\VectorSSE.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\EngineMath.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\EngineMathSSE.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Shared\StringUtil.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

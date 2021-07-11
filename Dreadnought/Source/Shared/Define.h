@@ -45,6 +45,10 @@ typedef TMulticastDelegate<ParamType0, ParamType1, ParamType2> Name;
 
 #define gEngine Engine::s_Engine
 
+#if defined(_DEBUG) || defined(DEBUG)
 #define NOENDBG noexcept(!_DEBUG)
+#else
+#define NOENDBG noexcept
+#endif
 
 #define MAX_BACK_BUFFER_COUNT 3

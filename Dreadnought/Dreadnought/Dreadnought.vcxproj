@@ -183,6 +183,12 @@
     <ClInclude Include="..\Source\Engine\Core\Engine.h" />
     <ClInclude Include="..\Source\Engine\Core\EngineType.h" />
     <ClInclude Include="..\Source\Engine\Core\Input.h" />
+    <ClInclude Include="..\Source\Engine\Math\EngineMath.h" />
+    <ClInclude Include="..\Source\Engine\Math\EngineMathSSE.h" />
+    <ClInclude Include="..\Source\Engine\Math\Vector.h" />
+    <ClInclude Include="..\Source\Engine\Math\Vector2D.h" />
+    <ClInclude Include="..\Source\Engine\Math\Vector4D.h" />
+    <ClInclude Include="..\Source\Engine\Math\VectorSSE.h" />
     <ClInclude Include="..\Source\Engine\Rendering\RHIDevice.h" />
     <ClInclude Include="..\Source\Engine\Rendering\VertexFactory.h" />
     <ClInclude Include="..\Source\Mesh\InternalMesh.h" />
@@ -198,6 +204,7 @@
     <ClInclude Include="..\Source\Shared\Define.h" />
     <ClInclude Include="..\Source\Shared\Error.h" />
     <ClInclude Include="..\Source\Shared\stdafx.h" />
+    <ClInclude Include="..\Source\Shared\StringUtil.h" />
     <ClInclude Include="..\Source\Shared\Timer.h" />
     <ClInclude Include="..\Source\UserInterface\Console.h" />
     <ClInclude Include="..\Source\Windows\Window.h" />

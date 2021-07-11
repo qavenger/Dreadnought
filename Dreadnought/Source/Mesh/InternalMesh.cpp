@@ -187,19 +187,17 @@ void InternalMesh::GenerateSphereInternalMesh(std::vector<uint16>& Indices, std:
 	UVs1[0] = float2(0.f, 0.f); 
 	UVs2[0] = UVs1[0]; // same as uvs1
 
-	const float PI = 3.14159265358f;
-	const float TWOPI = PI * 2.f;
 	for (int Slice = 0; Slice < NumSlices; ++Slice)
 	{
 		float Theta = PI / (NumSlices + 1) * (Slice + 1);
 		for (int VertexId = 0; VertexId < NumVerticesPerSlices; ++VertexId)
 		{
 			int Index = Slice * NumVerticesPerSlices + VertexId + 1;
-			float Phi = TWOPI / NumVerticesPerSlices * VertexId;
-			float3 Vertex(sin(Theta) * cos(Phi), cos(Theta), sin(Theta) * sin(Phi));
+			float Phi = TWO_PI / NumVerticesPerSlices * VertexId;
+			float3 Vertex(GMath::Sin(Theta) * GMath::Cos(Phi), GMath::Cos(Theta), GMath::Sin(Theta) * GMath::Sin(Phi));
 			Vertices[Index] = Vertex;
 			Normals[Index] = Vertex;
-			UVs1[Index] = float2(Phi / TWOPI, Theta / PI);
+			UVs1[Index] = float2(Phi / TWO_PI, Theta / PI);
 			UVs2[Index] = UVs1[Index];
 		}
 	}
@@ -293,11 +291,10 @@ void InternalMesh::GenerateConeInternalMesh(std::vector<uint16>& Indices, std::v
 	UVs1.resize(NumVertices);
 	UVs2.resize(NumVertices);
 
-	const float PI = 3.14159265358f;
 	const float TWOPI = 2.f * PI;
 	const float Theta = PI / 6.f;
 	
-	Vertices[0] = float3(0.f, 1.f / tan(Theta), 0.f);
+	Vertices[0] = float3(0.f, 1.f / GMath::Tan(Theta), 0.f);
 	Normals[0] = float3(0.f, 1.f, 0.f);
 	UVs1[0] = float2(0.5f, 0.5f);
 	UVs2[0] = float2(0.25f, 0.25f);
@@ -305,8 +302,8 @@ void InternalMesh::GenerateConeInternalMesh(std::vector<uint16>& Indices, std::v
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
 		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		float CosPhi = cos(Phi);
-		float SinPhi = sin(Phi);
+		float CosPhi = GMath::Cos(Phi);
+		float SinPhi = GMath::Sin(Phi);
 		Vertices[VertexId + 1] = float3(CosPhi, 0.f, SinPhi);
 		Normals[VertexId + 1] = Vertices[VertexId + 1];
 		UVs1[VertexId + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
@@ -316,8 +313,8 @@ void InternalMesh::GenerateConeInternalMesh(std::vector<uint16>& Indices, std::v
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
 		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		float CosPhi = cos(Phi);
-		float SinPhi = sin(Phi);
+		float CosPhi = GMath::Cos(Phi);
+		float SinPhi = GMath::Sin(Phi);
 		Vertices[VertexId + NumVerticesOfCircle + 1] = float3(CosPhi, 0.f, SinPhi);
 		Normals[VertexId + NumVerticesOfCircle + 1] = float3(0.f, -1.f, 0.f);
 		UVs1[VertexId + NumVerticesOfCircle + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
@@ -357,9 +354,6 @@ void InternalMesh::GenerateCylinderInternalMesh(std::vector<uint16>& Indices, st
 	UVs1.resize(NumVertices);
 	UVs2.resize(NumVertices);
 
-	const float PI = 3.14159265358f;
-	const float TWOPI = 2.f * PI;
-
 	Vertices[0] = float3(0.f, 1.f, 0.f);
 	Normals[0] = float3(0.f, 1.f, 0.f);
 	UVs1[0] = float2(0.5f, 0.5f);
@@ -367,9 +361,9 @@ void InternalMesh::GenerateCylinderInternalMesh(std::vector<uint16>& Indices, st
 
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
-		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		float CosPhi = cos(Phi);
-		float SinPhi = sin(Phi);
+		float Phi = TWO_PI / NumVerticesOfCircle * VertexId;
+		float CosPhi = GMath::Cos(Phi);
+		float SinPhi = GMath::Sin(Phi);
 		Vertices[VertexId + 1] = float3(CosPhi, 1.f, SinPhi);
 		Normals[VertexId + 1] = float3(0.f, 1.f, 0.f);
 		UVs1[VertexId + 1] = float2(CosPhi * 0.5f + 0.5f, SinPhi * 0.5f + 0.5f);
@@ -378,33 +372,33 @@ void InternalMesh::GenerateCylinderInternalMesh(std::vector<uint16>& Indices, st
 
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
-		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		float CosPhi = cos(Phi);
-		float SinPhi = sin(Phi);
+		float Phi = TWO_PI / NumVerticesOfCircle * VertexId;
+		float CosPhi = GMath::Cos(Phi);
+		float SinPhi = GMath::Sin(Phi);
 		int Base = NumVerticesOfCircle + VertexId;
 		Vertices[Base + 1] = float3(CosPhi, 1.f, SinPhi);
 		Normals[Base + 1] = float3(CosPhi, 0.f, SinPhi);
-		UVs1[Base + 1] = float2(Phi / TWOPI, 1.f);
-		UVs2[Base + 1] = float2(Phi / TWOPI, 1.f);
+		UVs1[Base + 1] = float2(Phi / TWO_PI, 1.f);
+		UVs2[Base + 1] = float2(Phi / TWO_PI, 1.f);
 	}
 
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
-		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		float CosPhi = cos(Phi);
-		float SinPhi = sin(Phi);
+		float Phi = TWO_PI / NumVerticesOfCircle * VertexId;
+		float CosPhi = GMath::Cos(Phi);
+		float SinPhi = GMath::Sin(Phi);
 		int Base = 2 * NumVerticesOfCircle + VertexId;
 		Vertices[Base + 1] = float3(CosPhi, -1.f, SinPhi);
 		Normals[Base + 1] = float3(CosPhi, 0.f, SinPhi);
-		UVs1[Base + 1] = float2(Phi / TWOPI, 0.f);
-		UVs2[Base + 1] = float2(Phi / TWOPI, 0.5f);
+		UVs1[Base + 1] = float2(Phi / TWO_PI, 0.f);
+		UVs2[Base + 1] = float2(Phi / TWO_PI, 0.5f);
 	}
 
 	for (int VertexId = 0; VertexId < NumVerticesOfCircle; ++VertexId)
 	{
-		float Phi = TWOPI / NumVerticesOfCircle * VertexId;
-		float CosPhi = cos(Phi);
-		float SinPhi = sin(Phi);
+		float Phi = TWO_PI / NumVerticesOfCircle * VertexId;
+		float CosPhi = GMath::Cos(Phi);
+		float SinPhi = GMath::Sin(Phi);
 		int Base = 3 * NumVerticesOfCircle + VertexId;
 		Vertices[Base + 1] = float3(CosPhi, -1.f, SinPhi);
 		Normals[Base + 1] = float3(0.f, -1.f, 0.f);

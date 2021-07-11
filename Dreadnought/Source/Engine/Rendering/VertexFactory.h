@@ -48,7 +48,7 @@ public:
 		size_t Size()const NOENDBG;
 		size_t GetOffset()const NOENDBG;
 		size_t GetNextOffset()const NOENDBG;
-		static constexpr size_t SizeOf(EElementType type) NOENDBG
+		static constexpr size_t SizeOf(EElementType type)
 		{
 			using namespace DirectX;
 			switch (type)
@@ -63,7 +63,7 @@ public:
 		}
 		EElementType GetType()const noexcept { return Type; }
 
-		D3D12_INPUT_ELEMENT_DESC GetDesc(uint32 inputSlot) const NOENDBG
+		D3D12_INPUT_ELEMENT_DESC GetDesc(uint32 inputSlot) const
 		{
 			switch (Type)
 			{

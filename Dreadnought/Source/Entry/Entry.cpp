@@ -3,7 +3,7 @@
 #include <Engine.h>
 #include <iostream>
 #include <stdlib.h>
-
+#include <Vector.h>
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdline, int nCmdShow){
 #if defined(DEBUG) || defined(_DEBUG)
 	//_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_ALLOC_MEM_DF); 
@@ -11,14 +11,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdline
 #endif
 	gEngine = std::make_unique<Engine>();
 	gEngine->OnInit();
-	//WindowPool* wndPool = (WindowPool*)ISubsystem::GetSubsystem("WindowPool");
-	//if (wndPool)
-	//{
-	//	Window* wnd1 = wndPool->New("0");
-	//	Window* wnd2 = wndPool->New("1", wnd1);
-	//	Window* wnd3 = wndPool->New("2", wnd2);
-	//	Window* wnd4 = wndPool->New("3", wnd3);
-	//}
+
+	const float Step = 1000000;
+	const float StepSize = TWO_PI / Step;
+	float angle0 = 0, angle1 = 0;
+	_Vector2 v1(0), v2(0);
+	_Vector4 v(1152.24f, 1024.166f, 1024.5661f);
+	auto s = v.ToString();
+	Timer timer;
+	timer.Reset();
+	for (float i = 0; i < TWO_PI; i += StepSize)
+	{
+		angle0 += v1.HeadingAngle();
+		v1.y += i;
+	}
+	timer.Tick();
+	auto a = timer.Elapsed();
+	
+	Timer timer1;
+	timer1.Reset();
+	for (float i = 0; i < TWO_PI; i += StepSize)
+	{
+		angle1 += GMath::Atan2(v2.y, v2.x);
+		v2.y += i;
+	}
+	timer1.Tick();
+	auto b = timer1.Elapsed();
+
 	gEngine->Run();
 
 	gEngine->OnDestroy();
