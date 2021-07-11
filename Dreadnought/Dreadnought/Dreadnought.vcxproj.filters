@@ -42,6 +42,9 @@
     <Filter Include="Source\RHI\D3D12">
       <UniqueIdentifier>{d6c6320c-6858-4b28-8181-e2ab19b8273a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Engine\Math">
+      <UniqueIdentifier>{1c14573a-55e5-4d86-8a67-8445b53e1bac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Entry\Entry.cpp">
