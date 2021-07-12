@@ -19,6 +19,19 @@ void DeferredRenderer::OnInit()
 	SubMesh.VertexBuffer = gDevice->CreateVertexBuffer();
 	SubMesh.IndexBuffer->SetData(Index);
 	SubMesh.VertexBuffer->SetData((uint32)Positions.size(), Vertex, Layout);
+	SubMesh.VertexBuffer->SetData(Positions.size(), Vertex, Layout);
+	ShaderConstructDesc VertexShaderDesc, PixelShaderDesc;
+	VertexShaderDesc.ShaderFile = L"D:/DIYEngine/Dreadnought/Dreadnought/Shaders/test.hlsl";
+	VertexShaderDesc.ShaderEntry = "VS";
+	VertexShaderDesc.ShaderType = EShaderType::ST_Vertex;
+	PixelShaderDesc.ShaderFile = L"D:/DIYEngine/Dreadnought/Dreadnought/Shaders/test.hlsl";
+	PixelShaderDesc.ShaderEntry = "PS";
+	PixelShaderDesc.ShaderType = EShaderType::ST_Pixel;
+	SubMesh.VertexShader = gDevice->CreateShader();
+	SubMesh.VertexShader->SetShaderDesc(VertexShaderDesc);
+	SubMesh.PixelShader = gDevice->CreateShader();
+	SubMesh.PixelShader->SetShaderDesc(PixelShaderDesc);
+	SubMesh.PSO = gDevice->CreatePipelineStateObject();
 	SubMesh.Build(gDevice);
 }
 

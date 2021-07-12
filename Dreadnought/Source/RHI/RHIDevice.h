@@ -49,11 +49,15 @@ public:
 	virtual IIndexBuffer* CreateIndexBuffer() = 0;
 	virtual IVertexBuffer* CreateVertexBuffer() = 0;
 	virtual IShader* CreateShader() = 0;
+	virtual IPipelineStateObject* CreatePipelineStateObject() = 0;
 
 
-	virtual void SetIndexBuffer(IIndexBuffer* IndexBuffer) = 0;
-	virtual void SetVertexBuffer(IVertexBuffer* VertexBuffer) = 0;
-	virtual void SetShader(IShader* Shader) = 0;
+	virtual void BuildIndexBuffer(IIndexBuffer* IndexBuffer) = 0;
+	virtual void BuildVertexBuffer(IVertexBuffer* VertexBuffer) = 0;
+	virtual void BuildShader(IShader* Shader) = 0;
+	virtual void BuildPipelineStateObject(IPipelineStateObject* PSO) = 0;
+
+
 	virtual void SetPipelineStateObject(IPipelineStateObject* PSO) = 0;
 
 	virtual void DrawIndexedInstanced(IIndexBuffer* IndexBuffer, IVertexBuffer* VertexBuffer) = 0;

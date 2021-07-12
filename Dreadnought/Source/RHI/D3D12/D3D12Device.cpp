@@ -77,7 +77,7 @@ void D3D12Device::CreateSwapChain(
 	SwapChainDesc.BufferDesc.Height = WindowHeight;
 	SwapChainDesc.BufferDesc.RefreshRate.Numerator = 60;
 	SwapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
-	SwapChainDesc.BufferDesc.Format = TextureFormatMap[BackBufferFormat];//BackBufferFormat;
+	SwapChainDesc.BufferDesc.Format = TextureFormatMap[(uint32)BackBufferFormat];//BackBufferFormat;
 	SwapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	SwapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	SwapChainDesc.SampleDesc.Count = 1;
@@ -131,7 +131,7 @@ void D3D12Device::Resize(
 	ThrowIfFailed(SwapChain->ResizeBuffers(
 		SwapChainBufferCount,
 		WindowWidth, WindowHeight,
-		TextureFormatMap[BackBufferFormat],
+		TextureFormatMap[(uint32)BackBufferFormat],
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 
 	//create backbuffer
@@ -154,13 +154,13 @@ void D3D12Device::Resize(
 	DepthStencilDesc.Height = WindowHeight;
 	DepthStencilDesc.DepthOrArraySize = 1;
 	DepthStencilDesc.MipLevels = 1;
-	DepthStencilDesc.Format = TextureFormatMap[DepthStencilFormat];
+	DepthStencilDesc.Format = TextureFormatMap[(uint32)DepthStencilFormat];
 	DepthStencilDesc.SampleDesc.Count = 1;
 	DepthStencilDesc.SampleDesc.Quality = 0;
 	DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 	D3D12_CLEAR_VALUE ClearValue;
-	ClearValue.Format = TextureFormatMap[DepthStencilFormat];
+	ClearValue.Format = TextureFormatMap[(uint32)DepthStencilFormat];
 	ClearValue.DepthStencil.Depth = 1.f;
 	ClearValue.DepthStencil.Stencil = 0;
 	CD3DX12_HEAP_PROPERTIES DefaultHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
@@ -252,68 +252,68 @@ D3D12_CPU_DESCRIPTOR_HANDLE D3D12Device::DepthStencilView() const
 
 void D3D12Device::InitPlatformDenpendentMap()
 {
-	TextureFormatMap[ETextureFormat::TF_Unknown]          = DXGI_FORMAT_UNKNOWN;
-	TextureFormatMap[ETextureFormat::TF_R16]              = DXGI_FORMAT_R16_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R16G16]           = DXGI_FORMAT_R16G16_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R16G16B16A16]     = DXGI_FORMAT_R16G16B16A16_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R32]              = DXGI_FORMAT_R32_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R32G32]           = DXGI_FORMAT_R32G32_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R32G32B32]        = DXGI_FORMAT_R32G32B32_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R32G32B32A32]     = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_R8G8B8A8]         = DXGI_FORMAT_R8G8B8A8_UNORM;
-	TextureFormatMap[ETextureFormat::TF_D24S8]            = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	TextureFormatMap[ETextureFormat::TF_D32]              = DXGI_FORMAT_D32_FLOAT;
-	TextureFormatMap[ETextureFormat::TF_D32S8]            = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_Unknown]          = DXGI_FORMAT_UNKNOWN;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R16]              = DXGI_FORMAT_R16_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R16G16]           = DXGI_FORMAT_R16G16_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R16G16B16A16]     = DXGI_FORMAT_R16G16B16A16_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R32]              = DXGI_FORMAT_R32_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R32G32]           = DXGI_FORMAT_R32G32_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R32G32B32]        = DXGI_FORMAT_R32G32B32_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R32G32B32A32]     = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_R8G8B8A8]         = DXGI_FORMAT_R8G8B8A8_UNORM;
+	TextureFormatMap[(uint32)ETextureFormat::TF_D24S8]            = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_D32]              = DXGI_FORMAT_D32_FLOAT;
+	TextureFormatMap[(uint32)ETextureFormat::TF_D32S8]            = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 
-	CullModeMap[ECullMode::CM_None]                       = D3D12_CULL_MODE_NONE;
-	CullModeMap[ECullMode::CM_Back]                       = D3D12_CULL_MODE_BACK;
-	CullModeMap[ECullMode::CM_Front]                      = D3D12_CULL_MODE_FRONT;
+	CullModeMap[(uint32)ECullMode::CM_None]                       = D3D12_CULL_MODE_NONE;
+	CullModeMap[(uint32)ECullMode::CM_Back]                       = D3D12_CULL_MODE_BACK;
+	CullModeMap[(uint32)ECullMode::CM_Front]                      = D3D12_CULL_MODE_FRONT;
 
-	FillModeMap[EFillMode::FM_Wireframe]                  = D3D12_FILL_MODE_WIREFRAME;
-	FillModeMap[EFillMode::FM_Solid]                      = D3D12_FILL_MODE_SOLID;
+	FillModeMap[(uint32)EFillMode::FM_Wireframe]                  = D3D12_FILL_MODE_WIREFRAME;
+	FillModeMap[(uint32)EFillMode::FM_Solid]                      = D3D12_FILL_MODE_SOLID;
 
-	PrimitiveTopologyMap[EPrimitiveTopology::PT_Point]    = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	PrimitiveTopologyMap[EPrimitiveTopology::PT_Line]     = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-	PrimitiveTopologyMap[EPrimitiveTopology::PT_Triangle] = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	PrimitiveTopologyMap[(uint32)EPrimitiveTopology::PT_Point]    = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	PrimitiveTopologyMap[(uint32)EPrimitiveTopology::PT_Line]     = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	PrimitiveTopologyMap[(uint32)EPrimitiveTopology::PT_Triangle] = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
-	BlendModeMap[EBlendMode::BM_One]                     = D3D12_BLEND_ONE;
-	BlendModeMap[EBlendMode::BM_Zero]                    = D3D12_BLEND_ZERO;
-	BlendModeMap[EBlendMode::BM_SrcColor]                = D3D12_BLEND_SRC_COLOR;
-	BlendModeMap[EBlendMode::BM_InverseSrcColor]         = D3D12_BLEND_INV_SRC_COLOR;
-	BlendModeMap[EBlendMode::BM_SrcAlpha]                = D3D12_BLEND_SRC_ALPHA;
-	BlendModeMap[EBlendMode::BM_InverseSrcAlpha]         = D3D12_BLEND_INV_SRC_ALPHA;
-	BlendModeMap[EBlendMode::BM_DestColor]               = D3D12_BLEND_DEST_COLOR;
-	BlendModeMap[EBlendMode::BM_InverseDestColor]        = D3D12_BLEND_INV_DEST_COLOR;
-	BlendModeMap[EBlendMode::BM_DestAlpha]               = D3D12_BLEND_DEST_ALPHA;
-	BlendModeMap[EBlendMode::BM_InverseDestAlpha]        = D3D12_BLEND_INV_DEST_ALPHA;
+	BlendModeMap[(uint32)EBlendMode::BM_One]                      = D3D12_BLEND_ONE;
+	BlendModeMap[(uint32)EBlendMode::BM_Zero]                     = D3D12_BLEND_ZERO;
+	BlendModeMap[(uint32)EBlendMode::BM_SrcColor]                 = D3D12_BLEND_SRC_COLOR;
+	BlendModeMap[(uint32)EBlendMode::BM_InverseSrcColor]          = D3D12_BLEND_INV_SRC_COLOR;
+	BlendModeMap[(uint32)EBlendMode::BM_SrcAlpha]                 = D3D12_BLEND_SRC_ALPHA;
+	BlendModeMap[(uint32)EBlendMode::BM_InverseSrcAlpha]          = D3D12_BLEND_INV_SRC_ALPHA;
+	BlendModeMap[(uint32)EBlendMode::BM_DestColor]                = D3D12_BLEND_DEST_COLOR;
+	BlendModeMap[(uint32)EBlendMode::BM_InverseDestColor]         = D3D12_BLEND_INV_DEST_COLOR;
+	BlendModeMap[(uint32)EBlendMode::BM_DestAlpha]                = D3D12_BLEND_DEST_ALPHA;
+	BlendModeMap[(uint32)EBlendMode::BM_InverseDestAlpha]         = D3D12_BLEND_INV_DEST_ALPHA;
 
-	BlendOperatorMap[EBlendOperator::BO_Add]             = D3D12_BLEND_OP_ADD;
-	BlendOperatorMap[EBlendOperator::BO_Sub]             = D3D12_BLEND_OP_SUBTRACT;
-	BlendOperatorMap[EBlendOperator::BO_ReverseSub]      = D3D12_BLEND_OP_REV_SUBTRACT;
-	BlendOperatorMap[EBlendOperator::BO_Min]             = D3D12_BLEND_OP_MIN;
-	BlendOperatorMap[EBlendOperator::BO_Max]             = D3D12_BLEND_OP_MAX;
+	BlendOperatorMap[(uint32)EBlendOperator::BO_Add]              = D3D12_BLEND_OP_ADD;
+	BlendOperatorMap[(uint32)EBlendOperator::BO_Sub]              = D3D12_BLEND_OP_SUBTRACT;
+	BlendOperatorMap[(uint32)EBlendOperator::BO_ReverseSub]       = D3D12_BLEND_OP_REV_SUBTRACT;
+	BlendOperatorMap[(uint32)EBlendOperator::BO_Min]              = D3D12_BLEND_OP_MIN;
+	BlendOperatorMap[(uint32)EBlendOperator::BO_Max]              = D3D12_BLEND_OP_MAX;
 
-	ShaderTypeMap[EShaderType::ST_Vertex]                = "vs_5_0";
-	ShaderTypeMap[EShaderType::ST_Pixel]                 = "ps_5_0";
-	ShaderTypeMap[EShaderType::ST_Geometry]              = "gs_5_0";
-	ShaderTypeMap[EShaderType::ST_Comptuer]              = "cs_5_0";
+	ShaderTypeMap[(uint32)EShaderType::ST_Vertex]                 = "vs_5_0";
+	ShaderTypeMap[(uint32)EShaderType::ST_Pixel]                  = "ps_5_0";
+	ShaderTypeMap[(uint32)EShaderType::ST_Geometry]               = "gs_5_0";
+	ShaderTypeMap[(uint32)EShaderType::ST_Computer]               = "cs_5_0";
 
-	WriteMaskMap[EWriteMask::WM_R]                       = D3D12_COLOR_WRITE_ENABLE_RED;
-	WriteMaskMap[EWriteMask::WM_G]                       = D3D12_COLOR_WRITE_ENABLE_GREEN;
-	WriteMaskMap[EWriteMask::WM_B]                       = D3D12_COLOR_WRITE_ENABLE_BLUE;
-	WriteMaskMap[EWriteMask::WM_A]                       = D3D12_COLOR_WRITE_ENABLE_ALPHA;
-	WriteMaskMap[EWriteMask::WM_RGB]                     = (D3D12_COLOR_WRITE_ENABLE)(D3D12_COLOR_WRITE_ENABLE_RED | D3D12_COLOR_WRITE_ENABLE_GREEN | D3D12_COLOR_WRITE_ENABLE_BLUE);
-	WriteMaskMap[EWriteMask::WM_RGBA]                    = D3D12_COLOR_WRITE_ENABLE_ALL;
-
-	DepthFunctionMap[EDepthFunction::DF_Never]           = D3D12_COMPARISON_FUNC_NEVER;
-	DepthFunctionMap[EDepthFunction::DF_Less]            = D3D12_COMPARISON_FUNC_LESS;
-	DepthFunctionMap[EDepthFunction::DF_Equal]           = D3D12_COMPARISON_FUNC_EQUAL;
-	DepthFunctionMap[EDepthFunction::DF_LessEqual]       = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-	DepthFunctionMap[EDepthFunction::DF_Greater]         = D3D12_COMPARISON_FUNC_GREATER;
-	DepthFunctionMap[EDepthFunction::DF_NotEqual]        = D3D12_COMPARISON_FUNC_NOT_EQUAL;
-	DepthFunctionMap[EDepthFunction::DF_GreaterEqual]    = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
-	DepthFunctionMap[EDepthFunction::DF_Always]          = D3D12_COMPARISON_FUNC_ALWAYS;
-} 
+	WriteMaskMap[(uint32)EWriteMask::WM_R]                        = D3D12_COLOR_WRITE_ENABLE_RED;
+	WriteMaskMap[(uint32)EWriteMask::WM_G]                        = D3D12_COLOR_WRITE_ENABLE_GREEN;
+	WriteMaskMap[(uint32)EWriteMask::WM_B]                        = D3D12_COLOR_WRITE_ENABLE_BLUE;
+	WriteMaskMap[(uint32)EWriteMask::WM_A]                        = D3D12_COLOR_WRITE_ENABLE_ALPHA;
+	WriteMaskMap[(uint32)EWriteMask::WM_RGB]                      = (D3D12_COLOR_WRITE_ENABLE)(D3D12_COLOR_WRITE_ENABLE_RED | D3D12_COLOR_WRITE_ENABLE_GREEN | D3D12_COLOR_WRITE_ENABLE_BLUE);
+	WriteMaskMap[(uint32)EWriteMask::WM_RGBA]                     = D3D12_COLOR_WRITE_ENABLE_ALL;
+ 
+	DepthFunctionMap[(uint32)EDepthFunction::DF_Never]            = D3D12_COMPARISON_FUNC_NEVER;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_Less]             = D3D12_COMPARISON_FUNC_LESS;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_Equal]            = D3D12_COMPARISON_FUNC_EQUAL;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_LessEqual]        = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_Greater]          = D3D12_COMPARISON_FUNC_GREATER;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_NotEqual]         = D3D12_COMPARISON_FUNC_NOT_EQUAL;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_GreaterEqual]     = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+	DepthFunctionMap[(uint32)EDepthFunction::DF_Always]           = D3D12_COMPARISON_FUNC_ALWAYS;
+}  
 
 void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
 {
@@ -332,7 +332,7 @@ void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
 		ResourceDesc.Height = 1;
 		ResourceDesc.DepthOrArraySize = 1;
 		ResourceDesc.MipLevels = 1;
-		ResourceDesc.Format = TextureFormatMap[Desc.Format];
+		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
 		ResourceDesc.SampleDesc = SampleDesc;
 		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -350,7 +350,7 @@ void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
 		ResourceDesc.Height = Desc.TextureHeight;
 		ResourceDesc.DepthOrArraySize = 1;
 		ResourceDesc.MipLevels = Desc.MipmapLevels;
-		ResourceDesc.Format = TextureFormatMap[Desc.Format];
+		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
 		ResourceDesc.SampleDesc = SampleDesc;
 		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
@@ -378,11 +378,11 @@ void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
 		Desc.Format != ETextureFormat::TF_D32S8)
 	{
 		FLOAT ClearColor[] = { Desc.ClearValues.ClearColorR, Desc.ClearValues.ClearColorG, Desc.ClearValues.ClearColorB, Desc.ClearValues.ClearColorA };
-		ClearValue = CD3DX12_CLEAR_VALUE(TextureFormatMap[Desc.Format], ClearColor);
+		ClearValue = CD3DX12_CLEAR_VALUE(TextureFormatMap[(uint32)Desc.Format], ClearColor);
 	}
 	else
 	{
-		ClearValue = CD3DX12_CLEAR_VALUE(TextureFormatMap[Desc.Format], Desc.ClearValues.ClearDepth, Desc.ClearValues.ClearStencil);
+		ClearValue = CD3DX12_CLEAR_VALUE(TextureFormatMap[(uint32)Desc.Format], Desc.ClearValues.ClearDepth, Desc.ClearValues.ClearStencil);
 	}
 	D3D12_CLEAR_VALUE* CV = Desc.IsClearValid() ? &ClearValue : nullptr;
 
@@ -413,6 +413,11 @@ IShader* D3D12Device::CreateShader()
 {
 
 	return new D3D12Shader();
+}
+
+IPipelineStateObject* D3D12Device::CreatePipelineStateObject()
+{
+	return new D3D12PipelineStateObject();
 }
 
 void D3D12Device::SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) const
@@ -549,24 +554,34 @@ ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(
 	return DefaultBuffer;
 }
 
-void D3D12Device::SetIndexBuffer(IIndexBuffer* IndexBuffer)
+void D3D12Device::BuildIndexBuffer(IIndexBuffer* IndexBuffer)
 {
+	ThrowIfFailed(CommandList->Reset(CommandAllocator.Get(), nullptr));
+
 	D3D12IndexBuffer* D3DIB = (D3D12IndexBuffer*)IndexBuffer;
 	D3DIB->IndexBufferGPU = CreateDefaultBuffer(D3DIB->GetData(), D3DIB->GetDataSize(), D3DIB->UploadBuffer);
+
+	ThrowIfFailed(CommandList->Close());
 }
 
-void D3D12Device::SetVertexBuffer(IVertexBuffer* VertexBuffer)
+void D3D12Device::BuildVertexBuffer(IVertexBuffer* VertexBuffer)
 {
+	ThrowIfFailed(CommandList->Reset(CommandAllocator.Get(), nullptr));
+
 	D3D12VertexBuffer* D3DVB = (D3D12VertexBuffer*)VertexBuffer;
 	D3DVB->VertexBufferGPU = CreateDefaultBuffer(D3DVB->GetData(), D3DVB->GetDataSize(), D3DVB->UploadBuffer);
+
+	ThrowIfFailed(CommandList->Close());
 }
 
-void D3D12Device::SetShader(IShader* Shader)
+void D3D12Device::BuildShader(IShader* Shader)
 {
+	ThrowIfFailed(CommandList->Reset(CommandAllocator.Get(), nullptr));
+
 	D3D12Shader* D3DShader = (D3D12Shader*)Shader;
 	std::wstring ShaderFile = D3DShader->GetShaderFile();
 	std::string ShaderEntry = D3DShader->GetShaderEntry();
-	std::string ShaderTarget = ShaderTypeMap[D3DShader->GetShaderType()];
+	std::string ShaderTarget = ShaderTypeMap[(uint32)D3DShader->GetShaderType()];
 	uint32 CompileFlag = 0;
 #if defined(DEBUG) || defined(_DEBUG)
 	CompileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -580,16 +595,24 @@ void D3D12Device::SetShader(IShader* Shader)
 	}
 
 	ThrowIfFailed(Result);
+
+	ThrowIfFailed(CommandList->Close());
 }
 
-void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
+void D3D12Device::BuildPipelineStateObject(IPipelineStateObject* PSO)
 {
+	ThrowIfFailed(CommandList->Reset(CommandAllocator.Get(), nullptr));
+
 	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)PSO;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc;
 	ZeroMemory(&PSODesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	D3D12Shader* VertexShader = (D3D12Shader*)D3DPSO->VertexShader;
 	D3D12Shader* PixelShader = (D3D12Shader*)D3DPSO->PixelShader;
 	D3D12Shader* GeometryShader = (D3D12Shader*)D3DPSO->GeometryShader;
+	std::vector< D3D12_INPUT_ELEMENT_DESC>       VertexLayout;
+	VertexLayout = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 } };
+	PSODesc.InputLayout = { VertexLayout.data() , 1 };
+	PSODesc.pRootSignature = nullptr;
 	PSODesc.VS.pShaderBytecode = VertexShader->GetShaderCode()->GetBufferPointer();
 	PSODesc.VS.BytecodeLength = VertexShader->GetShaderCode()->GetBufferSize();
 	if (PixelShader)
@@ -602,8 +625,8 @@ void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
 		PSODesc.GS.pShaderBytecode = GeometryShader->GetShaderCode()->GetBufferPointer();
 		PSODesc.GS.BytecodeLength = GeometryShader->GetShaderCode()->GetBufferSize();
 	}
-	PSODesc.RasterizerState.CullMode = CullModeMap[D3DPSO->CullMode];
-	PSODesc.RasterizerState.FillMode = FillModeMap[D3DPSO->FillMode];
+	PSODesc.RasterizerState.CullMode = CullModeMap[(uint32)D3DPSO->CullMode];
+	PSODesc.RasterizerState.FillMode = FillModeMap[(uint32)D3DPSO->FillMode];
 	PSODesc.RasterizerState.FrontCounterClockwise = false;
 	PSODesc.RasterizerState.DepthBias = 0;
 	PSODesc.RasterizerState.DepthBiasClamp = 0.f;
@@ -617,13 +640,13 @@ void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
 	for (uint32 Index = 0; Index < D3DPSO->NumRenderTarget; ++Index)
 	{
 		bool BlendEnable                       = D3DPSO->State.IsRenderTargetEnableBlend(Index);
-		D3D12_BLEND ColorSrc                   = BlendModeMap[D3DPSO->State.ColorSrcBlendMode[Index]];
-		D3D12_BLEND ColorDest                  = BlendModeMap[D3DPSO->State.ColorDestBlendMode[Index]];
-		D3D12_BLEND_OP ColorOP                 = BlendOperatorMap[D3DPSO->State.ColorBlendOperator[Index]];
-		D3D12_BLEND AlphaSrc                   = BlendModeMap[D3DPSO->State.AlphaSrcBlendMode[Index]];
-		D3D12_BLEND AlphaDest                  = BlendModeMap[D3DPSO->State.AlphaDestBlendMode[Index]];
-		D3D12_BLEND_OP AlphaOP                 = BlendOperatorMap[D3DPSO->State.AlphaBlendOperator[Index]];
-		D3D12_COLOR_WRITE_ENABLE WriteMask     = WriteMaskMap[D3DPSO->State.WriteMask[Index]];
+		D3D12_BLEND ColorSrc                   = BlendModeMap[(uint32)D3DPSO->State.ColorSrcBlendMode[Index]];
+		D3D12_BLEND ColorDest                  = BlendModeMap[(uint32)D3DPSO->State.ColorDestBlendMode[Index]];
+		D3D12_BLEND_OP ColorOP                 = BlendOperatorMap[(uint32)D3DPSO->State.ColorBlendOperator[Index]];
+		D3D12_BLEND AlphaSrc                   = BlendModeMap[(uint32)D3DPSO->State.AlphaSrcBlendMode[Index]];
+		D3D12_BLEND AlphaDest                  = BlendModeMap[(uint32)D3DPSO->State.AlphaDestBlendMode[Index]];
+		D3D12_BLEND_OP AlphaOP                 = BlendOperatorMap[(uint32)D3DPSO->State.AlphaBlendOperator[Index]];
+		D3D12_COLOR_WRITE_ENABLE WriteMask     = WriteMaskMap[(uint32)D3DPSO->State.WriteMask[Index]];
 		const D3D12_RENDER_TARGET_BLEND_DESC RenderTargetBlendDesc =
 		{
 			BlendEnable,FALSE,
@@ -636,31 +659,39 @@ void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
 	}
 	PSODesc.DepthStencilState.DepthEnable = D3DPSO->EnableDepthTest;
 	PSODesc.DepthStencilState.DepthWriteMask = D3DPSO->EnableDepthWrite ? D3D12_DEPTH_WRITE_MASK_ALL : D3D12_DEPTH_WRITE_MASK_ZERO;
-	PSODesc.DepthStencilState.DepthFunc = DepthFunctionMap[D3DPSO->DepthFunction];
+	PSODesc.DepthStencilState.DepthFunc = DepthFunctionMap[(uint32)D3DPSO->DepthFunction];
 	PSODesc.DepthStencilState.StencilEnable = D3DPSO->EnableStencilTest;
 	PSODesc.DepthStencilState.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
 	PSODesc.DepthStencilState.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
 	PSODesc.DepthStencilState.FrontFace = { D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
 	PSODesc.DepthStencilState.BackFace = { D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS };
 	PSODesc.SampleMask = UINT_MAX;
-	PSODesc.PrimitiveTopologyType = PrimitiveTopologyMap[D3DPSO->PrimitiveTopology];
+	PSODesc.PrimitiveTopologyType = PrimitiveTopologyMap[(uint32)D3DPSO->PrimitiveTopology];
 	if (D3DPSO->IsBackbuffer)
 	{
-		PSODesc.RTVFormats[0] = TextureFormatMap[BackBufferFormat];
-		PSODesc.DSVFormat = TextureFormatMap[DepthStencilFormat];
+		PSODesc.RTVFormats[0] = TextureFormatMap[(uint32)BackBufferFormat];
+		PSODesc.DSVFormat = TextureFormatMap[(uint32)DepthStencilFormat];
 		PSODesc.NumRenderTargets = 1;
 	}
 	else
 	{
 		for (uint32 Index = 0; Index < D3DPSO->NumRenderTarget; ++Index)
-			PSODesc.RTVFormats[Index] = TextureFormatMap[D3DPSO->SceneColorRenderTarget[Index]->GetTexture()->GetDesc().Format];
-		PSODesc.DSVFormat = TextureFormatMap[D3DPSO->DepthStencilRenderTarget->GetTexture()->GetDesc().Format];
+			PSODesc.RTVFormats[Index] = TextureFormatMap[(uint32)D3DPSO->SceneColorRenderTarget[Index]->GetTexture()->GetDesc().Format];
+		PSODesc.DSVFormat = TextureFormatMap[(uint32)D3DPSO->DepthStencilRenderTarget->GetTexture()->GetDesc().Format];
 		PSODesc.NumRenderTargets = D3DPSO->NumRenderTarget;
 	}
 	PSODesc.SampleDesc.Count = 1;
 	PSODesc.SampleDesc.Quality = 0;
 
 	ThrowIfFailed(Device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&D3DPSO->GetPSO())));
+
+	ThrowIfFailed(CommandList->Close());
+}
+
+void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
+{
+	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)PSO;
+	CommandList->SetPipelineState(D3DPSO->GetPSO().Get());
 }
 
 void D3D12Device::DrawIndexedInstanced(IIndexBuffer* IndexBuffer, IVertexBuffer* VertexBuffer)

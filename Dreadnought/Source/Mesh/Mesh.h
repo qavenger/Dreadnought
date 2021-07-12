@@ -1,4 +1,5 @@
 #pragma once
+
 class Mesh
 {
 public:
@@ -7,7 +8,10 @@ public:
 	void Destroy();
 
 public:
-	IVertexBuffer*        VertexBuffer;
-	IIndexBuffer*         IndexBuffer;
+	IVertexBuffer*           VertexBuffer;
+	IIndexBuffer*            IndexBuffer;
+	IShader*                 VertexShader;
+	IShader*                 PixelShader;
+	IPipelineStateObject*    PSO;
 };
 

@@ -36,11 +36,15 @@ public:
 	virtual IIndexBuffer* CreateIndexBuffer();
 	virtual IVertexBuffer* CreateVertexBuffer();
 	virtual IShader* CreateShader();
+	virtual IPipelineStateObject* CreatePipelineStateObject();
 
 
-	virtual void SetIndexBuffer(IIndexBuffer* IndexBuffer);
-	virtual void SetVertexBuffer(IVertexBuffer* VertexBuffer);
-	virtual void SetShader(IShader* Shader);
+	virtual void BuildIndexBuffer(IIndexBuffer* IndexBuffer);
+	virtual void BuildVertexBuffer(IVertexBuffer* VertexBuffer);
+	virtual void BuildShader(IShader* Shader);
+	virtual void BuildPipelineStateObject(IPipelineStateObject* PSO);
+
+
 	virtual void SetPipelineStateObject(IPipelineStateObject* PSO);
 
 	virtual void DrawIndexedInstanced(IIndexBuffer* IndexBuffer, IVertexBuffer* VertexBuffer);
@@ -79,13 +83,13 @@ private:
 	uint32										      DsvDescriptorSize;
 	uint32										      CbvSrvUavDescriptorSize;
 
-	std::unordered_map<ETextureFormat, DXGI_FORMAT>                            TextureFormatMap;
-	std::unordered_map<ECullMode, D3D12_CULL_MODE>                             CullModeMap;
-	std::unordered_map<EFillMode, D3D12_FILL_MODE>                             FillModeMap;
-	std::unordered_map<EPrimitiveTopology, D3D12_PRIMITIVE_TOPOLOGY_TYPE>      PrimitiveTopologyMap;
-	std::unordered_map<EBlendMode, D3D12_BLEND>                                BlendModeMap;
-	std::unordered_map<EBlendOperator, D3D12_BLEND_OP>                         BlendOperatorMap;
-	std::unordered_map<EWriteMask, D3D12_COLOR_WRITE_ENABLE>                   WriteMaskMap;
-	std::unordered_map<EShaderType, std::string>                               ShaderTypeMap;
-	std::unordered_map<EDepthFunction, D3D12_COMPARISON_FUNC>                  DepthFunctionMap;
+	DXGI_FORMAT                                       TextureFormatMap[(uint32)ETextureFormat::TF_Num];
+	D3D12_CULL_MODE                                   CullModeMap[(uint32)ECullMode::CM_Num];
+	D3D12_FILL_MODE                                   FillModeMap[(uint32)EFillMode::FM_Num];
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE                     PrimitiveTopologyMap[(uint32)EPrimitiveTopology::PT_Num];
+	D3D12_BLEND                                       BlendModeMap[(uint32)EBlendMode::BM_Num];
+	D3D12_BLEND_OP                                    BlendOperatorMap[(uint32)EBlendOperator::BO_Num];
+	D3D12_COLOR_WRITE_ENABLE                          WriteMaskMap[(uint32)EWriteMask::WM_Num];
+	std::string                                       ShaderTypeMap[(uint32)EShaderType::ST_Num];
+	D3D12_COMPARISON_FUNC                             DepthFunctionMap[(uint32)EDepthFunction::DF_Num];
 };

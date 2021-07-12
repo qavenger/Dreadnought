@@ -5,6 +5,9 @@ class IVertexBuffer
 public:
 	virtual ~IVertexBuffer() {}
 
+	virtual void* GetVertexLayout() = 0;
+
+public:
 	void SetData(uint32 Count, std::vector<float>& Data, std::vector<ETextureFormat>& Layout);
 
 	uint32 GetSizePerVertex() const;

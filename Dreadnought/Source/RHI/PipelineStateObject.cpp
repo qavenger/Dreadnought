@@ -4,7 +4,7 @@
 
 bool BlendState::IsRenderTargetEnableBlend(uint32 Index) const
 {
-	FatalIfFalse(Index > MAX_RENDER_TARGET, "Index must be in [0, 7]");
+	FatalIfFalse((Index >= 0 && Index < MAX_RENDER_TARGET), "Index must be in [0, 7]");
 
 	if (ColorSrcBlendMode[Index] == EBlendMode::BM_One &&
 		ColorDestBlendMode[Index] == EBlendMode::BM_Zero &&

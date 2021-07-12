@@ -4,12 +4,18 @@
 
 void Mesh::Build(IRHIDevice* Device) const
 {
-	gDevice->SetIndexBuffer(IndexBuffer);
-	gDevice->SetVertexBuffer(VertexBuffer);
+	gDevice->BuildIndexBuffer(IndexBuffer);
+	gDevice->BuildVertexBuffer(VertexBuffer);
+	gDevice->BuildShader(VertexShader);
+	gDevice->BuildShader(PixelShader);
+	PSO->VertexShader = VertexShader;
+	PSO->PixelShader = PixelShader;
+	gDevice->BuildPipelineStateObject(PSO);
 }
 
 void Mesh::Draw(IRHIDevice* Device) const
 {
+	gDevice->SetPipelineStateObject(PSO);
 	Device->DrawIndexedInstanced(IndexBuffer, VertexBuffer);
 }
 
