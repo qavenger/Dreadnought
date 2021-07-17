@@ -36,13 +36,13 @@ public:
 	virtual void Transition(void* Resource, EResourceState Before, EResourceState After) const;
 
 	//Create Resource Function
-	virtual void CreateTextureXD(TextureDesc& Desc, RHITexture* Tex);
+	virtual RHITexture* CreateTexture();
 	virtual RHIIndexBuffer* CreateIndexBuffer();
 	virtual RHIVertexBuffer* CreateVertexBuffer();
 	virtual RHIShader* CreateShader();
 	virtual RHIPipelineStateObject* CreatePipelineStateObject();
 
-
+	virtual void BuildTexture(RHITexture* Texture);
 	virtual void BuildIndexBuffer(RHIIndexBuffer* IndexBuffer);
 	virtual void BuildVertexBuffer(RHIVertexBuffer* VertexBuffer);
 	virtual void BuildShader(RHIShader* Shader);

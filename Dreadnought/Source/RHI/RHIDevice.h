@@ -31,15 +31,15 @@ struct ClearCDSValue
 
 struct RHIRenderPassInfo
 {
-	bool           UseBackBuffer;
-	RHIRenderTarget* SceneColor[MAX_RENDER_TARGET];
-	ClearCDSValue  ClearColor[MAX_RENDER_TARGET];
-	uint32         NumRenderTarget;
-	RHIRenderTarget* SceneDepthZ;
-	float          ClearDepth;
-	uint8          ClearStencil;
-	bool           ClearDepthValid;
-	bool           ClearStencilValid;
+	bool               UseBackBuffer;
+	RHIRenderTarget*   SceneColor[MAX_RENDER_TARGET];
+	ClearCDSValue      ClearColor[MAX_RENDER_TARGET];
+	uint32             NumRenderTarget;
+	RHIRenderTarget*   SceneDepthZ;
+	float              ClearDepth;
+	uint8              ClearStencil;
+	bool               ClearDepthValid;
+	bool               ClearStencilValid;
 
 	RHIRenderPassInfo()
 		: UseBackBuffer(true)
@@ -104,13 +104,13 @@ public:
 	virtual void Transition(void* Resource, EResourceState Before, EResourceState After) const = 0;
 
 	//Create Resource Function
-	virtual void CreateTextureXD(TextureDesc& Desc, RHITexture* Tex) = 0;
+	virtual RHITexture* CreateTexture() = 0;
 	virtual RHIIndexBuffer* CreateIndexBuffer() = 0;
 	virtual RHIVertexBuffer* CreateVertexBuffer() = 0;
 	virtual RHIShader* CreateShader() = 0;
 	virtual RHIPipelineStateObject* CreatePipelineStateObject() = 0;
 
-
+	virtual void BuildTexture(RHITexture* Texture) = 0;
 	virtual void BuildIndexBuffer(RHIIndexBuffer* IndexBuffer) = 0;
 	virtual void BuildVertexBuffer(RHIVertexBuffer* VertexBuffer) = 0;
 	virtual void BuildShader(RHIShader* Shader) = 0;

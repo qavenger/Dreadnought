@@ -58,7 +58,7 @@ void D3D12Device::Init()
 
 void D3D12Device::Destroy()
 {
-
+	
 }
 
 void D3D12Device::CreateSwapChain(
@@ -328,74 +328,10 @@ void D3D12Device::InitPlatformDenpendentMap()
 	ResourceStateMap[(uint32)EResourceState::RS_Present]              = D3D12_RESOURCE_STATE_PRESENT;
 }  
 
-void D3D12Device::CreateTextureXD(TextureDesc& Desc, RHITexture* Tex)
+RHITexture* D3D12Device::CreateTexture()
 {
-	D3D12Texture* D3DTexture = new D3D12Texture(Desc);
-	
-	D3D12_RESOURCE_DESC ResourceDesc = {};
-	DXGI_SAMPLE_DESC SampleDesc;
-	switch (Desc.Dimension)
-	{
-	case ETextureDimension::TD_TextureBuffer:
-		SampleDesc.Count = 1;
-		SampleDesc.Quality = 0;
-		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; 
-		ResourceDesc.Alignment = 0;
-		ResourceDesc.Width = Desc.TextureWidth;
-		ResourceDesc.Height = 1;
-		ResourceDesc.DepthOrArraySize = 1;
-		ResourceDesc.MipLevels = 1;
-		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
-		ResourceDesc.SampleDesc = SampleDesc;
-		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		break;
-	case ETextureDimension::TD_Texture1D:
-		
-		break;
-	case ETextureDimension::TD_Texture2D:
-		SampleDesc.Count = 1;
-		SampleDesc.Quality = 0;
-		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		ResourceDesc.Alignment = 0;
-		ResourceDesc.Width = Desc.TextureWidth;
-		ResourceDesc.Height = Desc.TextureHeight;
-		ResourceDesc.DepthOrArraySize = 1;
-		ResourceDesc.MipLevels = Desc.MipmapLevels;
-		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
-		ResourceDesc.SampleDesc = SampleDesc;
-		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		break;
-	case ETextureDimension::TD_Texture3D:
-
-		break;
-	case ETextureDimension::TD_TextureCube:
-
-		break;
-	default:
-		// throw unknow type error
-		break;
-
-	}
-
-	//set properties
-	D3D12_HEAP_PROPERTIES Properties;
-	Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
-
-	//create resource
-	ThrowIfFailed(Device->CreateCommittedResource(
-		&Properties,
-		D3D12_HEAP_FLAG_NONE,
-		&ResourceDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr, // need not to clear
-		IID_PPV_ARGS(&D3DTexture->GetResource())));
-
-	Tex = D3DTexture;
+	return new D3D12Texture();
 }
-
 
 RHIIndexBuffer* D3D12Device::CreateIndexBuffer()
 {
@@ -536,18 +472,85 @@ void D3D12Device::BeginFrame()
 
 void D3D12Device::EndFrame()
 {
-	SCOPE_EVENT(RenderFinish)
 	{
+		SCOPE_EVENT(RenderFinish)
 		Transition(CurrentBackBuffer().Get(), EResourceState::RS_RenderTarget, EResourceState::RS_Present);
-
-		FlushCommandQueue();
-
-		CurrentBackBufferIndex = (CurrentBackBufferIndex + 1) % 2;
-
-		Present();
-
-		WaitForGPU();
 	}
+
+	FlushCommandQueue();
+
+	Present();
+
+	CurrentBackBufferIndex = (CurrentBackBufferIndex + 1) % 2;
+
+	WaitForGPU();
+}
+
+void D3D12Device::BuildTexture(RHITexture* Tex)
+{
+	TextureDesc Desc = Tex->GetDesc();
+	D3D12Texture* D3DTexture = (D3D12Texture*)Tex;
+
+	D3D12_RESOURCE_DESC ResourceDesc = {};
+	DXGI_SAMPLE_DESC SampleDesc;
+	switch (Desc.Dimension)
+	{
+	case ETextureDimension::TD_TextureBuffer:
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		ResourceDesc.Alignment = 0;
+		ResourceDesc.Width = Desc.TextureWidth;
+		ResourceDesc.Height = 1;
+		ResourceDesc.DepthOrArraySize = 1;
+		ResourceDesc.MipLevels = 1;
+		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
+		ResourceDesc.SampleDesc = SampleDesc;
+		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		break;
+	case ETextureDimension::TD_Texture1D:
+
+		break;
+	case ETextureDimension::TD_Texture2D:
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		ResourceDesc.Alignment = 0;
+		ResourceDesc.Width = Desc.TextureWidth;
+		ResourceDesc.Height = Desc.TextureHeight;
+		ResourceDesc.DepthOrArraySize = 1;
+		ResourceDesc.MipLevels = Desc.MipmapLevels;
+		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
+		ResourceDesc.SampleDesc = SampleDesc;
+		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		break;
+	case ETextureDimension::TD_Texture3D:
+
+		break;
+	case ETextureDimension::TD_TextureCube:
+
+		break;
+	default:
+		// throw unknow type error
+		break;
+
+	}
+
+	//set properties
+	D3D12_HEAP_PROPERTIES Properties;
+	Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	//create resource
+	ThrowIfFailed(Device->CreateCommittedResource(
+		&Properties,
+		D3D12_HEAP_FLAG_NONE,
+		&ResourceDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr, // need not to clear
+		IID_PPV_ARGS(&D3DTexture->GetResource())));
 }
 
 ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(
