@@ -2,7 +2,7 @@
 
 #include "../Texture.h"
 
-class D3D12Texture : public ITexture
+class D3D12Texture : public RHITexture
 {
 public:
 	D3D12Texture(TextureDesc& Desc);

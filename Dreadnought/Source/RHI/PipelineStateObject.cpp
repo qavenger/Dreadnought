@@ -17,7 +17,7 @@ bool BlendState::IsRenderTargetEnableBlend(uint32 Index) const
 	return true;
 }
 
-IPipelineStateObject::IPipelineStateObject()
+RHIPipelineStateObject::RHIPipelineStateObject()
 {
 	for (uint32 Index = 0; Index < MAX_RENDER_TARGET; ++Index)
 	{

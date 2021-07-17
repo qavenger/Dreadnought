@@ -33,22 +33,23 @@ public:
 	virtual void FlushCommandQueueSync();
 	virtual void WaitForGPU();
 	virtual void Present() const;
+	virtual void Transition(void* Resource, EResourceState Before, EResourceState After) const;
 
 	//Create Resource Function
-	virtual void CreateTextureXD(TextureDesc& Desc, ITexture* Tex);
-	virtual IIndexBuffer* CreateIndexBuffer();
-	virtual IVertexBuffer* CreateVertexBuffer();
-	virtual IShader* CreateShader();
-	virtual IPipelineStateObject* CreatePipelineStateObject();
+	virtual void CreateTextureXD(TextureDesc& Desc, RHITexture* Tex);
+	virtual RHIIndexBuffer* CreateIndexBuffer();
+	virtual RHIVertexBuffer* CreateVertexBuffer();
+	virtual RHIShader* CreateShader();
+	virtual RHIPipelineStateObject* CreatePipelineStateObject();
 
 
-	virtual void BuildIndexBuffer(IIndexBuffer* IndexBuffer);
-	virtual void BuildVertexBuffer(IVertexBuffer* VertexBuffer);
-	virtual void BuildShader(IShader* Shader);
-	virtual void BuildPipelineStateObject(IPipelineStateObject* PSO);
+	virtual void BuildIndexBuffer(RHIIndexBuffer* IndexBuffer);
+	virtual void BuildVertexBuffer(RHIVertexBuffer* VertexBuffer);
+	virtual void BuildShader(RHIShader* Shader);
+	virtual void BuildPipelineStateObject(RHIPipelineStateObject* PSO);
 
 
-	virtual void SetPipelineStateObject(IPipelineStateObject* PSO);
+	virtual void SetPipelineStateObject(RHIPipelineStateObject* PSO);
 
 	virtual void DrawElements(const DrawInfo& Info);
 
@@ -100,4 +101,5 @@ private:
 	D3D12_COMPARISON_FUNC                             DepthFunctionMap[(uint32)EDepthFunction::DF_Num];
 	D3D12_FILTER                                      TextureFilterMap[(uint32)ETextureFilter::TF_Num];
 	D3D12_TEXTURE_ADDRESS_MODE                        TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Num];
+	D3D12_RESOURCE_STATES                             ResourceStateMap[(uint32)EResourceState::RS_Num];
 };

@@ -177,14 +177,7 @@ void D3D12Device::Resize(
 		nullptr,
 		DepthStencilView());
 
-	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		DepthStencilBuffer.Get(),
-		D3D12_RESOURCE_STATE_COMMON,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE
-	);
-	CommandList->ResourceBarrier(
-		1,
-		&Barrier);
+	Transition(DepthStencilBuffer.Get(), EResourceState::RS_Common, EResourceState::RS_DepthWrite);
 
 	FlushCommandQueueSync();
 }
@@ -326,9 +319,16 @@ void D3D12Device::InitPlatformDenpendentMap()
 	TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Wrap]            = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Mirror]          = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
 	TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Clamp]           = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+
+	ResourceStateMap[(uint32)EResourceState::RS_Common]               = D3D12_RESOURCE_STATE_COMMON;
+	ResourceStateMap[(uint32)EResourceState::RS_Read]                 = D3D12_RESOURCE_STATE_GENERIC_READ;
+	ResourceStateMap[(uint32)EResourceState::RS_RenderTarget]         = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	ResourceStateMap[(uint32)EResourceState::RS_CopyDest]             = D3D12_RESOURCE_STATE_COPY_DEST;
+	ResourceStateMap[(uint32)EResourceState::RS_DepthWrite]           = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	ResourceStateMap[(uint32)EResourceState::RS_Present]              = D3D12_RESOURCE_STATE_PRESENT;
 }  
 
-void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
+void D3D12Device::CreateTextureXD(TextureDesc& Desc, RHITexture* Tex)
 {
 	D3D12Texture* D3DTexture = new D3D12Texture(Desc);
 	
@@ -397,23 +397,23 @@ void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
 }
 
 
-IIndexBuffer* D3D12Device::CreateIndexBuffer()
+RHIIndexBuffer* D3D12Device::CreateIndexBuffer()
 {
 	return new D3D12IndexBuffer();
 }
 
-IVertexBuffer* D3D12Device::CreateVertexBuffer()
+RHIVertexBuffer* D3D12Device::CreateVertexBuffer()
 {
 	return new D3D12VertexBuffer();
 }
 
-IShader* D3D12Device::CreateShader()
+RHIShader* D3D12Device::CreateShader()
 {
 
 	return new D3D12Shader();
 }
 
-IPipelineStateObject* D3D12Device::CreatePipelineStateObject()
+RHIPipelineStateObject* D3D12Device::CreatePipelineStateObject()
 {
 	return new D3D12PipelineStateObject();
 }
@@ -519,23 +519,26 @@ void D3D12Device::Present() const
 	SwapChain->Present(0, 0);
 }
 
+void D3D12Device::Transition(void* Resource, EResourceState Before, EResourceState After) const
+{
+	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition((ID3D12Resource*)Resource,
+		ResourceStateMap[(uint32)Before], ResourceStateMap[(uint32)After]);
+	CommandList->ResourceBarrier(1, &Barrier);
+}
+
 void D3D12Device::BeginFrame()
 {
 	ThrowIfFailed(CommandAllocator->Reset());
 	ResetCommandList();
 
-	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer().Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	CommandList->ResourceBarrier(1, &Barrier);
+	Transition(CurrentBackBuffer().Get(), EResourceState::RS_Present, EResourceState::RS_RenderTarget);
 }
 
 void D3D12Device::EndFrame()
 {
 	SCOPE_EVENT(RenderFinish)
 	{
-		CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer().Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		CommandList->ResourceBarrier(1, &Barrier);
+		Transition(CurrentBackBuffer().Get(), EResourceState::RS_RenderTarget, EResourceState::RS_Present);
 
 		FlushCommandQueue();
 
@@ -577,36 +580,26 @@ ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(
 	SubResourceData.RowPitch = SizeInBytes;
 	SubResourceData.SlicePitch = SubResourceData.RowPitch;
 
-	CD3DX12_RESOURCE_BARRIER Barrier =
-		CD3DX12_RESOURCE_BARRIER::Transition(
-			DefaultBuffer.Get(),
-			D3D12_RESOURCE_STATE_COMMON,
-			D3D12_RESOURCE_STATE_COPY_DEST);
-	CommandList->ResourceBarrier(1, &Barrier);
+	Transition(DefaultBuffer.Get(), EResourceState::RS_Common, EResourceState::RS_CopyDest);
 	UpdateSubresources<1>(CommandList.Get(), DefaultBuffer.Get(), UploadBuffer.Get(), 0, 0, 1, &SubResourceData);
-
-	Barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		DefaultBuffer.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_GENERIC_READ);
-	CommandList->ResourceBarrier(1, &Barrier);
+	Transition(DefaultBuffer.Get(), EResourceState::RS_CopyDest, EResourceState::RS_Read);
 
 	return DefaultBuffer;
 }
 
-void D3D12Device::BuildIndexBuffer(IIndexBuffer* IndexBuffer)
+void D3D12Device::BuildIndexBuffer(RHIIndexBuffer* IndexBuffer)
 {
 	D3D12IndexBuffer* D3DIB = (D3D12IndexBuffer*)IndexBuffer;
 	D3DIB->IndexBufferGPU = CreateDefaultBuffer(D3DIB->GetData(), D3DIB->GetDataSize(), D3DIB->UploadBuffer);
 }
 
-void D3D12Device::BuildVertexBuffer(IVertexBuffer* VertexBuffer)
+void D3D12Device::BuildVertexBuffer(RHIVertexBuffer* VertexBuffer)
 {
 	D3D12VertexBuffer* D3DVB = (D3D12VertexBuffer*)VertexBuffer;
 	D3DVB->VertexBufferGPU = CreateDefaultBuffer(D3DVB->GetData(), D3DVB->GetDataSize(), D3DVB->UploadBuffer);
 }
 
-void D3D12Device::BuildShader(IShader* Shader)
+void D3D12Device::BuildShader(RHIShader* Shader)
 {
 	D3D12Shader* D3DShader = (D3D12Shader*)Shader;
 	std::wstring ShaderFile = D3DShader->GetShaderFile();
@@ -627,7 +620,7 @@ void D3D12Device::BuildShader(IShader* Shader)
 	ThrowIfFailed(Result);
 }
 
-void D3D12Device::BuildPipelineStateObject(IPipelineStateObject* PSO)
+void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 {
 	CD3DX12_ROOT_PARAMETER slotRootParameter[1];
 
@@ -741,7 +734,7 @@ void D3D12Device::BuildPipelineStateObject(IPipelineStateObject* PSO)
 	ThrowIfFailed(Device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&D3DPSO->GetPSO())));
 }
 
-void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
+void D3D12Device::SetPipelineStateObject(RHIPipelineStateObject* PSO)
 {
 	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)PSO;
 	CommandList->SetPipelineState(D3DPSO->GetPSO().Get());

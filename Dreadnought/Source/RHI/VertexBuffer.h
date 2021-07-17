@@ -1,9 +1,9 @@
 #pragma once
 
-class IVertexBuffer
+class RHIVertexBuffer
 {
 public:
-	virtual ~IVertexBuffer() {}
+	virtual ~RHIVertexBuffer() {}
 
 	virtual void* GetVertexLayout() = 0;
 
@@ -18,6 +18,6 @@ public:
 protected:
 	uint32                            SizeInBytes;
 	uint32                            VertexCount;
-	std::vector<ETextureFormat>        VertexLayout;
+	std::vector<ETextureFormat>       VertexLayout;
 	std::vector<float>                VertexData;
 };

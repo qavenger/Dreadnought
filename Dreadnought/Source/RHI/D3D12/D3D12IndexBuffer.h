@@ -2,7 +2,7 @@
 
 #include "../IndexBuffer.h"
 
-class D3D12IndexBuffer : public IIndexBuffer
+class D3D12IndexBuffer : public RHIIndexBuffer
 {
 public:
 	D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const;

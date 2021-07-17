@@ -137,3 +137,15 @@ enum class ETextureWrapMode
 	TWM_Num,
 };
 
+enum class EResourceState
+{
+	RS_Common = 0,
+	RS_Read,
+	RS_RenderTarget,
+	RS_CopyDest,
+	RS_DepthWrite,
+	RS_Present,
+
+	RS_Num,
+};
+

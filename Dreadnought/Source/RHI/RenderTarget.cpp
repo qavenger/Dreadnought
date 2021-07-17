@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "RenderTarget.h"
 
-ITexture* IRenderTarget::GetTexture() const
+RHITexture* RHIRenderTarget::GetTexture() const
 {
 	return Texture;
 }

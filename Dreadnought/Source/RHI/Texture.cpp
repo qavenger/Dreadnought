@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Texture.h"
 
-ITexture::ITexture(TextureDesc& Desc)
+RHITexture::RHITexture(TextureDesc& Desc)
 	:Desc(Desc)
 {
 

@@ -1,9 +1,9 @@
 #pragma once
 
-class IIndexBuffer
+class RHIIndexBuffer
 {
 public:
-	virtual ~IIndexBuffer() {}
+	virtual ~RHIIndexBuffer() {}
 	void SetData(std::vector<uint32>& Data);
 	void SetData(std::vector<uint16>& Data);
 

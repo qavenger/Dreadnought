@@ -13,21 +13,21 @@ struct BlendState
 	bool IsRenderTargetEnableBlend(uint32 Index) const;
 };
 
-class IPipelineStateObject
+class RHIPipelineStateObject
 {
 public:
-	IPipelineStateObject();
-	virtual ~IPipelineStateObject() {}
+	RHIPipelineStateObject();
+	virtual ~RHIPipelineStateObject() {}
 
 public:
 	BlendState                State;
 	EPrimitiveTopology        GsHsPrimitiveTopology;
 	ECullMode                 CullMode;
 	EFillMode                 FillMode;
-	IShader*                  VertexShader;
-	IShader*                  PixelShader;
-	IShader*                  GeometryShader;
-	IShader*                  ComputerShader;
+	RHIShader*                  VertexShader;
+	RHIShader*                  PixelShader;
+	RHIShader*                  GeometryShader;
+	RHIShader*                  ComputerShader;
 	EDepthFunction            DepthFunction;
 	bool                      EnableDepthTest;
 	bool                      EnableDepthWrite;
@@ -35,6 +35,6 @@ public:
 
 	uint32                    NumRenderTarget;
 	bool                      IsBackbuffer;
-	IRenderTarget*            SceneColorRenderTarget[MAX_RENDER_TARGET];
-	IRenderTarget*            DepthStencilRenderTarget;
+	RHIRenderTarget*            SceneColorRenderTarget[MAX_RENDER_TARGET];
+	RHIRenderTarget*            DepthStencilRenderTarget;
 };
