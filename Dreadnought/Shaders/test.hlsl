@@ -14,7 +14,10 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 
-	vout.Position.xyz = vin.Position * 0.3f;
+	vout.Position.xyz = vin.Position;
+	vout.Position.xy *= 0.7;
+	vout.Position.z *= 0.2;
+	vout.Position.z += 0.5;
 	vout.Position.w = 1.f;
 
 	return vout;

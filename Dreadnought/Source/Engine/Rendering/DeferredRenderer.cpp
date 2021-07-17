@@ -13,13 +13,17 @@ void DeferredRenderer::OnInit()
 	std::vector<ETextureFormat> Layout;
 	Layout.push_back(ETextureFormat::TF_R32G32B32);
 	std::vector<float> Vertex;
-	Vertex.resize(Positions.size() * sizeof(float3));
-	memcpy(&Vertex[0], &Positions[0], Vertex.size());
+	Vertex.resize(Positions.size() * 3);
+	for (uint32 Index = 0; Index < Positions.size(); ++Index)
+	{
+		Vertex[3 * Index + 0] = Positions[Index].x;
+		Vertex[3 * Index + 1] = Positions[Index].y;
+		Vertex[3 * Index + 2] = Positions[Index].z;
+	}
 	SubMesh.IndexBuffer = gDevice->CreateIndexBuffer();
 	SubMesh.VertexBuffer = gDevice->CreateVertexBuffer();
 	SubMesh.IndexBuffer->SetData(Index);
 	SubMesh.VertexBuffer->SetData((uint32)Positions.size(), Vertex, Layout);
-	SubMesh.VertexBuffer->SetData(Positions.size(), Vertex, Layout);
 	ShaderConstructDesc VertexShaderDesc, PixelShaderDesc;
 	VertexShaderDesc.ShaderFile = L"D:/DIYEngine/Dreadnought/Dreadnought/Shaders/test.hlsl";
 	VertexShaderDesc.ShaderEntry = "VS";
@@ -32,6 +36,8 @@ void DeferredRenderer::OnInit()
 	SubMesh.PixelShader = gDevice->CreateShader();
 	SubMesh.PixelShader->SetShaderDesc(PixelShaderDesc);
 	SubMesh.PSO = gDevice->CreatePipelineStateObject();
+	SubMesh.PrimitiveTopology = EPrimitiveTopology::PT_Triangle;
+	SubMesh.ObjectName = "StarSky";
 	SubMesh.Build(gDevice);
 }
 
@@ -39,6 +45,20 @@ void DeferredRenderer::OnDestroy()
 {
 	ImGui_ImplDX12_Shutdown();
 	SubMesh.Destroy();
+}
+
+void DeferredRenderer::OnTick(float dt)
+{
+	SCOPE_EVENT(BasePass)
+	{
+		RHIRenderPassInfo Info;
+		Info.ClearColor[0].ClearColorG = 1;
+		gDevice->BeginRenderPass(Info);
+		gDevice->SetViewport(0, 0, 1024, 720, 0, 1);
+		gDevice->SetScissor(0, 0, 1024, 720);
+		SubMesh.Draw(gDevice);
+		gDevice->EndRenderPass();
+	}
 }
 
 void DeferredRenderer::OnPostTick(float dt)
@@ -55,7 +75,6 @@ void DeferredRenderer::OnPostTick(float dt)
 
 //	DeviceResources->PrepareGUI();
 //	ImGui::Render();
-	SubMesh.Draw(gDevice);
 	float color[] = { (float)sin(Engine::GetGameTime()),0,0,1 };
 	/*gDevice->ClearRenderTargetView(color);
 

@@ -52,4 +52,41 @@ typedef TMulticastDelegate<ParamType0, ParamType1, ParamType2> Name;
 #define NOENDBG noexcept
 #endif
 
+// DX12 RHI
+#define USE_DX12_RHI 1
+
 #define MAX_BACK_BUFFER_COUNT 3
+#define MAX_RENDER_TARGET 8
+
+#if USE_DX12_RHI
+#define SCOPE_EVENT(EventName) \
+        struct EventName##_ScopeEvent\
+	    {\
+		    EventName##_ScopeEvent()\
+            {\
+                gDevice->BeginScopeEvent(#EventName);\
+            }\
+		    ~EventName##_ScopeEvent()\
+           {\
+                gDevice->EndScopeEvent();\
+           }\
+        } EventName##Local;
+        
+#define SCOPE_EVENT_STR_FORMAT(UniqueName, ...) \
+        char EventName[100] = {0}; \
+        sprintf(EventName, __VA_ARGS__); \
+        struct UniqueName##_ScopeEventStr\
+	    {\
+		    UniqueName##_ScopeEventStr(const char* In)\
+            {\
+                gDevice->BeginScopeEvent(In);\
+            }\
+		    ~UniqueName##_ScopeEventStr()\
+           {\
+                gDevice->EndScopeEvent();\
+           }\
+        } UniqueName##StrLocal(EventName);
+#else
+#define SCOPE_EVENT(EventName)
+#define SCOPE_EVENT_STR(EventName, Msg)
+#endif

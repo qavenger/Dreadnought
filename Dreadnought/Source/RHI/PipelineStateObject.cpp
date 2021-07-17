@@ -30,7 +30,7 @@ IPipelineStateObject::IPipelineStateObject()
 		State.WriteMask[Index] = EWriteMask::WM_RGBA;
 	}
 
-	PrimitiveTopology = EPrimitiveTopology::PT_Triangle;
+	GsHsPrimitiveTopology = EPrimitiveTopology::PT_Triangle;
 	CullMode = ECullMode::CM_Back;
 	FillMode = EFillMode::FM_Solid;
 

@@ -118,5 +118,22 @@ enum class EShaderType
 	ST_Num
 };
 
-#define MAX_RENDER_TARGET 8
+enum class ETextureFilter
+{
+	TF_Point = 0,
+	TF_Linear,
+	TF_Trilinear,
+	TF_Anisotropic,
+
+	TF_Num,
+};
+
+enum class ETextureWrapMode
+{
+	TWM_Wrap = 0,
+	TWM_Mirror,
+	TWM_Clamp,
+
+	TWM_Num,
+};
 

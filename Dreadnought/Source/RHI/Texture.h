@@ -1,27 +1,5 @@
 #pragma once
 
-//Clear Color/Depht/Stencil Value
-struct ClearCDSValue
-{
-	float               ClearColorR;
-	float               ClearColorG;
-	float               ClearColorB;
-	float               ClearColorA;
-	float               ClearDepth;
-	uint8               ClearStencil;
-
-	ClearCDSValue()
-		:ClearColorR(0.f)
-		,ClearColorG(0.f)
-		,ClearColorB(0.f)
-		,ClearColorA(1.f)
-		,ClearDepth(1.f)
-		,ClearStencil(0)
-	{
-
-	}
-};
-
 struct TextureDesc
 {
 	ETextureDimension    Dimension;
@@ -30,10 +8,6 @@ struct TextureDesc
 	uint32               TextureDepth;
 	uint32               MipmapLevels;
 	ETextureFormat       Format;
-	ClearCDSValue        ClearValues;
-	bool                 ClearValid = false;
-
-	bool IsClearValid() const { return ClearValid; }
 };
 
 class ITexture

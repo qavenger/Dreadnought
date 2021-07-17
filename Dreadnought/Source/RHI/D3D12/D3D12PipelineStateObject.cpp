@@ -2,7 +2,7 @@
 #include "D3D12PipelineStateObject.h"
 
 
-ComPtr<ID3D12PipelineState> D3D12PipelineStateObject::GetPSO()
+ComPtr<ID3D12PipelineState>& D3D12PipelineStateObject::GetPSO()
 {
 	return PSO;
 }

@@ -21,7 +21,7 @@ public:
 
 public:
 	BlendState                State;
-	EPrimitiveTopology        PrimitiveTopology;
+	EPrimitiveTopology        GsHsPrimitiveTopology;
 	ECullMode                 CullMode;
 	EFillMode                 FillMode;
 	IShader*                  VertexShader;

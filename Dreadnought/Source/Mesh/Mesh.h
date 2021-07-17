@@ -10,8 +10,11 @@ public:
 public:
 	IVertexBuffer*           VertexBuffer;
 	IIndexBuffer*            IndexBuffer;
+	EPrimitiveTopology       PrimitiveTopology;
 	IShader*                 VertexShader;
 	IShader*                 PixelShader;
 	IPipelineStateObject*    PSO;
+
+	std::string              ObjectName;
 };
 

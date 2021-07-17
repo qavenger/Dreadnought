@@ -11,6 +11,7 @@
 #define NOSYSCOMMANDS
 #define NOMINMAX
 #define NOIMAGE
+#define _CRT_SECURE_NO_WARNINGS 1
 
 #include <Define.h>
 #include <wrl.h>
@@ -60,11 +61,13 @@
 #include <crtdbg.h>
 #endif
 
+#ifdef PLATFORM_WINDOWS
+#include <pix.h>
+#endif
+
 #ifdef _DEBUG
 #include <dxgidebug.h>
 #endif
 #endif
 
 using Microsoft::WRL::ComPtr;
-
-#define USE_DX12_RHI
