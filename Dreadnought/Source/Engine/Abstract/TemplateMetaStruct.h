@@ -195,3 +195,9 @@ struct TIsArrayOrRefOfType
 			typename TRemoveCV< typename TRemoveRef<typename TRemoveArray<T>::type>::type >::type
 		>::value;
 };
+
+template<typename T, typename =void>
+struct TIsClass : FalseType{};
+
+template<typename T>
+struct TIsClass < T, TVoidType<char T::*>> : TrueType {};
