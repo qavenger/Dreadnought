@@ -1,7 +1,6 @@
 #pragma once
 #include <cmath>
 #include <assert.h>
-#include <VectorSSE.h>
 
 namespace MathConstant
 {
@@ -14,7 +13,7 @@ namespace MathConstant
 #define BIG_NUMBER				(3.4e+38f)
 #define SMALL_NUMBER			(1.0e-8f)
 #define KINDA_SMALL_NUMBER		(1.0e-4f)
-#define E						(2.71828182845904523536f)
+#define EULER_NUMBER			(2.71828182845904523536f)
 #define GOLDEN_RATIO			(1.6180339887498948482045868343656381f)
 #define MAX_INT_PART_FLOAT		(8388608.f)
 #define SQRT_2					(1.4142135623730950488016887242097f)
@@ -23,16 +22,16 @@ namespace MathConstant
 #define INV_SQRT_3				(0.57735026918962576450914878050196f)
 #define HALF_SQRT_2				(0.70710678118654752440084436210485f)
 #define HALF_SQRT_3				(0.86602540378443864676372317075294f)
-}
+};
 
 namespace Threshold
 {
 #define DELTA					(0.00001f)
 #define FLOAT_NORMAL_THRESH		(0.0001f)
 
-//
-// Magic numbers for numerical precision.
-//
+	//
+	// Magic numbers for numerical precision.
+	//
 #define THRESH_POINT_ON_PLANE			(0.10f)		/* Thickness of plane for front/back/inside test */
 #define THRESH_POINT_ON_SIDE			(0.20f)		/* Thickness of polygon side's side-plane for point-inside/outside/on side test */
 #define THRESH_POINTS_ARE_SAME			(0.00002f)	/* Two points are same if within this distance */
@@ -50,7 +49,7 @@ namespace Threshold
 
 #define THRESH_VECTOR_NORMALIZED		(0.01f)		/** Allowed error for a normalized vector (against squared magnitude) */
 #define THRESH_QUAT_NORMALIZED			(0.01f)		/** Allowed error for a normalized quaternion (against squared magnitude) */
-}
+};
 
 struct _Vector2;
 struct _Vector;
@@ -58,6 +57,11 @@ struct _Vector4;
 struct _Rotator;
 struct _Quaternion;
 //typedef _Vector2 float2;
+
+typedef _Vector2 float2;
+typedef _Vector float3;
+typedef _Vector4 float4;
+
 struct GMath
 {
 	template<typename T>
@@ -259,10 +263,7 @@ struct GMath
 		return std::atan2(y, x);
 	}
 
-	FORCEINLINE static float RSqrt(const float x)
-	{
-		return SSE::rsqrt(x);
-	}
+	FORCEINLINE static float RSqrt(const float x);
 
 	template<typename T>
 	FORCEINLINE static constexpr T Abs(const T x)

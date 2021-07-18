@@ -1,5 +1,6 @@
 #include<stdafx.h>
 #include<EngineMath.h>
+#include<VectorSSE.h>
 #include<Vector.h>
 #include<Vector2D.h>
 #include<Vector4D.h>
@@ -180,3 +181,21 @@ FORCEINLINE VectorRegister SSE::VectorLog2(const VectorRegister& X)
 	return MakeVectorRegister(GMath::Log2(VectorGetComponent(X, 0)), GMath::Log2(VectorGetComponent(X, 1)), GMath::Log2(VectorGetComponent(X, 2)), GMath::Log2(VectorGetComponent(X, 3)));
 }
 
+FORCEINLINE _Vector4::_Vector4(const _Vector2& v, float z, float w)
+	:x(v.x), y(v.y), z(z), w(w)
+{
+	CheckNan();
+}
+
+FORCEINLINE _Vector4::_Vector4(const _Vector2& v0, const _Vector2& v1)
+	: x(v0.x), y(v0.y), z(v1.x), w(v1.y)
+{
+	CheckNan();
+}
+
+
+FORCEINLINE _Vector2::_Vector2(const _Vector4& v)
+{
+	x = v.x;
+	y = v.y;
+}

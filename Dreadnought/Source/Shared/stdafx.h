@@ -14,6 +14,7 @@
 #define _CRT_SECURE_NO_WARNINGS 1
 
 #include <Define.h>
+#include <EngineMath.h>
 #include <wrl.h>
 #include <d3d12.h>
 #include <dxgi1_6.h>
@@ -46,7 +47,6 @@
 #include <Engine/Abstract/InterfaceBase.h>
 #include <Engine/Abstract/TemplatedBase.h>
 #include <Engine/Abstract/Object.h>
-#include <EngineMath.h>
 #include <Engine.h>
 #include <RHI/CommonEnums.h>
 #include "RHI/RHIDeviceCreator.h"

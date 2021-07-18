@@ -1183,3 +1183,9 @@ namespace SSE
 	//TODO: Vectorize
 	FORCEINLINE VectorRegister VectorLog2(const VectorRegister& X);
 }
+
+
+FORCEINLINE float GMath::RSqrt(const float x)
+{
+	return SSE::rsqrt(x);
+}

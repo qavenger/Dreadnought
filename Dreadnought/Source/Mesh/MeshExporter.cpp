@@ -5,6 +5,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Exporter.hpp>
+#include <MathUtil.h>
 
 void IMeshExporter::ExportMesh(const std::string& Filename, std::vector<uint16>& Indices,
     std::vector<float3>& Vertices, std::vector<float3>& Normals, std::vector<float2>& UVs1, std::vector<float2>& UVs2)

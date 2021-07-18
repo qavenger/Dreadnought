@@ -1,6 +1,5 @@
 #pragma once
 #include <EngineMath.h>
-#include <Vector2D.h>
 typedef struct _Vector
 {
 	float x, y, z;

@@ -1,7 +1,5 @@
 #pragma once
 #include <EngineMath.h>
-#include <Vector.h>
-#include <Vector4D.h>
 typedef struct _Vector2
 {
 	float x, y;
@@ -386,11 +384,6 @@ public:
 } _float2;
 
 
-FORCEINLINE _Vector2::_Vector2(const _Vector4& v)
-{
-	x = v.x;
-	y = v.y;
-}
 
 #define DECLARE_OP\
 		OP(+)\
@@ -461,16 +454,3 @@ FORCEINLINE float _Vector2::HeadingAngle() const
 {
 	return GMath::Atan2(y, x);
 }
-
-FORCEINLINE _Vector4::_Vector4(const _Vector2& v, float z, float w)
-	:x(v.x),y(v.y),z(z),w(w)
-{
-	CheckNan();
-}
-
-FORCEINLINE _Vector4::_Vector4(const _Vector2& v0, const _Vector2& v1)
-	:x(v0.x),y(v0.y),z(v1.x),w(v1.y)
-{
-	CheckNan();
-}
-

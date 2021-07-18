@@ -16,7 +16,7 @@ enum class EKeyCode : uint8
 	Print, Execute, Print_Screen, Insert, Delete, Help,
 	Key0, Key1, Key2, Key3, Key4, Key5, Key6, Key7, Key8, Key9,
 	A = 0x41,
-	B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+	B, C, D, KeyBoardE, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
 	LWin, RWin, App,
 	Sleep = 0x5F,
 	NumPad0, NumPad1, NumPad2, NumPad3, NumPad4,

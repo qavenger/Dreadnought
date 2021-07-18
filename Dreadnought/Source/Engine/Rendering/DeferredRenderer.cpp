@@ -2,6 +2,7 @@
 #include "DeferredRenderer.h"
 #include "Mesh/Mesh.h"
 #include "Mesh/InternalMesh.h"
+#include <MathUtil.h>
 
 Mesh SubMesh;
 void DeferredRenderer::OnInit() 
