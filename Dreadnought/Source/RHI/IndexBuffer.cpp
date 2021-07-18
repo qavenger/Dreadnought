@@ -2,7 +2,7 @@
 #include "IndexBuffer.h"
 
 
-void IIndexBuffer::SetData(std::vector<uint32>& Data)
+void RHIIndexBuffer::SetData(std::vector<uint32>& Data)
 {
 	IndexCount = (uint32)Data.size();
 	SizeInBytes = IndexCount * sizeof(uint32);
@@ -11,7 +11,7 @@ void IIndexBuffer::SetData(std::vector<uint32>& Data)
 	IndexData32 = Data;
 }
 
-void IIndexBuffer::SetData(std::vector<uint16>& Data)
+void RHIIndexBuffer::SetData(std::vector<uint16>& Data)
 {
 	IndexCount = (uint32)Data.size();
 	SizeInBytes = IndexCount * sizeof(uint16);
@@ -20,22 +20,22 @@ void IIndexBuffer::SetData(std::vector<uint16>& Data)
 	IndexData16 = Data;
 }
 
-uint32 IIndexBuffer::GetTriangleCount() const 
+uint32 RHIIndexBuffer::GetTriangleCount() const 
 {
 	return IndexCount / 3;
 }
 
-uint32 IIndexBuffer::GetIndexCount() const
+uint32 RHIIndexBuffer::GetIndexCount() const
 {
 	return IndexCount;
 }
 
-uint32 IIndexBuffer::GetDataSize() const
+uint32 RHIIndexBuffer::GetDataSize() const
 {
 	return SizeInBytes;
 }
 
-void* IIndexBuffer::GetData() const
+void* RHIIndexBuffer::GetData() const
 {
 	return IsHalf ? (void*)&IndexData16[0] : (void*)&IndexData32[0];
 }

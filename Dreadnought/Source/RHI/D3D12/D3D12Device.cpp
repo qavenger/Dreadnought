@@ -58,7 +58,7 @@ void D3D12Device::Init()
 
 void D3D12Device::Destroy()
 {
-
+	
 }
 
 void D3D12Device::CreateSwapChain(
@@ -177,14 +177,7 @@ void D3D12Device::Resize(
 		nullptr,
 		DepthStencilView());
 
-	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		DepthStencilBuffer.Get(),
-		D3D12_RESOURCE_STATE_COMMON,
-		D3D12_RESOURCE_STATE_DEPTH_WRITE
-	);
-	CommandList->ResourceBarrier(
-		1,
-		&Barrier);
+	Transition(DepthStencilBuffer.Get(), EResourceState::RS_Common, EResourceState::RS_DepthWrite);
 
 	FlushCommandQueueSync();
 }
@@ -326,94 +319,37 @@ void D3D12Device::InitPlatformDenpendentMap()
 	TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Wrap]            = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Mirror]          = D3D12_TEXTURE_ADDRESS_MODE_MIRROR;
 	TextureWrapModeMap[(uint32)ETextureWrapMode::TWM_Clamp]           = D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+
+	ResourceStateMap[(uint32)EResourceState::RS_Common]               = D3D12_RESOURCE_STATE_COMMON;
+	ResourceStateMap[(uint32)EResourceState::RS_Read]                 = D3D12_RESOURCE_STATE_GENERIC_READ;
+	ResourceStateMap[(uint32)EResourceState::RS_RenderTarget]         = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	ResourceStateMap[(uint32)EResourceState::RS_CopyDest]             = D3D12_RESOURCE_STATE_COPY_DEST;
+	ResourceStateMap[(uint32)EResourceState::RS_DepthWrite]           = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+	ResourceStateMap[(uint32)EResourceState::RS_Present]              = D3D12_RESOURCE_STATE_PRESENT;
 }  
 
-void D3D12Device::CreateTextureXD(TextureDesc& Desc, ITexture* Tex)
+RHITexture* D3D12Device::CreateTexture()
 {
-	D3D12Texture* D3DTexture = new D3D12Texture(Desc);
-	
-	D3D12_RESOURCE_DESC ResourceDesc = {};
-	DXGI_SAMPLE_DESC SampleDesc;
-	switch (Desc.Dimension)
-	{
-	case ETextureDimension::TD_TextureBuffer:
-		SampleDesc.Count = 1;
-		SampleDesc.Quality = 0;
-		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; 
-		ResourceDesc.Alignment = 0;
-		ResourceDesc.Width = Desc.TextureWidth;
-		ResourceDesc.Height = 1;
-		ResourceDesc.DepthOrArraySize = 1;
-		ResourceDesc.MipLevels = 1;
-		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
-		ResourceDesc.SampleDesc = SampleDesc;
-		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-		break;
-	case ETextureDimension::TD_Texture1D:
-		
-		break;
-	case ETextureDimension::TD_Texture2D:
-		SampleDesc.Count = 1;
-		SampleDesc.Quality = 0;
-		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		ResourceDesc.Alignment = 0;
-		ResourceDesc.Width = Desc.TextureWidth;
-		ResourceDesc.Height = Desc.TextureHeight;
-		ResourceDesc.DepthOrArraySize = 1;
-		ResourceDesc.MipLevels = Desc.MipmapLevels;
-		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
-		ResourceDesc.SampleDesc = SampleDesc;
-		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-		break;
-	case ETextureDimension::TD_Texture3D:
-
-		break;
-	case ETextureDimension::TD_TextureCube:
-
-		break;
-	default:
-		// throw unknow type error
-		break;
-
-	}
-
-	//set properties
-	D3D12_HEAP_PROPERTIES Properties;
-	Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
-
-	//create resource
-	ThrowIfFailed(Device->CreateCommittedResource(
-		&Properties,
-		D3D12_HEAP_FLAG_NONE,
-		&ResourceDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		nullptr, // need not to clear
-		IID_PPV_ARGS(&D3DTexture->GetResource())));
-
-	Tex = D3DTexture;
+	return new D3D12Texture();
 }
 
-
-IIndexBuffer* D3D12Device::CreateIndexBuffer()
+RHIIndexBuffer* D3D12Device::CreateIndexBuffer()
 {
 	return new D3D12IndexBuffer();
 }
 
-IVertexBuffer* D3D12Device::CreateVertexBuffer()
+RHIVertexBuffer* D3D12Device::CreateVertexBuffer()
 {
 	return new D3D12VertexBuffer();
 }
 
-IShader* D3D12Device::CreateShader()
+RHIShader* D3D12Device::CreateShader()
 {
 
 	return new D3D12Shader();
 }
 
-IPipelineStateObject* D3D12Device::CreatePipelineStateObject()
+RHIPipelineStateObject* D3D12Device::CreatePipelineStateObject()
 {
 	return new D3D12PipelineStateObject();
 }
@@ -519,32 +455,102 @@ void D3D12Device::Present() const
 	SwapChain->Present(0, 0);
 }
 
+void D3D12Device::Transition(void* Resource, EResourceState Before, EResourceState After) const
+{
+	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition((ID3D12Resource*)Resource,
+		ResourceStateMap[(uint32)Before], ResourceStateMap[(uint32)After]);
+	CommandList->ResourceBarrier(1, &Barrier);
+}
+
 void D3D12Device::BeginFrame()
 {
 	ThrowIfFailed(CommandAllocator->Reset());
 	ResetCommandList();
 
-	CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer().Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	CommandList->ResourceBarrier(1, &Barrier);
+	Transition(CurrentBackBuffer().Get(), EResourceState::RS_Present, EResourceState::RS_RenderTarget);
 }
 
 void D3D12Device::EndFrame()
 {
-	SCOPE_EVENT(RenderFinish)
 	{
-		CD3DX12_RESOURCE_BARRIER Barrier = CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer().Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		CommandList->ResourceBarrier(1, &Barrier);
-
-		FlushCommandQueue();
-
-		CurrentBackBufferIndex = (CurrentBackBufferIndex + 1) % 2;
-
-		Present();
-
-		WaitForGPU();
+		SCOPE_EVENT(RenderFinish)
+		Transition(CurrentBackBuffer().Get(), EResourceState::RS_RenderTarget, EResourceState::RS_Present);
 	}
+
+	FlushCommandQueue();
+
+	Present();
+
+	CurrentBackBufferIndex = (CurrentBackBufferIndex + 1) % 2;
+
+	WaitForGPU();
+}
+
+void D3D12Device::BuildTexture(RHITexture* Tex)
+{
+	TextureDesc Desc = Tex->GetDesc();
+	D3D12Texture* D3DTexture = (D3D12Texture*)Tex;
+
+	D3D12_RESOURCE_DESC ResourceDesc = {};
+	DXGI_SAMPLE_DESC SampleDesc;
+	switch (Desc.Dimension)
+	{
+	case ETextureDimension::TD_TextureBuffer:
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		ResourceDesc.Alignment = 0;
+		ResourceDesc.Width = Desc.TextureWidth;
+		ResourceDesc.Height = 1;
+		ResourceDesc.DepthOrArraySize = 1;
+		ResourceDesc.MipLevels = 1;
+		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
+		ResourceDesc.SampleDesc = SampleDesc;
+		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+		break;
+	case ETextureDimension::TD_Texture1D:
+
+		break;
+	case ETextureDimension::TD_Texture2D:
+		SampleDesc.Count = 1;
+		SampleDesc.Quality = 0;
+		ResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		ResourceDesc.Alignment = 0;
+		ResourceDesc.Width = Desc.TextureWidth;
+		ResourceDesc.Height = Desc.TextureHeight;
+		ResourceDesc.DepthOrArraySize = 1;
+		ResourceDesc.MipLevels = Desc.MipmapLevels;
+		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
+		ResourceDesc.SampleDesc = SampleDesc;
+		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		break;
+	case ETextureDimension::TD_Texture3D:
+
+		break;
+	case ETextureDimension::TD_TextureCube:
+
+		break;
+	default:
+		// throw unknow type error
+		break;
+
+	}
+
+	//set properties
+	D3D12_HEAP_PROPERTIES Properties;
+	Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+
+	//create resource
+	ThrowIfFailed(Device->CreateCommittedResource(
+		&Properties,
+		D3D12_HEAP_FLAG_NONE,
+		&ResourceDesc,
+		D3D12_RESOURCE_STATE_COMMON,
+		nullptr, // need not to clear
+		IID_PPV_ARGS(&D3DTexture->GetResource())));
 }
 
 ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(
@@ -577,36 +583,26 @@ ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(
 	SubResourceData.RowPitch = SizeInBytes;
 	SubResourceData.SlicePitch = SubResourceData.RowPitch;
 
-	CD3DX12_RESOURCE_BARRIER Barrier =
-		CD3DX12_RESOURCE_BARRIER::Transition(
-			DefaultBuffer.Get(),
-			D3D12_RESOURCE_STATE_COMMON,
-			D3D12_RESOURCE_STATE_COPY_DEST);
-	CommandList->ResourceBarrier(1, &Barrier);
+	Transition(DefaultBuffer.Get(), EResourceState::RS_Common, EResourceState::RS_CopyDest);
 	UpdateSubresources<1>(CommandList.Get(), DefaultBuffer.Get(), UploadBuffer.Get(), 0, 0, 1, &SubResourceData);
-
-	Barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-		DefaultBuffer.Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_GENERIC_READ);
-	CommandList->ResourceBarrier(1, &Barrier);
+	Transition(DefaultBuffer.Get(), EResourceState::RS_CopyDest, EResourceState::RS_Read);
 
 	return DefaultBuffer;
 }
 
-void D3D12Device::BuildIndexBuffer(IIndexBuffer* IndexBuffer)
+void D3D12Device::BuildIndexBuffer(RHIIndexBuffer* IndexBuffer)
 {
 	D3D12IndexBuffer* D3DIB = (D3D12IndexBuffer*)IndexBuffer;
 	D3DIB->IndexBufferGPU = CreateDefaultBuffer(D3DIB->GetData(), D3DIB->GetDataSize(), D3DIB->UploadBuffer);
 }
 
-void D3D12Device::BuildVertexBuffer(IVertexBuffer* VertexBuffer)
+void D3D12Device::BuildVertexBuffer(RHIVertexBuffer* VertexBuffer)
 {
 	D3D12VertexBuffer* D3DVB = (D3D12VertexBuffer*)VertexBuffer;
 	D3DVB->VertexBufferGPU = CreateDefaultBuffer(D3DVB->GetData(), D3DVB->GetDataSize(), D3DVB->UploadBuffer);
 }
 
-void D3D12Device::BuildShader(IShader* Shader)
+void D3D12Device::BuildShader(RHIShader* Shader)
 {
 	D3D12Shader* D3DShader = (D3D12Shader*)Shader;
 	std::wstring ShaderFile = D3DShader->GetShaderFile();
@@ -627,7 +623,7 @@ void D3D12Device::BuildShader(IShader* Shader)
 	ThrowIfFailed(Result);
 }
 
-void D3D12Device::BuildPipelineStateObject(IPipelineStateObject* PSO)
+void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 {
 	CD3DX12_ROOT_PARAMETER slotRootParameter[1];
 
@@ -741,7 +737,7 @@ void D3D12Device::BuildPipelineStateObject(IPipelineStateObject* PSO)
 	ThrowIfFailed(Device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&D3DPSO->GetPSO())));
 }
 
-void D3D12Device::SetPipelineStateObject(IPipelineStateObject* PSO)
+void D3D12Device::SetPipelineStateObject(RHIPipelineStateObject* PSO)
 {
 	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)PSO;
 	CommandList->SetPipelineState(D3DPSO->GetPSO().Get());

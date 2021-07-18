@@ -2,7 +2,7 @@
 
 #include "../PipelineStateObject.h"
 
-class D3D12PipelineStateObject : public IPipelineStateObject
+class D3D12PipelineStateObject : public RHIPipelineStateObject
 {
 public:
 

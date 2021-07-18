@@ -47,8 +47,6 @@ void Engine::OnInit()
 
 void Engine::PreTick(float dt)
 {
-	gDevice->BeginFrame();
-
 	for (auto* i : Systems)
 	{  
 		i->OnPreTick(dt);
@@ -61,16 +59,18 @@ void Engine::PostTick(float dt)
 	{
 		i->OnPostTick(dt);
 	}
-
-	gDevice->EndFrame();
 }
 
 void Engine::Tick(float dt)
 {
+	gDevice->BeginFrame();
+
 	for (auto* i : Systems)
 	{
 		i->OnTick(dt);
 	}
+
+	gDevice->EndFrame();
 }
 
 void Engine::OnDestroy()

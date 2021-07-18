@@ -1,7 +1,7 @@
 #pragma once
 #include "../Shader.h"
 
-class D3D12Shader : public IShader
+class D3D12Shader : public RHIShader
 {
 public:
 	virtual ~D3D12Shader() {}

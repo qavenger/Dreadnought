@@ -2,7 +2,7 @@
 
 #include "../VertexBuffer.h"
 
-class D3D12VertexBuffer : public IVertexBuffer
+class D3D12VertexBuffer : public RHIVertexBuffer
 {
 public:
 	virtual void* GetVertexLayout();

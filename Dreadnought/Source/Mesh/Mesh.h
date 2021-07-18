@@ -8,13 +8,13 @@ public:
 	void Destroy();
 
 public:
-	IVertexBuffer*           VertexBuffer;
-	IIndexBuffer*            IndexBuffer;
-	EPrimitiveTopology       PrimitiveTopology;
-	IShader*                 VertexShader;
-	IShader*                 PixelShader;
-	IPipelineStateObject*    PSO;
+	RHIVertexBuffer*           VertexBuffer;
+	RHIIndexBuffer*            IndexBuffer;
+	EPrimitiveTopology         PrimitiveTopology;
+	RHIShader*                 VertexShader;
+	RHIShader*                 PixelShader;
+	RHIPipelineStateObject*    PSO;
 
-	std::string              ObjectName;
+	std::string                ObjectName;
 };
 

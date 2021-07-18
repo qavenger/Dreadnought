@@ -10,13 +10,15 @@ struct TextureDesc
 	ETextureFormat       Format;
 };
 
-class ITexture
+class RHITexture
 {
 public:
-	ITexture(TextureDesc& Desc);
-	virtual ~ITexture() {}
+	RHITexture();
+	virtual ~RHITexture() {}
 	
-	TextureDesc GetDesc() const { return Desc; }
+	void SetDesc(const TextureDesc& Desc);
+
+	TextureDesc GetDesc() const;
 
 private:
 	TextureDesc Desc;

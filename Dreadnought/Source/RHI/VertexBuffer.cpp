@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "VertexBuffer.h"
 
-void IVertexBuffer::SetData(uint32 Count, std::vector<float>& Data, std::vector<ETextureFormat>& Layout)
+void RHIVertexBuffer::SetData(uint32 Count, std::vector<float>& Data, std::vector<ETextureFormat>& Layout)
 {
 	VertexCount = Count;
 	SizeInBytes = (uint32)Data.size() * sizeof(float);
@@ -10,22 +10,22 @@ void IVertexBuffer::SetData(uint32 Count, std::vector<float>& Data, std::vector<
 	VertexLayout = Layout;
 }
 
-uint32 IVertexBuffer::GetSizePerVertex() const
+uint32 RHIVertexBuffer::GetSizePerVertex() const
 {
 	return SizeInBytes / VertexCount;
 }
 
-uint32 IVertexBuffer::GetVertexCount() const
+uint32 RHIVertexBuffer::GetVertexCount() const
 {
 	return VertexCount;
 }
 
-uint32 IVertexBuffer::GetDataSize() const
+uint32 RHIVertexBuffer::GetDataSize() const
 {
 	return SizeInBytes;
 }
 
-void* IVertexBuffer::GetData() const
+void* RHIVertexBuffer::GetData() const
 {
 	return (void*)&VertexData[0];
 }

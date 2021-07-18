@@ -7,10 +7,10 @@ struct ShaderConstructDesc
 	EShaderType  ShaderType;
 };
 
-class IShader
+class RHIShader
 {
 public:
-	virtual ~IShader() {}
+	virtual ~RHIShader() {}
 
 public:
 	void SetShaderDesc(ShaderConstructDesc& Desc);

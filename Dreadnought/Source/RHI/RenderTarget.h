@@ -2,13 +2,13 @@
 
 #include "Texture.h"
 
-class IRenderTarget
+class RHIRenderTarget
 {
 public:
-	virtual ~IRenderTarget() {}
+	virtual ~RHIRenderTarget() {}
 
-	ITexture* GetTexture() const;
+	RHITexture* GetTexture() const;
 
 protected:
-	ITexture*          Texture;
+	RHITexture*          Texture;
 };

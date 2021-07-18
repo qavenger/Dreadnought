@@ -27,8 +27,14 @@ void Mesh::Draw(IRHIDevice* Device) const
 
 void Mesh::Destroy()
 {
-	if(VertexBuffer)
+	if (VertexBuffer)
 		delete VertexBuffer;
 	if (IndexBuffer)
 		delete IndexBuffer;
+	if (VertexShader)
+		delete VertexShader;
+	if (PixelShader)
+		delete PixelShader;
+	if (PSO)
+		delete PSO;
 }
