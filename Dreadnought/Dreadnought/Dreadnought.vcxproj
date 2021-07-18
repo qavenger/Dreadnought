@@ -159,6 +159,9 @@
     <ClCompile Include="..\Source\Engine\Abstract\Object.cpp" />
     <ClCompile Include="..\Source\Engine\Core\Engine.cpp" />
     <ClCompile Include="..\Source\Engine\Core\Input.cpp" />
+    <ClCompile Include="..\Source\Engine\Core\Transform.cpp" />
+    <ClCompile Include="..\Source\Engine\Math\EngineMath.cpp" />
+    <ClCompile Include="..\Source\Engine\Math\Matrix.cpp" />
     <ClCompile Include="..\Source\Engine\Rendering\DeferredRenderer.cpp" />
     <ClCompile Include="..\Source\Engine\Rendering\VertexFactory.cpp" />
     <ClCompile Include="..\Source\Entry\Entry.cpp" />
@@ -190,9 +193,15 @@
     <ClInclude Include="..\Source\Engine\Abstract\InterfaceBase.h" />
     <ClInclude Include="..\Source\Engine\Abstract\Object.h" />
     <ClInclude Include="..\Source\Engine\Abstract\TemplatedBase.h" />
+    <ClInclude Include="..\Source\Engine\Abstract\TemplateMetaStruct.h" />
     <ClInclude Include="..\Source\Engine\Core\Engine.h" />
     <ClInclude Include="..\Source\Engine\Core\EngineType.h" />
     <ClInclude Include="..\Source\Engine\Core\Input.h" />
+    <ClInclude Include="..\Source\Engine\Core\Transform.h" />
+    <ClInclude Include="..\Source\Engine\Math\MathUtil.h" />
+    <ClInclude Include="..\Source\Engine\Math\Matrix.h" />
+    <ClInclude Include="..\Source\Engine\Math\Quaternion.h" />
+    <ClInclude Include="..\Source\Engine\Math\Rotator.h" />
     <ClInclude Include="..\Source\Engine\Rendering\DeferredRenderer.h" />
     <ClInclude Include="..\Source\Engine\Math\EngineMath.h" />
     <ClInclude Include="..\Source\Engine\Math\EngineMathSSE.h" />

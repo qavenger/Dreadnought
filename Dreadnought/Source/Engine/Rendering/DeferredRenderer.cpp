@@ -25,10 +25,10 @@ void DeferredRenderer::OnInit()
 	SubMesh.IndexBuffer->SetData(Index);
 	SubMesh.VertexBuffer->SetData((uint32)Positions.size(), Vertex, Layout);
 	ShaderConstructDesc VertexShaderDesc, PixelShaderDesc;
-	VertexShaderDesc.ShaderFile = L"D:/DIYEngine/Dreadnought/Dreadnought/Shaders/test.hlsl";
+	VertexShaderDesc.ShaderFile = L"../Shaders/test.hlsl";
 	VertexShaderDesc.ShaderEntry = "VS";
 	VertexShaderDesc.ShaderType = EShaderType::ST_Vertex;
-	PixelShaderDesc.ShaderFile = L"D:/DIYEngine/Dreadnought/Dreadnought/Shaders/test.hlsl";
+	PixelShaderDesc.ShaderFile = L"../Shaders/test.hlsl";
 	PixelShaderDesc.ShaderEntry = "PS";
 	PixelShaderDesc.ShaderType = EShaderType::ST_Pixel;
 	SubMesh.VertexShader = gDevice->CreateShader();

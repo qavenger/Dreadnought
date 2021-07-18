@@ -1,7 +1,7 @@
 #pragma once
 #include <cmath>
 #include <assert.h>
-#include <EngineMathSSE.h>
+#include <VectorSSE.h>
 
 namespace MathConstant
 {
@@ -55,122 +55,124 @@ namespace Threshold
 struct _Vector2;
 struct _Vector;
 struct _Vector4;
+struct _Rotator;
+struct _Quaternion;
 //typedef _Vector2 float2;
 struct GMath
 {
 	template<typename T>
-	inline static constexpr T Min(const T a, const T b)
+	FORCEINLINE static constexpr T Min(const T a, const T b)
 	{
 		return (a > b) ? (b) : (a);
 	}
 
 	template<typename T>
-	inline static constexpr T Max(const T a,const T b)
+	FORCEINLINE static constexpr T Max(const T a,const T b)
 	{
 		return (a > b) ? (a) : (b);
 	}
 
 	template<typename T>
-	inline static constexpr T Clamp(const T x, const T min, const T max)
+	FORCEINLINE static constexpr T Clamp(const T x, const T min, const T max)
 	{
 		return Min(Max(x, min), max);
 	}
 	
 	template<typename T>
-	inline static constexpr T Lerp(const T A, const T B, const T Alpha)
+	FORCEINLINE static constexpr T Lerp(const T A, const T B, const T Alpha)
 	{
 		return (1 - Alpha) * A + Alpha * B;
 	}
 
 	template<typename T>
-	inline static constexpr bool IsNan(const T x)
+	FORCEINLINE static constexpr bool IsNan(const T x)
 	{
 		return isnan(x);
 	}
 
 	template<typename T>
-	inline static constexpr bool IsInf(const T x)
+	FORCEINLINE static constexpr bool IsInf(const T x)
 	{
 		return std::isinf(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Sqrt(const T x)
+	FORCEINLINE static constexpr T Sqrt(const T x)
 	{
 		return std::sqrt(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Square(const T x)
+	FORCEINLINE static constexpr T Square(const T x)
 	{
 		return x * x;
 	}
 
 	template<typename T>
-	inline static constexpr T Pow(const T x, const T exp)
+	FORCEINLINE static constexpr T Pow(const T x, const T exp)
 	{
 		return std::pow(x, exp);
 	}
 
 	template<typename T>
-	inline static constexpr T Sin(const T x)
+	FORCEINLINE static constexpr T Sin(const T x)
 	{
 		return std::sin(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Asin(const T x)
+	FORCEINLINE static constexpr T Asin(const T x)
 	{
 		return std::asin(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Acos(const T x)
+	FORCEINLINE static constexpr T Acos(const T x)
 	{
 		return std::acos(x);
 	}
 
 	/// Sine phase with frequency of 2pi
 	template<typename T>
-	inline static constexpr T Sin01(const T x)
+	FORCEINLINE static constexpr T Sin01(const T x)
 	{
 		return std::sin(TWO_PI * x);
 	}
 
 	template<typename T>
-	inline static constexpr T Cos(const T x)
+	FORCEINLINE static constexpr T Cos(const T x)
 	{
 		return std::cos(x);
 	}
 
 	/// Cosine phase with frequency of 2pi
 	template<typename T>
-	inline static constexpr T Cos01(const T x)
+	FORCEINLINE static constexpr T Cos01(const T x)
 	{
 		return std::cos(TWO_PI * x);
 	}
 
 	template<typename T>
-	inline static constexpr T Floor(const T x)
+	FORCEINLINE static constexpr T Floor(const T x)
 	{
 		return std::floor(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Ceil(const T x)
+	FORCEINLINE static constexpr T Ceil(const T x)
 	{
 		return std::ceil(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Frac(const T x)
+	FORCEINLINE static constexpr T Frac(const T x)
 	{
 		return x - Floor(x);
 	}
 
 	/// Linearly estimated Sine phase (might slower than normal version on new devices)
 	template<typename T>
-	inline static constexpr T SinEst(const T x)
+	FORCEINLINE static constexpr T SinEst(const T x)
 	{
 		T p = Abs(2 * Frac(x * static_cast<T>(INV_TWO_PI) + static_cast<T>(0.75)) - 1);
 		return (6-4*p)*p*p - 1;
@@ -178,7 +180,7 @@ struct GMath
 
 	/// Linearly estimated Cosine phase (might slower than normal version on new devices)
 	template<typename T>
-	inline static constexpr T CosEst(const T x)
+	FORCEINLINE static constexpr T CosEst(const T x)
 	{
 		T p = Abs(2 * Frac(x * static_cast<T>(INV_TWO_PI)) - 1);
 		return (6 - 4 * p) * p * p - 1;
@@ -190,7 +192,7 @@ struct GMath
 	/// <param name="outSin">sin result</param>
 	/// <param name="outCos">cos result</param>
 	/// <param name="x">input param</param>
-	inline static constexpr void SinCos(float* outSin, float* outCos, float x)
+	FORCEINLINE static constexpr void SinCos(float* outSin, float* outCos, float x)
 	{
 		float quotient = INV_TWO_PI * x;
 		quotient = (float)((int)(x >= 0.0f ? quotient + 0.5f : quotient - 0.5f));
@@ -219,7 +221,7 @@ struct GMath
 
 	/// Linearly estimated Sine phase with frequency of 2pi (might slower than normal version on new devices)
 	template<typename T>
-	inline static constexpr T Sin01Est(const T x)
+	FORCEINLINE static constexpr T Sin01Est(const T x)
 	{
 		T p = Abs(2 * Frac(x + static_cast<T>(0.75)) - 1);
 		return (6 - 4 * p) * p * p - 1;
@@ -227,61 +229,61 @@ struct GMath
 
 	/// Linearly estimated Cosine phase with frequency of 2pi (might slower than normal version on new devices)
 	template<typename T>
-	inline static constexpr T Cos01Est(const T x)
+	FORCEINLINE static constexpr T Cos01Est(const T x)
 	{
 		T p = Abs(2 * Frac(x) - 1);
 		return (6 - 4 * p) * p * p - 1;
 	}
 
 	template<typename T>
-	inline static constexpr T Tan(const T x)
+	FORCEINLINE static constexpr T Tan(const T x)
 	{
 		return std::tan(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Cot(const T x)
+	FORCEINLINE static constexpr T Cot(const T x)
 	{
 		return static_cast<T>(1) / std::tan(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Atan(const T x)
+	FORCEINLINE static constexpr T Atan(const T x)
 	{
 		return std::atan(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Atan2(const T y, const T x)
+	FORCEINLINE static constexpr T Atan2(const T y, const T x)
 	{
 		return std::atan2(y, x);
 	}
 
-	inline static float RSqrt(const float x)
+	FORCEINLINE static float RSqrt(const float x)
 	{
 		return SSE::rsqrt(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Abs(const T x)
+	FORCEINLINE static constexpr T Abs(const T x)
 	{
 		return std::abs(x);
 	}
 
 	template<typename T>
-	inline static constexpr T Select(const T x, const T ge, const T lt)
+	FORCEINLINE static constexpr T Select(const T x, const T ge, const T lt)
 	{
 		return x >= 0 ? ge : lt;
 	}
 
 	template<typename T>
-	inline static constexpr T Sign(const T x)
+	FORCEINLINE static constexpr T Sign(const T x)
 	{
 		return Select(x, static_cast<T>(1), static_cast<T>(-1));
 	}
 
 	template<typename T>
-	inline static constexpr T Saturate(const T x)
+	FORCEINLINE static constexpr T Saturate(const T x)
 	{
 		return Clamp(x, static_cast<T>(0), static_cast<T>(1));
 	}
@@ -290,15 +292,38 @@ struct GMath
 	static constexpr float Deg2Rad = PI / 180.f;
 
 	template<typename T>
-	inline static T RadiansToDegree(const T& x)
+	FORCEINLINE static T RadiansToDegree(const T x)
 	{
 		return x * Rad2Deg;
 	}
 
 	template<typename T>
-	inline static T DegreeToRadians(const T& x)
+	FORCEINLINE static T DegreeToRadians(const T x)
 	{
 		return x * Deg2Rad;
+	}
+
+	template<typename T>
+	FORCEINLINE static T Exp2(const T x)
+	{
+		return pow(static_cast<T>(2), x);
+	}
+	template<typename T>
+	FORCEINLINE static T Ln(const T x)
+	{
+		return log(x);
+	}
+
+	template<typename T>
+	FORCEINLINE static T LogX(const T base, const T value)
+	{
+		return log(value) / log(base);
+	}
+
+	template<typename T>
+	FORCEINLINE static T Log2(const T x)
+	{
+		return log(x) * 1.442695f;
 	}
 };
 

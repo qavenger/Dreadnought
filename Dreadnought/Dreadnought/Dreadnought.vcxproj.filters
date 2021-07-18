@@ -137,6 +137,15 @@
     <ClCompile Include="..\Source\RHI\D3D12\D3D12PipelineStateObject.cpp">
       <Filter>Source\RHI\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Engine\Core\Transform.cpp">
+      <Filter>Source\Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Engine\Math\EngineMath.cpp">
+      <Filter>Source\Engine\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\Engine\Math\Matrix.cpp">
+      <Filter>Source\Engine\Math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Dreadnought.rc">
@@ -272,6 +281,24 @@
     </ClInclude>
     <ClInclude Include="..\Source\Shared\StringUtil.h">
       <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Core\Transform.h">
+      <Filter>Source\Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\Quaternion.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\Rotator.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\MathUtil.h">
+      <Filter>Source\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Math\Matrix.h">
+      <Filter>Source\Engine\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Abstract\TemplateMetaStruct.h">
+      <Filter>Source\Engine\Abstract</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

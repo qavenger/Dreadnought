@@ -34,6 +34,7 @@
 #include <DirectXCollision.h>
 #include <../RHI/D3D12/d3dx12.h>
 #include <EngineType.h>
+#include <Engine/Abstract/TemplateMetaStruct.h>
 //#include <Input.h>
 #include "Timer.h"
 #include "Error.h"
