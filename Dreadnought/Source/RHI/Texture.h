@@ -8,6 +8,8 @@ struct TextureDesc
 	uint32               TextureDepth;
 	uint32               MipmapLevels;
 	ETextureFormat       Format;
+	std::wstring         Name;
+	bool                 UseForDepth;
 };
 
 class RHITexture
@@ -19,6 +21,10 @@ public:
 	void SetDesc(const TextureDesc& Desc);
 
 	TextureDesc GetDesc() const;
+
+public:
+	// return raw resource pointer, such as ID3D12Resouce*
+	virtual void* GetResourceRaw() = 0;
 
 private:
 	TextureDesc Desc;

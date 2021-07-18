@@ -21,7 +21,7 @@ void IRHIDevice::CreateSwapChain(
 	WindowHandle = Handle;
 	WindowWidth = Width;
 	WindowHeight = Height;
-	SwapChainBufferCount = BufferCount;
+	BackBufferCount = BufferCount;
 	BackBufferFormat = BBFormat;
 	DepthStencilFormat = DSFormat;
 	CurrentBackBufferIndex = 0;

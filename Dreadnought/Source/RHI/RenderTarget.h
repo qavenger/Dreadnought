@@ -5,7 +5,9 @@
 class RHIRenderTarget
 {
 public:
-	virtual ~RHIRenderTarget() {}
+	virtual ~RHIRenderTarget() { delete Texture; }
+
+	void SetTexture(RHITexture* Texture);
 
 	RHITexture* GetTexture() const;
 

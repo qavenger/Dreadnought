@@ -9,6 +9,9 @@ public:
 
 	ComPtr<ID3D12Resource>& GetResource() { return Resource; }
 
+public:
+	virtual void* GetResourceRaw() { return Resource.Get(); }
+
 private:
 	ComPtr<ID3D12Resource> Resource;
 };

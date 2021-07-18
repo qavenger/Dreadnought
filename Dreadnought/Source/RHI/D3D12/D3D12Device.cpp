@@ -71,6 +71,23 @@ void D3D12Device::CreateSwapChain(
 {
 	IRHIDevice::CreateSwapChain(Handle, Width, Height, BufferCount, BBFormat, DSFormat);
 
+	TextureDesc Desc;
+	Desc.Dimension = ETextureDimension::TD_Texture2D;
+	Desc.Format = BackBufferFormat;
+	Desc.MipmapLevels = 1;
+	Desc.TextureWidth = WindowWidth;
+	Desc.TextureHeight = WindowHeight;
+	Desc.TextureDepth = 1;
+	Desc.Name = L"BackBuffer";
+	Desc.UseForDepth = false;
+	BackBuffer.resize(BackBufferCount);
+	for (uint32 Index = 0; Index < BackBufferCount; ++Index)
+	{
+		D3D12Texture* Tex = (D3D12Texture*)CreateTexture();
+		Tex->SetDesc(Desc);
+		BackBuffer[Index].SetTexture(Tex);
+	}
+
 	SwapChain.Reset();
 	DXGI_SWAP_CHAIN_DESC SwapChainDesc;
 	SwapChainDesc.BufferDesc.Width = WindowWidth;
@@ -83,7 +100,7 @@ void D3D12Device::CreateSwapChain(
 	SwapChainDesc.SampleDesc.Count = 1;
 	SwapChainDesc.SampleDesc.Quality = 0;
 	SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	SwapChainDesc.BufferCount = SwapChainBufferCount;
+	SwapChainDesc.BufferCount = BackBufferCount;
 	SwapChainDesc.OutputWindow = WindowHandle;
 	SwapChainDesc.Windowed = true;
 	SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
@@ -96,7 +113,7 @@ void D3D12Device::CreateSwapChain(
 
 	//Create RTV Descriptor Heap
 	D3D12_DESCRIPTOR_HEAP_DESC RtvHeapDesc;
-	RtvHeapDesc.NumDescriptors = 2;
+	RtvHeapDesc.NumDescriptors = BackBufferCount;
 	RtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	RtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	RtvHeapDesc.NodeMask = 0;
@@ -123,61 +140,45 @@ void D3D12Device::Resize(
 
 	IRHIDevice::Resize(Width, Height);
 
-	SwapChainBuffer.resize(SwapChainBufferCount);
-	for (uint32 Index = 0; Index < SwapChainBufferCount; ++Index)
-	{
-		SwapChainBuffer[Index].Reset();
-	}
 	ThrowIfFailed(SwapChain->ResizeBuffers(
-		SwapChainBufferCount,
+		BackBufferCount,
 		WindowWidth, WindowHeight,
 		TextureFormatMap[(uint32)BackBufferFormat],
 		DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH));
 
 	//create backbuffer
-	CD3DX12_CPU_DESCRIPTOR_HANDLE RtvHeapHandle(RtvHeap->GetCPUDescriptorHandleForHeapStart());
-	for (uint32 Index = 0; Index < SwapChainBufferCount; ++Index)
+	for (uint32 Index = 0; Index < BackBufferCount; ++Index)
 	{
-		ThrowIfFailed(SwapChain->GetBuffer(Index, IID_PPV_ARGS(&SwapChainBuffer[Index])));
-		ThrowIfFailed(SwapChainBuffer[Index]->SetName(L"BackBuffer"));
-		Device->CreateRenderTargetView(SwapChainBuffer[Index].Get(), nullptr, RtvHeapHandle);
-		//offset next descriptor buffer
-		RtvHeapHandle.Offset(1, RtvDescriptorSize);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE RtvHeapHandle(RtvHeap->GetCPUDescriptorHandleForHeapStart(), Index, RtvDescriptorSize);
+		D3D12Texture* Tex = (D3D12Texture*)BackBuffer[Index].GetTexture();
+		ThrowIfFailed(SwapChain->GetBuffer(Index, IID_PPV_ARGS(&Tex->GetResource())));
+		ThrowIfFailed(Tex->GetResource()->SetName(L"BackBuffer"));
+		Device->CreateRenderTargetView(Tex->GetResource().Get(), nullptr, RtvHeapHandle);
+		BackBuffer[Index].SetRenderTargetView(RtvHeapHandle);
 	}
 
 	//create depth stencil buffer
-	DepthStencilBuffer.Reset();
-	D3D12_RESOURCE_DESC DepthStencilDesc;
-	DepthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	DepthStencilDesc.Alignment = 0;
-	DepthStencilDesc.Width = WindowWidth;
-	DepthStencilDesc.Height = WindowHeight;
-	DepthStencilDesc.DepthOrArraySize = 1;
-	DepthStencilDesc.MipLevels = 1;
-	DepthStencilDesc.Format = TextureFormatMap[(uint32)DepthStencilFormat];
-	DepthStencilDesc.SampleDesc.Count = 1;
-	DepthStencilDesc.SampleDesc.Quality = 0;
-	DepthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	DepthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-	D3D12_CLEAR_VALUE ClearValue;
-	ClearValue.Format = TextureFormatMap[(uint32)DepthStencilFormat];
-	ClearValue.DepthStencil.Depth = 1.f;
-	ClearValue.DepthStencil.Stencil = 0;
-	CD3DX12_HEAP_PROPERTIES DefaultHeap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	ThrowIfFailed(Device->CreateCommittedResource(
-		&DefaultHeap,
-		D3D12_HEAP_FLAG_NONE,
-		&DepthStencilDesc,
-		D3D12_RESOURCE_STATE_COMMON,
-		&ClearValue,
-		IID_PPV_ARGS(&DepthStencilBuffer)));
+	TextureDesc DepthStencilDesc;
+	DepthStencilDesc.Dimension = ETextureDimension::TD_Texture2D;
+	DepthStencilDesc.Format = DepthStencilFormat;
+	DepthStencilDesc.TextureWidth = WindowWidth;
+	DepthStencilDesc.TextureHeight = WindowHeight;
+	DepthStencilDesc.TextureDepth = 1;
+	DepthStencilDesc.MipmapLevels = 1;
+	DepthStencilDesc.Name = L"SceneDepthZ";
+	DepthStencilDesc.UseForDepth = true;
+	D3D12Texture* DepthTexture = (D3D12Texture*)CreateTexture();
+	DepthTexture->SetDesc(DepthStencilDesc);
+	BuildTexture(DepthTexture);
+	DepthStencilBuffer.SetTexture(DepthTexture);
+	DepthStencilBuffer.SetRenderTargetView(GetDepthStencilView());
 
 	Device->CreateDepthStencilView(
-		DepthStencilBuffer.Get(),
+		DepthTexture->GetResource().Get(),
 		nullptr,
-		DepthStencilView());
-
-	Transition(DepthStencilBuffer.Get(), EResourceState::RS_Common, EResourceState::RS_DepthWrite);
+		GetDepthStencilView());
+	
+	Transition(DepthTexture->GetResource().Get(), EResourceState::RS_Common, EResourceState::RS_DepthWrite);
 
 	FlushCommandQueueSync();
 }
@@ -225,12 +226,7 @@ void D3D12Device::QueryAdapters()
 	}
 }
 
-ComPtr<ID3D12Resource> D3D12Device::CurrentBackBuffer() const
-{
-	return SwapChainBuffer[CurrentBackBufferIndex];
-}
-
-D3D12_CPU_DESCRIPTOR_HANDLE D3D12Device::CurrentBackBufferView() const
+D3D12_CPU_DESCRIPTOR_HANDLE D3D12Device::GetCurrentBackBufferView() const
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		RtvHeap->GetCPUDescriptorHandleForHeapStart(), 
@@ -238,7 +234,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE D3D12Device::CurrentBackBufferView() const
 		RtvDescriptorSize);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE D3D12Device::DepthStencilView() const
+D3D12_CPU_DESCRIPTOR_HANDLE D3D12Device::GetDepthStencilView() const
 {
 	return DsvHeap->GetCPUDescriptorHandleForHeapStart();
 }
@@ -375,13 +371,11 @@ void D3D12Device::SetScissor(float Left, float Top, float Right, float Bottom) c
 
 void D3D12Device::BeginRenderPass(const RHIRenderPassInfo& RPInfo)
 {
-	ThrowIfFalse((!RPInfo.UseBackBuffer) || (RPInfo.NumRenderTarget == 1), "Number of RenderTarget must be 1 when render to backbuffer");
-
 	D3D12_CPU_DESCRIPTOR_HANDLE SceneColorRenderTargetView[MAX_RENDER_TARGET];
 	for (uint32 Index = 0; Index < RPInfo.NumRenderTarget; ++Index)
 	{
 		D3D12RenderTarget* SceneColorRenderTarget = (D3D12RenderTarget*)RPInfo.SceneColor[Index];
-		SceneColorRenderTargetView[Index] = RPInfo.UseBackBuffer ? CurrentBackBufferView() : SceneColorRenderTarget->GetRenderTargetView();
+		SceneColorRenderTargetView[Index] = SceneColorRenderTarget->GetRenderTargetView();
 
 		const ClearCDSValue& ClearValue = RPInfo.ClearColor[Index];
 		if (ClearValue.IsClearColorValid())
@@ -395,7 +389,7 @@ void D3D12Device::BeginRenderPass(const RHIRenderPassInfo& RPInfo)
 	if (RPInfo.IsClearDepthValid()) DSClearFlag |= D3D12_CLEAR_FLAG_DEPTH;
 	if (RPInfo.IsClearStencilValid()) DSClearFlag |= D3D12_CLEAR_FLAG_STENCIL;
 	D3D12RenderTarget* DepthRenderTarget = (D3D12RenderTarget*)RPInfo.SceneDepthZ;
-	D3D12_CPU_DESCRIPTOR_HANDLE DepthRenderTargetView = RPInfo.UseBackBuffer ? DepthStencilView() : DepthRenderTarget->GetRenderTargetView();
+	D3D12_CPU_DESCRIPTOR_HANDLE DepthRenderTargetView = DepthRenderTarget->GetRenderTargetView();
 	CommandList->ClearDepthStencilView(DepthRenderTargetView, DSClearFlag, RPInfo.ClearDepth, RPInfo.ClearStencil, 0, nullptr);
 
 	CommandList->OMSetRenderTargets(RPInfo.NumRenderTarget, SceneColorRenderTargetView, true, &DepthRenderTargetView);
@@ -450,9 +444,10 @@ void D3D12Device::EndScopeEvent()
 	PIXEndEvent(CommandList.Get());
 }
 
-void D3D12Device::Present() const
+void D3D12Device::Present()
 {
 	SwapChain->Present(0, 0);
+	CurrentBackBufferIndex = (CurrentBackBufferIndex + 1) % 2;
 }
 
 void D3D12Device::Transition(void* Resource, EResourceState Before, EResourceState After) const
@@ -467,22 +462,18 @@ void D3D12Device::BeginFrame()
 	ThrowIfFailed(CommandAllocator->Reset());
 	ResetCommandList();
 
-	Transition(CurrentBackBuffer().Get(), EResourceState::RS_Present, EResourceState::RS_RenderTarget);
+	Transition(GetRHIBackbufferRenderTarget()->GetTexture()->GetResourceRaw(), EResourceState::RS_Present, EResourceState::RS_RenderTarget);
 }
 
 void D3D12Device::EndFrame()
 {
 	{
 		SCOPE_EVENT(RenderFinish)
-		Transition(CurrentBackBuffer().Get(), EResourceState::RS_RenderTarget, EResourceState::RS_Present);
+		Transition(GetRHIBackbufferRenderTarget()->GetTexture()->GetResourceRaw(), EResourceState::RS_RenderTarget, EResourceState::RS_Present);
 	}
 
 	FlushCommandQueue();
-
 	Present();
-
-	CurrentBackBufferIndex = (CurrentBackBufferIndex + 1) % 2;
-
 	WaitForGPU();
 }
 
@@ -525,7 +516,8 @@ void D3D12Device::BuildTexture(RHITexture* Tex)
 		ResourceDesc.Format = TextureFormatMap[(uint32)Desc.Format];
 		ResourceDesc.SampleDesc = SampleDesc;
 		ResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		if (Desc.UseForDepth) ResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+		else ResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		break;
 	case ETextureDimension::TD_Texture3D:
 
@@ -540,8 +532,12 @@ void D3D12Device::BuildTexture(RHITexture* Tex)
 	}
 
 	//set properties
-	D3D12_HEAP_PROPERTIES Properties;
-	Properties.Type = D3D12_HEAP_TYPE_DEFAULT;
+	D3D12_HEAP_PROPERTIES Properties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
+	D3D12_CLEAR_VALUE ClearValue;
+	ClearValue.Format = TextureFormatMap[(uint32)Desc.Format];
+	ClearValue.DepthStencil.Depth = 1.f;
+	ClearValue.DepthStencil.Stencil = 0;
 
 	//create resource
 	ThrowIfFailed(Device->CreateCommittedResource(
@@ -549,8 +545,10 @@ void D3D12Device::BuildTexture(RHITexture* Tex)
 		D3D12_HEAP_FLAG_NONE,
 		&ResourceDesc,
 		D3D12_RESOURCE_STATE_COMMON,
-		nullptr, // need not to clear
+		Desc.UseForDepth ? &ClearValue : nullptr, // need not to clear
 		IID_PPV_ARGS(&D3DTexture->GetResource())));
+
+	D3DTexture->GetResource()->SetName(Desc.Name.c_str());
 }
 
 ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../RHIDevice.h"
+#include "D3D12RenderTarget.h"
 
 class D3D12Device : public IRHIDevice
 {
@@ -32,7 +33,7 @@ public:
 	virtual void FlushCommandQueue();
 	virtual void FlushCommandQueueSync();
 	virtual void WaitForGPU();
-	virtual void Present() const;
+	virtual void Present();
 	virtual void Transition(void* Resource, EResourceState Before, EResourceState After) const;
 
 	//Create Resource Function
@@ -50,15 +51,16 @@ public:
 
 
 	virtual void SetPipelineStateObject(RHIPipelineStateObject* PSO);
-
 	virtual void DrawElements(const DrawInfo& Info);
+
+	virtual RHIRenderTarget* GetRHIDepthRenderTarget() const { return (RHIRenderTarget*)&DepthStencilBuffer; }
+	virtual RHIRenderTarget* GetRHIBackbufferRenderTarget() const { return (RHIRenderTarget*)&BackBuffer[CurrentBackBufferIndex]; }
 
 private:
 	void InitDXGIAdapter();
 	void QueryAdapters();
-	ComPtr<ID3D12Resource> CurrentBackBuffer() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
-	D3D12_CPU_DESCRIPTOR_HANDLE DepthStencilView() const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferView() const;
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() const;
 	void InitPlatformDenpendentMap();
 
 	ComPtr<ID3D12Resource> CreateDefaultBuffer(
@@ -77,10 +79,8 @@ private:
 	uint64                                            CurrentFence;
 
 	ComPtr<IDXGISwapChain>                            SwapChain;
-	// special
-	std::vector<ComPtr<ID3D12Resource>>               SwapChainBuffer;
-	ComPtr<ID3D12Resource>                            DepthStencilBuffer;
-	// special end
+	std::vector<D3D12RenderTarget>                    BackBuffer;
+	D3D12RenderTarget                                 DepthStencilBuffer;
 	ComPtr<ID3D12DescriptorHeap>                      RtvHeap;
 	ComPtr<ID3D12DescriptorHeap>                      DsvHeap;
 	uint32                                            RtvDescriptorSize;

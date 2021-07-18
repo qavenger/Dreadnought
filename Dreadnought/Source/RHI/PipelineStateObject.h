@@ -24,10 +24,10 @@ public:
 	EPrimitiveTopology        GsHsPrimitiveTopology;
 	ECullMode                 CullMode;
 	EFillMode                 FillMode;
-	RHIShader*                  VertexShader;
-	RHIShader*                  PixelShader;
-	RHIShader*                  GeometryShader;
-	RHIShader*                  ComputerShader;
+	RHIShader*                VertexShader;
+	RHIShader*                PixelShader;
+	RHIShader*                GeometryShader;
+	RHIShader*                ComputerShader;
 	EDepthFunction            DepthFunction;
 	bool                      EnableDepthTest;
 	bool                      EnableDepthWrite;
@@ -35,6 +35,6 @@ public:
 
 	uint32                    NumRenderTarget;
 	bool                      IsBackbuffer;
-	RHIRenderTarget*            SceneColorRenderTarget[MAX_RENDER_TARGET];
-	RHIRenderTarget*            DepthStencilRenderTarget;
+	RHIRenderTarget*          SceneColorRenderTarget[MAX_RENDER_TARGET];
+	RHIRenderTarget*          DepthStencilRenderTarget;
 };

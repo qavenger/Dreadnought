@@ -42,8 +42,7 @@ struct RHIRenderPassInfo
 	bool               ClearStencilValid;
 
 	RHIRenderPassInfo()
-		: UseBackBuffer(true)
-		, NumRenderTarget(1)
+		: NumRenderTarget(1)
 		, ClearDepth(1.f)
 		, ClearStencil(0)
 		, ClearDepthValid(true)
@@ -63,8 +62,8 @@ struct RHIRenderPassInfo
 
 struct DrawInfo
 {
-	RHIIndexBuffer* IndexBuffer;
-	RHIVertexBuffer* VertexBuffer;
+	RHIIndexBuffer*      IndexBuffer;
+	RHIVertexBuffer*     VertexBuffer;
 	EPrimitiveTopology   PrimitiveTopology;
 };
 
@@ -100,7 +99,7 @@ public:
 	virtual void FlushCommandQueue() = 0;
 	virtual void FlushCommandQueueSync() = 0;
 	virtual void WaitForGPU() = 0;
-	virtual void Present() const = 0;
+	virtual void Present() = 0;
 	virtual void Transition(void* Resource, EResourceState Before, EResourceState After) const = 0;
 
 	//Create Resource Function
@@ -118,8 +117,10 @@ public:
 
 
 	virtual void SetPipelineStateObject(RHIPipelineStateObject* PSO) = 0;
-
 	virtual void DrawElements(const DrawInfo& Info) = 0;
+
+	virtual RHIRenderTarget* GetRHIDepthRenderTarget() const = 0;
+	virtual RHIRenderTarget* GetRHIBackbufferRenderTarget() const = 0;
 
 protected:
 	HWND                WindowHandle;
@@ -127,6 +128,6 @@ protected:
 	uint32              WindowHeight;
 	ETextureFormat      BackBufferFormat;
 	ETextureFormat      DepthStencilFormat;
-	uint32              SwapChainBufferCount;
+	uint32              BackBufferCount;
 	uint32              CurrentBackBufferIndex;
 };
