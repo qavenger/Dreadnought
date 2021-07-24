@@ -101,6 +101,12 @@ struct GMath
 	}
 
 	template<typename T>
+	FORCEINLINE static constexpr bool IsFinite(const T x)
+	{
+		return isfinite(x);
+	}
+
+	template<typename T>
 	FORCEINLINE static constexpr T Sqrt(const T x)
 	{
 		return std::sqrt(x);
@@ -331,5 +337,20 @@ struct GMath
 	{
 		return (x + 255) & ~255;
 	}
-};
 
+
+#define FASTASIN_HALF_PI		(1.5707963050f)
+	FORCEINLINE static float FastASin(float x)
+	{
+		bool bNonNegative = x >= 0.0f;
+		x = Abs(x);
+		float omX = 1 - x;
+		if (omX < 0.0f) omX = 0.0f;
+		float root = Sqrt(omX);
+		float rs = ((((((-0.0012624911f * x + 0.0066700901f) * x - 0.0170881256f) * x + 0.0308918810f) * x - 0.0501743046f) * x + 0.0889789874f) * x - 0.2145988016f) * x + FASTASIN_HALF_PI;
+		rs *= root;
+		return bNonNegative ? FASTASIN_HALF_PI - rs : rs - FASTASIN_HALF_PI;
+	}
+#undef FASTASIN_HALF_PI
+
+};
