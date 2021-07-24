@@ -13,21 +13,28 @@ struct BlendState
 	bool IsRenderTargetEnableBlend(uint32 Index) const;
 };
 
+class RHIShader;
+class RHIConstantBuffer;
+class RHIRenderTarget;
 class RHIPipelineStateObject
 {
 public:
 	RHIPipelineStateObject();
-	virtual ~RHIPipelineStateObject() {}
+	virtual ~RHIPipelineStateObject();
+
+	virtual void Init() = 0;
 
 public:
 	BlendState                State;
 	EPrimitiveTopology        GsHsPrimitiveTopology;
+	EPrimitiveTopology        PrimitiveTopology;
 	ECullMode                 CullMode;
 	EFillMode                 FillMode;
 	RHIShader*                VertexShader;
 	RHIShader*                PixelShader;
 	RHIShader*                GeometryShader;
 	RHIShader*                ComputerShader;
+	RHIConstantBuffer*        ConstantBuffer;
 	EDepthFunction            DepthFunction;
 	bool                      EnableDepthTest;
 	bool                      EnableDepthWrite;

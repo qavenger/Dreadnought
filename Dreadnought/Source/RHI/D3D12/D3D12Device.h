@@ -42,12 +42,14 @@ public:
 	virtual RHIVertexBuffer* CreateVertexBuffer();
 	virtual RHIShader* CreateShader();
 	virtual RHIPipelineStateObject* CreatePipelineStateObject();
+	virtual RHIConstantBuffer* CreateConstantBuffer();
 
 	virtual void BuildTexture(RHITexture* Texture);
 	virtual void BuildIndexBuffer(RHIIndexBuffer* IndexBuffer);
 	virtual void BuildVertexBuffer(RHIVertexBuffer* VertexBuffer);
 	virtual void BuildShader(RHIShader* Shader);
 	virtual void BuildPipelineStateObject(RHIPipelineStateObject* PSO);
+	virtual void BuildConstantBuffer(RHIConstantBuffer* ConstantBuffer);
 
 
 	virtual void SetPipelineStateObject(RHIPipelineStateObject* PSO);
@@ -55,6 +57,9 @@ public:
 
 	virtual RHIRenderTarget* GetRHIDepthRenderTarget() const { return (RHIRenderTarget*)&DepthStencilBuffer; }
 	virtual RHIRenderTarget* GetRHIBackbufferRenderTarget() const { return (RHIRenderTarget*)&BackBuffer[CurrentBackBufferIndex]; }
+
+public:
+	ComPtr<ID3D12RootSignature> CreateRootSignature(ComPtr<ID3DBlob>& Blob);
 
 private:
 	void InitDXGIAdapter();
@@ -83,10 +88,10 @@ private:
 	D3D12RenderTarget                                 DepthStencilBuffer;
 	ComPtr<ID3D12DescriptorHeap>                      RtvHeap;
 	ComPtr<ID3D12DescriptorHeap>                      DsvHeap;
+	ComPtr<ID3D12DescriptorHeap>                      CbvSrvUavHeap;
 	uint32                                            RtvDescriptorSize;
 	uint32										      DsvDescriptorSize;
 	uint32										      CbvSrvUavDescriptorSize;
-	ComPtr<ID3D12RootSignature> RootSignature;
 
 	DXGI_FORMAT                                       TextureFormatMap[(uint32)ETextureFormat::TF_Num];
 	D3D12_CULL_MODE                                   CullModeMap[(uint32)ECullMode::CM_Num];

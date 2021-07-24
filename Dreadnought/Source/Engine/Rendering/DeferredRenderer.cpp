@@ -55,7 +55,7 @@ void DeferredRenderer::OnTick(float dt)
 		RHIRenderPassInfo Info;
 		Info.SceneColor[0] = gDevice->GetRHIBackbufferRenderTarget();
 		Info.SceneDepthZ = gDevice->GetRHIDepthRenderTarget();
-		Info.ClearColor[0].ClearColorG = 1;
+	//	Info.ClearColor[0].ClearColorG = 1;
 		gDevice->BeginRenderPass(Info);
 		gDevice->SetViewport(0, 0, 1024, 720, 0, 1);
 		gDevice->SetScissor(0, 0, 1024, 720);

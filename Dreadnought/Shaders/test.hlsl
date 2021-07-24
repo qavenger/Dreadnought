@@ -7,23 +7,32 @@ struct VertexIn
 struct VertexOut
 {
 	float4 Position  : SV_POSITION;
+	float3 WorldPosition : COLOR;
 	//	float4 Color : COLOR;
+};
+
+cbuffer OutColor : register(b0)
+{
+	float4x4 WVP;
+	float3 Color;
+};
+
+cbuffer CC : register(b1)
+{
+	float b;
 };
 
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 
-	vout.Position.xyz = vin.Position;
-	vout.Position.xy *= 0.7;
-	vout.Position.z *= 0.2;
-	vout.Position.z += 0.5;
-	vout.Position.w = 1.f;
+	vout.Position = mul(float4(vin.Position, 1.f), WVP);
+	vout.WorldPosition = vin.Position;
 
 	return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return float4(1.f, 1.f, 0.f, 1.f);
+	return float4(pin.WorldPosition, Color.r);
 }

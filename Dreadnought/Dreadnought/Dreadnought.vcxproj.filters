@@ -146,6 +146,15 @@
     <ClCompile Include="..\Source\Engine\Math\Matrix.cpp">
       <Filter>Source\Engine\Math</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Engine\Rendering\RenderPass.cpp">
+      <Filter>Source\Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\ConstantBuffer.cpp">
+      <Filter>Source\RHI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Source\RHI\D3D12\D3D12ConstantBuffer.cpp">
+      <Filter>Source\RHI\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Dreadnought.rc">
@@ -299,6 +308,15 @@
     </ClInclude>
     <ClInclude Include="..\Source\Engine\Abstract\TemplateMetaStruct.h">
       <Filter>Source\Engine\Abstract</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\Engine\Rendering\RenderPass.h">
+      <Filter>Source\Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\ConstantBuffer.h">
+      <Filter>Source\RHI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Source\RHI\D3D12\D3D12ConstantBuffer.h">
+      <Filter>Source\RHI\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
