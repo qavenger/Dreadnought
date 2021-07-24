@@ -326,5 +326,10 @@ struct GMath
 	{
 		return log(x) * 1.442695f;
 	}
+
+	FORCEINLINE static uint32 RoundUp256(uint32 x)
+	{
+		return (x + 255) & ~255;
+	}
 };
 

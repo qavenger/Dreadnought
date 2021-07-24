@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "PipelineStateObject.h"
 
-
 bool BlendState::IsRenderTargetEnableBlend(uint32 Index) const
 {
 	FatalIfFalse((Index >= 0 && Index < MAX_RENDER_TARGET), "Index must be in [0, 7]");
@@ -17,6 +16,16 @@ bool BlendState::IsRenderTargetEnableBlend(uint32 Index) const
 	return true;
 }
 
+RHIPipelineStateObject::~RHIPipelineStateObject()
+{
+	if (VertexShader)
+		delete VertexShader;
+	if (PixelShader)
+		delete PixelShader;
+	if (ConstantBuffer)
+		delete ConstantBuffer;
+}
+
 RHIPipelineStateObject::RHIPipelineStateObject()
 {
 	for (uint32 Index = 0; Index < MAX_RENDER_TARGET; ++Index)
@@ -28,9 +37,12 @@ RHIPipelineStateObject::RHIPipelineStateObject()
 		State.AlphaDestBlendMode[Index] = EBlendMode::BM_Zero;
 		State.AlphaBlendOperator[Index] = EBlendOperator::BO_Add;
 		State.WriteMask[Index] = EWriteMask::WM_RGBA;
+		SceneColorRenderTarget[Index] = nullptr;
 	}
+	DepthStencilRenderTarget = nullptr;
 
 	GsHsPrimitiveTopology = EPrimitiveTopology::PT_Triangle;
+	PrimitiveTopology = EPrimitiveTopology::PT_Triangle;
 	CullMode = ECullMode::CM_Back;
 	FillMode = EFillMode::FM_Solid;
 
@@ -38,6 +50,7 @@ RHIPipelineStateObject::RHIPipelineStateObject()
 	PixelShader = nullptr;
 	GeometryShader = nullptr;
 	ComputerShader = nullptr;
+	ConstantBuffer = nullptr;
 
 	DepthFunction = EDepthFunction::DF_Less;
 	EnableDepthTest = true;

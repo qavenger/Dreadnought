@@ -49,12 +49,18 @@
 #include <Engine/Abstract/Object.h>
 #include <Engine.h>
 #include <RHI/CommonEnums.h>
-#include "RHI/RHIDeviceCreator.h"
-#include "RHI/RHIDevice.h"
+#include <RHI/RHIDeviceCreator.h>
+#include <RHI/RHIDevice.h>
+#include <EngineMath.h>
 #pragma comment (lib, "dxgi.lib")
 #pragma comment (lib, "d3d12.lib")
 #pragma comment (lib, "dxguid.lib")
 #pragma comment (lib, "d3dcompiler.lib")
+
+#ifdef USE_DX12_RHI
+#include <DirectXMath.h>
+using namespace DirectX;
+#endif
 
 #ifdef PLATFORM_WINDOWS
 #if defined(DEBUG) || defined(_DEBUG)

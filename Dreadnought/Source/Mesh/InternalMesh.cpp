@@ -86,9 +86,9 @@ void InternalMesh::GenerateCubeInternalMesh(std::vector<uint16>& Indices, std::v
 	UVs2[11] = float2(0.66666f, 0.f);
 
 	// triangle 4
-	Indices[12] = 8; Indices[13] = 9; Indices[14] = 10;
+	Indices[12] = 8; Indices[13] = 10; Indices[14] = 9;
 	// triangle 5
-	Indices[15] = 8; Indices[16] = 10; Indices[17] = 11;
+	Indices[15] = 8; Indices[16] = 11; Indices[17] = 10;
 
 	// right
 	Vertices[12] = float3(1.f, -1.f, 1.f);

@@ -6,6 +6,7 @@
 #include "VertexBuffer.h"
 #include "Shader.h"
 #include "PipelineStateObject.h"
+#include "ConstantBuffer.h"
 
 //Clear Color/Depht/Stencil Value
 struct ClearCDSValue
@@ -31,7 +32,6 @@ struct ClearCDSValue
 
 struct RHIRenderPassInfo
 {
-	bool               UseBackBuffer;
 	RHIRenderTarget*   SceneColor[MAX_RENDER_TARGET];
 	ClearCDSValue      ClearColor[MAX_RENDER_TARGET];
 	uint32             NumRenderTarget;
@@ -62,9 +62,9 @@ struct RHIRenderPassInfo
 
 struct DrawInfo
 {
-	RHIIndexBuffer*      IndexBuffer;
-	RHIVertexBuffer*     VertexBuffer;
-	EPrimitiveTopology   PrimitiveTopology;
+	RHIIndexBuffer*           IndexBuffer;
+	RHIVertexBuffer*          VertexBuffer;
+	RHIPipelineStateObject*   PSO;
 };
 
 class IRHIDevice
@@ -108,12 +108,14 @@ public:
 	virtual RHIVertexBuffer* CreateVertexBuffer() = 0;
 	virtual RHIShader* CreateShader() = 0;
 	virtual RHIPipelineStateObject* CreatePipelineStateObject() = 0;
+	virtual RHIConstantBuffer* CreateConstantBuffer() = 0;
 
 	virtual void BuildTexture(RHITexture* Texture) = 0;
 	virtual void BuildIndexBuffer(RHIIndexBuffer* IndexBuffer) = 0;
 	virtual void BuildVertexBuffer(RHIVertexBuffer* VertexBuffer) = 0;
 	virtual void BuildShader(RHIShader* Shader) = 0;
 	virtual void BuildPipelineStateObject(RHIPipelineStateObject* PSO) = 0;
+	virtual void BuildConstantBuffer(RHIConstantBuffer* ConstantBuffer) = 0;
 
 
 	virtual void SetPipelineStateObject(RHIPipelineStateObject* PSO) = 0;

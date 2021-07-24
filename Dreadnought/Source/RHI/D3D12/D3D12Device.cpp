@@ -6,6 +6,7 @@
 #include "D3D12Shader.h"
 #include "D3D12PipelineStateObject.h"
 #include "D3D12RenderTarget.h"
+#include "D3D12ConstantBuffer.h"
 
 void D3D12Device::Init()
 {
@@ -129,6 +130,16 @@ void D3D12Device::CreateSwapChain(
 	ThrowIfFailed(Device->CreateDescriptorHeap(
 		&DsvHeapDesc,
 		IID_PPV_ARGS(&DsvHeap)));
+
+	//Create CBV/SRV/UAV Descriptor Heap
+	D3D12_DESCRIPTOR_HEAP_DESC CbvSrvUavDesc;
+	CbvSrvUavDesc.NumDescriptors = 1;
+	CbvSrvUavDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	CbvSrvUavDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+	CbvSrvUavDesc.NodeMask = 0;
+	ThrowIfFailed(Device->CreateDescriptorHeap(
+		&CbvSrvUavDesc,
+		IID_PPV_ARGS(&CbvSrvUavHeap)));
 }
 
 void D3D12Device::Resize(
@@ -350,6 +361,11 @@ RHIPipelineStateObject* D3D12Device::CreatePipelineStateObject()
 	return new D3D12PipelineStateObject();
 }
 
+RHIConstantBuffer* D3D12Device::CreateConstantBuffer()
+{
+	return new D3D12ConstantBuffer();
+}
+
 void D3D12Device::SetViewport(float X, float Y, float Width, float Height, float MinDepth, float MaxDepth) const
 {
 	D3D12_VIEWPORT VP;
@@ -551,6 +567,19 @@ void D3D12Device::BuildTexture(RHITexture* Tex)
 	D3DTexture->GetResource()->SetName(Desc.Name.c_str());
 }
 
+ComPtr<ID3D12RootSignature> D3D12Device::CreateRootSignature(ComPtr<ID3DBlob>& Blob)
+{
+	ComPtr<ID3D12RootSignature> RootSignature;
+
+	ThrowIfFailed(Device->CreateRootSignature(
+		0,
+		Blob->GetBufferPointer(),
+		Blob->GetBufferSize(),
+		IID_PPV_ARGS(&RootSignature)));
+
+	return RootSignature;
+}
+
 ComPtr<ID3D12Resource> D3D12Device::CreateDefaultBuffer(
 	const void* Data,
 	uint32 SizeInBytes,
@@ -623,35 +652,6 @@ void D3D12Device::BuildShader(RHIShader* Shader)
 
 void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 {
-	CD3DX12_ROOT_PARAMETER slotRootParameter[1];
-
-	// Create a single descriptor table of CBVs.
-	CD3DX12_DESCRIPTOR_RANGE cbvTable;
-	cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-	slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
-
-	// A root signature is an array of root parameters.
-	CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameter, 0, nullptr,
-		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-
-	// create a root signature with a single slot which points to a descriptor range consisting of a single constant buffer
-	ComPtr<ID3DBlob> serializedRootSig = nullptr;
-	ComPtr<ID3DBlob> errorBlob = nullptr;
-	HRESULT hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1,
-		serializedRootSig.GetAddressOf(), errorBlob.GetAddressOf());
-
-	if (errorBlob != nullptr)
-	{
-		::OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-	}
-	ThrowIfFailed(hr);
-
-	ThrowIfFailed(Device->CreateRootSignature(
-		0,
-		serializedRootSig->GetBufferPointer(),
-		serializedRootSig->GetBufferSize(),
-		IID_PPV_ARGS(&RootSignature)));
-
 	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)PSO;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC PSODesc;
 	ZeroMemory(&PSODesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
@@ -661,7 +661,7 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 	std::vector< D3D12_INPUT_ELEMENT_DESC>       VertexLayout;
 	VertexLayout = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 } };
 	PSODesc.InputLayout = { VertexLayout.data() , 1 };
-	PSODesc.pRootSignature = RootSignature.Get();
+	PSODesc.pRootSignature = D3DPSO->GetRootSignature().Get();
 	PSODesc.VS.pShaderBytecode = VertexShader->GetShaderCode()->GetBufferPointer();
 	PSODesc.VS.BytecodeLength = VertexShader->GetShaderCode()->GetBufferSize();
 	if (PixelShader)
@@ -735,6 +735,24 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 	ThrowIfFailed(Device->CreateGraphicsPipelineState(&PSODesc, IID_PPV_ARGS(&D3DPSO->GetPSO())));
 }
 
+void D3D12Device::BuildConstantBuffer(RHIConstantBuffer* ConstantBuffer)
+{
+	D3D12ConstantBuffer* D3DConstantBuffer = (D3D12ConstantBuffer*)ConstantBuffer;
+	uint32 ElementSize = D3DConstantBuffer->GetElementSize();
+	uint32 ElementCount = D3DConstantBuffer->GetElementCount();
+	uint32 Size = GMath::RoundUp256(ElementSize * ElementCount);
+
+	CD3DX12_HEAP_PROPERTIES Properties(D3D12_HEAP_TYPE_UPLOAD);
+	CD3DX12_RESOURCE_DESC BufferDesc = CD3DX12_RESOURCE_DESC::Buffer(Size);
+	ThrowIfFailed(Device->CreateCommittedResource(
+		&Properties,
+		D3D12_HEAP_FLAG_NONE,
+		&BufferDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&D3DConstantBuffer->GetResource())));
+}
+
 void D3D12Device::SetPipelineStateObject(RHIPipelineStateObject* PSO)
 {
 	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)PSO;
@@ -745,12 +763,21 @@ void D3D12Device::DrawElements(const DrawInfo& Info)
 {
 	ThrowIfFalse(Info.VertexBuffer != nullptr, "VertexBuffer Is None");
 
-	CommandList->SetGraphicsRootSignature(RootSignature.Get());
+	D3D12PipelineStateObject* D3DPSO = (D3D12PipelineStateObject*)Info.PSO;
+	SetPipelineStateObject(Info.PSO);
+
+	CommandList->SetGraphicsRootSignature(D3DPSO->GetRootSignature().Get());
+	/*ID3D12DescriptorHeap* DescriptorHeap[] = { CbvSrvUavHeap.Get() };
+	CommandList->SetDescriptorHeaps(_countof(DescriptorHeap), DescriptorHeap);
+	CommandList->SetGraphicsRootDescriptorTable(1, CbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart());*/
+	D3D12ConstantBuffer* ConstantBuffer = (D3D12ConstantBuffer*)Info.PSO->ConstantBuffer;
+	D3D12_GPU_VIRTUAL_ADDRESS Address = ConstantBuffer->GetResource()->GetGPUVirtualAddress();
+	CommandList->SetGraphicsRootConstantBufferView(0, Address);
 
 	D3D12VertexBuffer* D3DVB = (D3D12VertexBuffer*)Info.VertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView = D3DVB->GetVertexBufferView();
 	CommandList->IASetVertexBuffers(0, 1, &VertexBufferView);
-	CommandList->IASetPrimitiveTopology(PrimitiveTopologyMap[(uint32)Info.PrimitiveTopology]);
+	CommandList->IASetPrimitiveTopology(PrimitiveTopologyMap[(uint32)Info.PSO->PrimitiveTopology]);
 
 	bool IndexExists = Info.IndexBuffer != nullptr;
 	if (IndexExists)
