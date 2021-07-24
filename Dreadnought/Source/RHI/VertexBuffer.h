@@ -5,10 +5,8 @@ class RHIVertexBuffer
 public:
 	virtual ~RHIVertexBuffer() {}
 
-	virtual void* GetVertexLayout() = 0;
-
 public:
-	void SetData(uint32 Count, std::vector<float>& Data, std::vector<ETextureFormat>& Layout);
+	void SetData(uint32 Count, std::vector<float>& Data);
 
 	uint32 GetSizePerVertex() const;
 	uint32 GetVertexCount() const;
@@ -18,6 +16,5 @@ public:
 protected:
 	uint32                            SizeInBytes;
 	uint32                            VertexCount;
-	std::vector<ETextureFormat>       VertexLayout;
 	std::vector<float>                VertexData;
 };

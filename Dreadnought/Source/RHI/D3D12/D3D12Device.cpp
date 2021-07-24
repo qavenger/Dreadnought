@@ -658,9 +658,8 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 	D3D12Shader* VertexShader = (D3D12Shader*)D3DPSO->VertexShader;
 	D3D12Shader* PixelShader = (D3D12Shader*)D3DPSO->PixelShader;
 	D3D12Shader* GeometryShader = (D3D12Shader*)D3DPSO->GeometryShader;
-	std::vector< D3D12_INPUT_ELEMENT_DESC>       VertexLayout;
-	VertexLayout = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 } };
-	PSODesc.InputLayout = { VertexLayout.data() , 1 };
+	PSODesc.InputLayout.pInputElementDescs = D3DPSO->GetInputLayout();
+	PSODesc.InputLayout.NumElements = D3DPSO->GetInputLayoutSize();
 	PSODesc.pRootSignature = D3DPSO->GetRootSignature().Get();
 	PSODesc.VS.pShaderBytecode = VertexShader->GetShaderCode()->GetBufferPointer();
 	PSODesc.VS.BytecodeLength = VertexShader->GetShaderCode()->GetBufferSize();

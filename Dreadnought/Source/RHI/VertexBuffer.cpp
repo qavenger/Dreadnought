@@ -1,13 +1,12 @@
 #include "stdafx.h"
 #include "VertexBuffer.h"
 
-void RHIVertexBuffer::SetData(uint32 Count, std::vector<float>& Data, std::vector<ETextureFormat>& Layout)
+void RHIVertexBuffer::SetData(uint32 Count, std::vector<float>& Data)
 {
 	VertexCount = Count;
 	SizeInBytes = (uint32)Data.size() * sizeof(float);
 
 	VertexData = Data;
-	VertexLayout = Layout;
 }
 
 uint32 RHIVertexBuffer::GetSizePerVertex() const

@@ -14,9 +14,9 @@ void Mesh::Build(IRHIDevice* Device) const
 	struct PerObjectData
 	{
 		XMFLOAT4X4 WVP;
-		XMFLOAT4 Color;
+		XMFLOAT3 Color;
 	} Data;
-	Data.Color = { 1,0,1,0 };
+	Data.Color = { -5, 0, -5 };
 	XMFLOAT3 EyePosition = XMFLOAT3(-5, 0, -5);
 	XMFLOAT3 CenterPosition = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 Up = XMFLOAT3(0, 1, 0);
