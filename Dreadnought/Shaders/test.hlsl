@@ -1,46 +1,41 @@
 struct VertexIn
 {
 	float3 Position  : POSITION;
-	//	float4 Color : COLOR;
+	float3 Normal : Normal;
 };
 
 struct VertexOut
 {
 	float4 Position  : SV_POSITION;
 	float3 WorldPosition : COLOR;
-	//	float4 Color : COLOR;
+	float3 WorldNormal : Normal;
 };
 
 cbuffer OutColor : register(b0)
 {
 	float4x4 WVP;
-	float3 Color;
+	float3 CameraPosition;
 };
 
-cbuffer CC : register(b1)
+cbuffer TT : register(b1)
 {
-	float b;
-};
+	float Intensity;
+}
 
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 
-	vout.Position = mul(WVP, float4(vin.Position, 1.f));
+	vout.Position = mul(float4(vin.Position, 1.f), WVP);
 	vout.WorldPosition = vin.Position;
+	vout.WorldNormal = vin.Normal.xyz;
 
 	return vout;
 }
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	float3 L = normalize(float3(.2, .3, 1));
-	//return float4(1,1,1,Color.r);
-	float3 x = ddx(pin.WorldPosition);
-	float3 y = ddy(pin.WorldPosition);
-	float3 n = normalize(cross(x, y));
-
-	float nol = saturate( dot(n, L) );
-
-	return float4(nol, nol, nol, Color.r);
+	float3 PixelToCamera = normalize(CameraPosition - pin.WorldPosition);
+	float3 L = normalize(float3(.18, .3, 1));
+	return float4(dot(L, pin.WorldNormal).xxx * Intensity, 1 + PixelToCamera.x);
 }

@@ -658,9 +658,8 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 	D3D12Shader* VertexShader = (D3D12Shader*)D3DPSO->VertexShader;
 	D3D12Shader* PixelShader = (D3D12Shader*)D3DPSO->PixelShader;
 	D3D12Shader* GeometryShader = (D3D12Shader*)D3DPSO->GeometryShader;
-	std::vector< D3D12_INPUT_ELEMENT_DESC>       VertexLayout;
-	VertexLayout = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 } };
-	PSODesc.InputLayout = { VertexLayout.data() , 1 };
+	PSODesc.InputLayout.pInputElementDescs = D3DPSO->GetInputLayout();
+	PSODesc.InputLayout.NumElements = D3DPSO->GetInputLayoutSize();
 	PSODesc.pRootSignature = D3DPSO->GetRootSignature().Get();
 	PSODesc.VS.pShaderBytecode = VertexShader->GetShaderCode()->GetBufferPointer();
 	PSODesc.VS.BytecodeLength = VertexShader->GetShaderCode()->GetBufferSize();
@@ -674,7 +673,7 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 		PSODesc.GS.pShaderBytecode = GeometryShader->GetShaderCode()->GetBufferPointer();
 		PSODesc.GS.BytecodeLength = GeometryShader->GetShaderCode()->GetBufferSize();
 	}
-	PSODesc.RasterizerState.CullMode = CullModeMap[(uint32)ECullMode::CM_None];
+	PSODesc.RasterizerState.CullMode = CullModeMap[(uint32)D3DPSO->CullMode];
 	PSODesc.RasterizerState.FillMode = FillModeMap[(uint32)D3DPSO->FillMode];
 	PSODesc.RasterizerState.FrontCounterClockwise = false;
 	PSODesc.RasterizerState.DepthBias = 0;
@@ -770,14 +769,18 @@ void D3D12Device::DrawElements(const DrawInfo& Info)
 	/*ID3D12DescriptorHeap* DescriptorHeap[] = { CbvSrvUavHeap.Get() };
 	CommandList->SetDescriptorHeaps(_countof(DescriptorHeap), DescriptorHeap);
 	CommandList->SetGraphicsRootDescriptorTable(1, CbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart());*/
-	D3D12ConstantBuffer* ConstantBuffer = (D3D12ConstantBuffer*)Info.PSO->ConstantBuffer;
-	D3D12_GPU_VIRTUAL_ADDRESS Address = ConstantBuffer->GetResource()->GetGPUVirtualAddress();
-	CommandList->SetGraphicsRootConstantBufferView(0, Address);
+	ThrowIfFalse(D3DPSO->ConstantBuffers.size() == D3DPSO->GetShaderConstantBuffersCount(), "Input size of constant buffer must be same as the size of shader constant buffer");
+	for (uint32 Index = 0; Index < Info.PSO->ConstantBuffers.size(); ++Index)
+	{
+		D3D12ConstantBuffer* D3DCB = (D3D12ConstantBuffer*)D3DPSO->ConstantBuffers[Index];
+		D3D12_GPU_VIRTUAL_ADDRESS Address = D3DCB->GetResource()->GetGPUVirtualAddress();
+		CommandList->SetGraphicsRootConstantBufferView(Index, Address);
+	}
 
 	D3D12VertexBuffer* D3DVB = (D3D12VertexBuffer*)Info.VertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView = D3DVB->GetVertexBufferView();
 	CommandList->IASetVertexBuffers(0, 1, &VertexBufferView);
-	CommandList->IASetPrimitiveTopology(PrimitiveTopologyMap[(uint32)Info.PSO->PrimitiveTopology]);
+	CommandList->IASetPrimitiveTopology(PrimitiveTopologyMap[(uint32)D3DPSO->PrimitiveTopology]);
 
 	bool IndexExists = Info.IndexBuffer != nullptr;
 	if (IndexExists)

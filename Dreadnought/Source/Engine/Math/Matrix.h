@@ -81,10 +81,22 @@ struct _Matrix
 
 struct TransformMatrix : public _Matrix
 {
-	TransformMatrix(const _Vector& xAxis, const _Vector& yAxis, const _Vector& zAxis, const _Vector& origin);
+	TransformMatrix(const _Rotator& rotation, const _Vector& scale, const _Vector& origin);
 };
 
 struct LookFromMatrix : public _Matrix
 {
 	LookFromMatrix(const _Vector& eyePos, const _Vector& lookDir, const _Vector& upVector);
+};
+
+struct PerspectiveMatrix : public _Matrix
+{
+	/// <summary>
+	/// Get a reversed z perspective matrix
+	/// </summary>
+	/// <param name="FOV">:			field of view in Y direction</param>
+	/// <param name="aspectRatio">:	aspect ratio width/height</param>
+	/// <param name="nearZ">:		near depth value(must > 0)</param>
+	/// <param name="farZ">:		far depth value</param>
+	PerspectiveMatrix(float FOV, float aspectRatio, float nearZ, float farZ);
 };

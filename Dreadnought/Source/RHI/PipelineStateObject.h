@@ -25,23 +25,23 @@ public:
 	virtual void Init() = 0;
 
 public:
-	BlendState                State;
-	EPrimitiveTopology        GsHsPrimitiveTopology;
-	EPrimitiveTopology        PrimitiveTopology;
-	ECullMode                 CullMode;
-	EFillMode                 FillMode;
-	RHIShader*                VertexShader;
-	RHIShader*                PixelShader;
-	RHIShader*                GeometryShader;
-	RHIShader*                ComputerShader;
-	RHIConstantBuffer*        ConstantBuffer;
-	EDepthFunction            DepthFunction;
-	bool                      EnableDepthTest;
-	bool                      EnableDepthWrite;
-	bool                      EnableStencilTest;
+	BlendState                             State;
+	EPrimitiveTopology                     GsHsPrimitiveTopology;
+	EPrimitiveTopology                     PrimitiveTopology;
+	ECullMode                              CullMode;
+	EFillMode                              FillMode;
+	RHIShader*                             VertexShader;
+	RHIShader*                             PixelShader;
+	RHIShader*                             GeometryShader;
+	RHIShader*                             ComputerShader;
+	std::vector<RHIConstantBuffer*>        ConstantBuffers;
+	EDepthFunction                         DepthFunction;
+	bool                                   EnableDepthTest;
+	bool                                   EnableDepthWrite;
+	bool                                   EnableStencilTest;
 
-	uint32                    NumRenderTarget;
-	bool                      IsBackbuffer;
-	RHIRenderTarget*          SceneColorRenderTarget[MAX_RENDER_TARGET];
-	RHIRenderTarget*          DepthStencilRenderTarget;
+	uint32                                 NumRenderTarget;
+	bool                                   IsBackbuffer;
+	RHIRenderTarget*                       SceneColorRenderTarget[MAX_RENDER_TARGET];
+	RHIRenderTarget*                       DepthStencilRenderTarget;
 };

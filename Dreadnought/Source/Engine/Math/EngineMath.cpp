@@ -597,18 +597,18 @@ _Rotator _Matrix::ToRotator() const
 	return rs;
 }
 
-TransformMatrix::TransformMatrix(const _Vector& xAxis, const _Vector& yAxis, const _Vector& zAxis, const _Vector& origin)
-	:
-	_Matrix(
-		xAxis.x, xAxis.y, xAxis.z, 0.0f,
-		yAxis.x, yAxis.y, yAxis.z, 0.0f,
-		zAxis.x, zAxis.y, zAxis.z, 0.0f,
-		origin.x, origin.y, origin.z, 1.0f
-	)
+TransformMatrix::TransformMatrix(const _Rotator& rotation, const _Vector& scale, const _Vector& origin)
 {
 }
 
 LookFromMatrix::LookFromMatrix(const _Vector& eyePos, const _Vector& lookDir, const _Vector& upVector)
 {
+	_Vector forward = lookDir.SafeNormalize();
+	_Vector right = Cross(upVector, forward).SafeNormalize();
+	_Vector up = Cross(forward, right);
 
+	M[0][0] = forward.x;		 M[0][1] = right.x;			M[0][2] = up.x;			M[0][3] = 0;
+	M[1][0] = forward.y;		 M[1][1] = right.y;			M[1][2] = up.y;			M[1][3] = 0;
+	M[2][0] = forward.z;		 M[2][1] = right.z;			M[2][2] = up.z;			M[2][3] = 0;
+	M[3][0] = forward | -eyePos; M[3][1] = right | -eyePos;	M[3][2] = up | -eyePos;	M[3][3] = 1;
 }
