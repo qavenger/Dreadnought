@@ -22,8 +22,8 @@ RHIPipelineStateObject::~RHIPipelineStateObject()
 		delete VertexShader;
 	if (PixelShader)
 		delete PixelShader;
-	if (ConstantBuffer)
-		delete ConstantBuffer;
+	for(RHIConstantBuffer* CB : ConstantBuffers)
+		delete CB;
 }
 
 RHIPipelineStateObject::RHIPipelineStateObject()
@@ -50,7 +50,6 @@ RHIPipelineStateObject::RHIPipelineStateObject()
 	PixelShader = nullptr;
 	GeometryShader = nullptr;
 	ComputerShader = nullptr;
-	ConstantBuffer = nullptr;
 
 	DepthFunction = EDepthFunction::DF_Less;
 	EnableDepthTest = true;

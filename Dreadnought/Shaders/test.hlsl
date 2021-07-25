@@ -17,6 +17,11 @@ cbuffer OutColor : register(b0)
 	float3 CameraPosition;
 };
 
+cbuffer TT : register(b1)
+{
+	float Intensity;
+}
+
 VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
@@ -31,5 +36,5 @@ VertexOut VS(VertexIn vin)
 float4 PS(VertexOut pin) : SV_Target
 {
 	float3 PixelToCamera = normalize(CameraPosition - pin.WorldPosition);
-	return float4(dot(PixelToCamera, pin.WorldNormal).xxx, 1);
+	return float4(dot(PixelToCamera, pin.WorldNormal).xxx* Intensity, 1);
 }

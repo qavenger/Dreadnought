@@ -3,6 +3,13 @@
 #include "D3D12Shader.h"
 #include "D3D12Device.h"
 
+
+D3D12PipelineStateObject::D3D12PipelineStateObject()
+	:NumShaderConstantBuffers(0)
+{
+
+}
+
 void D3D12PipelineStateObject::Init()
 {
 	gDevice->BuildShader(VertexShader);
@@ -54,9 +61,9 @@ void D3D12PipelineStateObject::Init()
 	//Build Root Signature
 	D3D12_SHADER_DESC PixelShaderDesc;
 	PSCodeReflection->GetDesc(&PixelShaderDesc);
-	const uint32 NumConstantBuffer = PixelShaderDesc.ConstantBuffers;
-	std::vector<CD3DX12_ROOT_PARAMETER> RootParameters(NumConstantBuffer);
-	for (uint32 Index = 0; Index < NumConstantBuffer; ++Index)
+	NumShaderConstantBuffers = PixelShaderDesc.ConstantBuffers;
+	std::vector<CD3DX12_ROOT_PARAMETER> RootParameters(NumShaderConstantBuffers);
+	for (uint32 Index = 0; Index < NumShaderConstantBuffers; ++Index)
 	{
 		ID3D12ShaderReflectionConstantBuffer* CB = PSCodeReflection->GetConstantBufferByIndex(Index);
 		D3D12_SHADER_BUFFER_DESC ShaderBufferDesc;
@@ -65,7 +72,7 @@ void D3D12PipelineStateObject::Init()
 	}
 
 	CD3DX12_ROOT_SIGNATURE_DESC RootSignatureDesc;
-	RootSignatureDesc.NumParameters = NumConstantBuffer;
+	RootSignatureDesc.NumParameters = NumShaderConstantBuffers;
 	RootSignatureDesc.pParameters = &RootParameters[0];
 	RootSignatureDesc.NumStaticSamplers = 0;
 	RootSignatureDesc.pStaticSamplers = nullptr;
@@ -80,6 +87,8 @@ void D3D12PipelineStateObject::Init()
 	ThrowIfFailed(Result);
 
 	RootSignature = ((D3D12Device*)gDevice)->CreateRootSignature(SerializedRootSig);
+
+	gDevice->BuildPipelineStateObject(this);
 }
 
 ComPtr<ID3D12PipelineState>& D3D12PipelineStateObject::GetPSO()
@@ -100,4 +109,9 @@ const D3D12_INPUT_ELEMENT_DESC* D3D12PipelineStateObject::GetInputLayout() const
 uint32 D3D12PipelineStateObject::GetInputLayoutSize() const
 {
 	return InputLayout.size();
+}
+
+uint32 D3D12PipelineStateObject::GetShaderConstantBuffersCount() const
+{
+	return NumShaderConstantBuffers;
 }

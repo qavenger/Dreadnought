@@ -9,15 +9,14 @@ void Mesh::Build(IRHIDevice* Device) const
 	PSO->VertexShader = VertexShader;
 	PSO->PixelShader = PixelShader;
 	PSO->Init();
-	gDevice->BuildPipelineStateObject(PSO);
 
 	struct PerObjectData
 	{
 		XMFLOAT4X4 WVP;
 		XMFLOAT3 Color;
 	} Data;
-	Data.Color = { -5, 0, -5 };
-	XMFLOAT3 EyePosition = XMFLOAT3(-5, 0, -5);
+	Data.Color = { -5, 3, -5 };
+	XMFLOAT3 EyePosition = XMFLOAT3(-5, 3, -5);
 	XMFLOAT3 CenterPosition = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 Up = XMFLOAT3(0, 1, 0);
 	XMMATRIX Trans = XMMatrixLookAtLH(XMLoadFloat3(&EyePosition), XMLoadFloat3(&CenterPosition), XMLoadFloat3(&Up));
@@ -28,7 +27,14 @@ void Mesh::Build(IRHIDevice* Device) const
 	ConstantBuffer->SetElementSize(sizeof(PerObjectData));
 	gDevice->BuildConstantBuffer(ConstantBuffer);
 	ConstantBuffer->UpdateData(&Data, sizeof(PerObjectData), 0);
-	PSO->ConstantBuffer = ConstantBuffer;
+	PSO->ConstantBuffers.push_back(ConstantBuffer);
+	RHIConstantBuffer* Intensity = gDevice->CreateConstantBuffer();
+	Intensity->SetElementCount(1);
+	Intensity->SetElementSize(4);
+	gDevice->BuildConstantBuffer(Intensity);
+	float Inst = 2.f;
+	Intensity->UpdateData(&Inst, 4, 0);
+	PSO->ConstantBuffers.push_back(Intensity);
 	gDevice->FlushCommandQueueSync();
 }
 

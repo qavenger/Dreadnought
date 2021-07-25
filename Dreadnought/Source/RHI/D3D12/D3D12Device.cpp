@@ -769,14 +769,18 @@ void D3D12Device::DrawElements(const DrawInfo& Info)
 	/*ID3D12DescriptorHeap* DescriptorHeap[] = { CbvSrvUavHeap.Get() };
 	CommandList->SetDescriptorHeaps(_countof(DescriptorHeap), DescriptorHeap);
 	CommandList->SetGraphicsRootDescriptorTable(1, CbvSrvUavHeap->GetGPUDescriptorHandleForHeapStart());*/
-	D3D12ConstantBuffer* ConstantBuffer = (D3D12ConstantBuffer*)Info.PSO->ConstantBuffer;
-	D3D12_GPU_VIRTUAL_ADDRESS Address = ConstantBuffer->GetResource()->GetGPUVirtualAddress();
-	CommandList->SetGraphicsRootConstantBufferView(0, Address);
+	ThrowIfFalse(D3DPSO->ConstantBuffers.size() == D3DPSO->GetShaderConstantBuffersCount(), "Input size of constant buffer must be same as the size of shader constant buffer");
+	for (uint32 Index = 0; Index < Info.PSO->ConstantBuffers.size(); ++Index)
+	{
+		D3D12ConstantBuffer* D3DCB = (D3D12ConstantBuffer*)D3DPSO->ConstantBuffers[Index];
+		D3D12_GPU_VIRTUAL_ADDRESS Address = D3DCB->GetResource()->GetGPUVirtualAddress();
+		CommandList->SetGraphicsRootConstantBufferView(Index, Address);
+	}
 
 	D3D12VertexBuffer* D3DVB = (D3D12VertexBuffer*)Info.VertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView = D3DVB->GetVertexBufferView();
 	CommandList->IASetVertexBuffers(0, 1, &VertexBufferView);
-	CommandList->IASetPrimitiveTopology(PrimitiveTopologyMap[(uint32)Info.PSO->PrimitiveTopology]);
+	CommandList->IASetPrimitiveTopology(PrimitiveTopologyMap[(uint32)D3DPSO->PrimitiveTopology]);
 
 	bool IndexExists = Info.IndexBuffer != nullptr;
 	if (IndexExists)
