@@ -141,7 +141,7 @@ FORCEINLINE _Vector::_Vector(const _Vector4& v)
 	CheckNan();
 }
 
-std::string _Matrix::ToString() const
+FORCEINLINE std::string _Matrix::ToString() const
 {
 	std::string rs;
 	rs += FormatString("[%g %g %g %g] ", M[0][0], M[0][1], M[0][2], M[0][3]);
@@ -151,7 +151,7 @@ std::string _Matrix::ToString() const
 	return rs;
 }
 
-uint32 _Matrix::Hash() const
+FORCEINLINE uint32 _Matrix::Hash() const
 {
 	uint32 rs = 0;
 	const uint32* ptr = (uint32*)this;
@@ -162,18 +162,16 @@ uint32 _Matrix::Hash() const
 	return rs;
 }
 
-FORCEINLINE _Matrix::_Matrix(_Vector x, _Vector y, _Vector z, _Vector w)
+ _Matrix::_Matrix(const _Vector& x, const _Vector& y, const _Vector& z, const _Vector& w)
 	:
 	M{
 	x.x, x.y, x.z, 0.0f,
 	y.x, y.y, y.z, 0.0f,
 	z.x, z.y, z.z, 0.0f,
 	w.x, w.y, w.z, 1.0f
-	}
-{
-}
+} {}
 
-FORCEINLINE _Matrix::_Matrix(_Vector4 x, _Vector4 y, _Vector4 z, _Vector4 w)
+_Matrix::_Matrix(const _Vector4& x, const _Vector4& y, const _Vector4& z, const _Vector4& w)
 	:
 	M{
 	x.x, x.y, x.z, x.w, 
@@ -234,107 +232,6 @@ _Matrix _Matrix::operator*(const _Matrix& m) const
 	return result;
 }
 
-_Matrix _Matrix::operator+(const _Matrix& m) const
-{
-	_Matrix result;
-	result.M[0][0] = M[0][0] + m.M[0][0];  result.M[1][0] = M[1][0] + m.M[1][0]; 
-	result.M[0][1] = M[0][1] + m.M[0][1];  result.M[1][1] = M[1][1] + m.M[1][1]; 
-	result.M[0][2] = M[0][2] + m.M[0][2];  result.M[1][2] = M[1][2] + m.M[1][2]; 
-	result.M[0][3] = M[0][3] + m.M[0][3];  result.M[1][3] = M[1][3] + m.M[1][3]; 
-										   
-	result.M[2][0] = M[2][0] + m.M[2][0];  result.M[3][0] = M[3][0] + m.M[3][0];
-	result.M[2][1] = M[2][1] + m.M[2][1];  result.M[3][1] = M[3][1] + m.M[3][1];
-	result.M[2][2] = M[2][2] + m.M[2][2];  result.M[3][2] = M[3][2] + m.M[3][2];
-	result.M[2][3] = M[2][3] + m.M[2][3];  result.M[3][3] = M[3][3] + m.M[3][3];
-	return result;
-}
-
-void _Matrix::operator+=(const _Matrix& m)
-{
-	M[0][0] = M[0][0] + m.M[0][0];  M[1][0] = M[1][0] + m.M[1][0];
-	M[0][1] = M[0][1] + m.M[0][1];  M[1][1] = M[1][1] + m.M[1][1];
-	M[0][2] = M[0][2] + m.M[0][2];  M[1][2] = M[1][2] + m.M[1][2];
-	M[0][3] = M[0][3] + m.M[0][3];  M[1][3] = M[1][3] + m.M[1][3];
-
-	M[2][0] = M[2][0] + m.M[2][0];  M[3][0] = M[3][0] + m.M[3][0];
-	M[2][1] = M[2][1] + m.M[2][1];  M[3][1] = M[3][1] + m.M[3][1];
-	M[2][2] = M[2][2] + m.M[2][2];  M[3][2] = M[3][2] + m.M[3][2];
-	M[2][3] = M[2][3] + m.M[2][3];  M[3][3] = M[3][3] + m.M[3][3];
-}
-
-_Matrix _Matrix::operator*(float other) const
-{
-	_Matrix result;
-	result.M[0][0] = M[0][0] * other;  result.M[1][0] = M[1][0] * other;
-	result.M[0][1] = M[0][1] * other;  result.M[1][1] = M[1][1] * other;
-	result.M[0][2] = M[0][2] * other;  result.M[1][2] = M[1][2] * other;
-	result.M[0][3] = M[0][3] * other;  result.M[1][3] = M[1][3] * other;
-							 									
-	result.M[2][0] = M[2][0] * other;  result.M[3][0] = M[3][0] * other;
-	result.M[2][1] = M[2][1] * other;  result.M[3][1] = M[3][1] * other;
-	result.M[2][2] = M[2][2] * other;  result.M[3][2] = M[3][2] * other;
-	result.M[2][3] = M[2][3] * other;  result.M[3][3] = M[3][3] * other;
-	return result;
-}
-
-void _Matrix::operator*=(float other)
-{
-	M[0][0] = M[0][0] * other;  M[1][0] = M[1][0] * other;
-	M[0][1] = M[0][1] * other;  M[1][1] = M[1][1] * other;
-	M[0][2] = M[0][2] * other;  M[1][2] = M[1][2] * other;
-	M[0][3] = M[0][3] * other;  M[1][3] = M[1][3] * other;
-
-	M[2][0] = M[2][0] * other;  M[3][0] = M[3][0] * other;
-	M[2][1] = M[2][1] * other;  M[3][1] = M[3][1] * other;
-	M[2][2] = M[2][2] * other;  M[3][2] = M[3][2] * other;
-	M[2][3] = M[2][3] * other;  M[3][3] = M[3][3] * other;
-}
-
-bool _Matrix::operator==(_Matrix m) const
-{
-	for (int32 x = 0; x < 4; ++x)
-	{
-		for (int32 y = 0; y < 4; ++y)
-		{
-			if (M[x][y] != m.M[x][y])
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool _Matrix::IsEquals(_Matrix m, float epsilon) const
-{
-	for (int32 x = 0; x < 4; ++x)
-	{
-		for (int32 y = 0; y < 4; ++y)
-		{
-			if (GMath::Abs(M[x][y] - m.M[x][y]) > epsilon)
-			{
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-bool _Matrix::operator!=(_Matrix m) const
-{
-	for (int32 x = 0; x < 4; ++x)
-	{
-		for (int32 y = 0; y < 4; ++y)
-		{
-			if (M[x][y] != m.M[x][y])
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 _Vector4 _Matrix::TransformVector4(const _Vector4& v) const
 {
 	_Vector4 result;
@@ -366,15 +263,6 @@ _Vector4 _Matrix::InverseTransformVector(const _Vector& v) const
 	return inv.TransformVector(v);
 }
 
-_Matrix _Matrix::GetTransposed() const
-{
-	return _Matrix(
-		M[0][0], M[1][0], M[2][0], M[3][0],
-		M[0][1], M[1][1], M[2][1], M[3][1],
-		M[0][2], M[1][2], M[2][2], M[3][2],
-		M[0][3], M[1][3], M[2][3], M[3][3]
-	);
-}
 
 _Matrix _Matrix::GetTransposeAdjoint() const
 {
@@ -426,7 +314,7 @@ float _Matrix::Determinant() const
 				);
 }
 
-float _Matrix::RotDeterminant() const
+FORCEINLINE float _Matrix::RotDeterminant() const
 {
 	return
 		M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) -
@@ -489,7 +377,7 @@ _Vector _Matrix::GetScaledAxis(uint32 index) const
 	return _Vector(M[index][0], M[index][1], M[index][2]);
 }
 
-_Vector _Matrix::GetScaledAxis(_Vector& X, _Vector& Y, _Vector& Z) const
+void _Matrix::GetScaledAxis(_Vector& X, _Vector& Y, _Vector& Z) const
 {
 	X.x = M[0][0]; X.y = M[0][1]; X.z = M[0][2];
 	Y.x = M[1][0]; Y.y = M[1][1]; Y.z = M[1][2];
@@ -502,7 +390,7 @@ _Vector _Matrix::GetUnitAxis(uint32 index) const
 	return _Vector(M[index][0], M[index][1], M[index][2]).SafeNormalize();
 }
 
-_Vector _Matrix::GetUnitAxis(_Vector& X, _Vector& Y, _Vector& Z) const
+void _Matrix::GetUnitAxis(_Vector& X, _Vector& Y, _Vector& Z) const
 {
 	GetScaledAxis(X, Y, Z);
 	X.Normalize();

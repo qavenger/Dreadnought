@@ -122,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);PLATFORM_WINDOWS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\Source;..\Source\Shared;..\Source\Engine\Core;..\Source\Engine\Math</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\Source;..\Source\Shared;..\Source\Engine\Core;..\Source\Engine\Math;..\..\Shaders</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
@@ -248,6 +248,11 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Dreadnought.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Shaders\test.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

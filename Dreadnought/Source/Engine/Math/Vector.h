@@ -45,13 +45,13 @@ public:
 	static const _Vector UpVector;
 	// Down Vector ( 0, 0, -1 )
 	static const _Vector DownVector;
-	// Left Vector ( 1, 0, 0 )
+	// Forward Vector ( 1, 0, 0 )
 	static const _Vector ForwardVector;
-	// Right Vector ( -1, 0, 0 )
+	// Backward Vector ( -1, 0, 0 )
 	static const _Vector BackwardVector;
-	// Left Vector ( 0, 1, 0 )
+	// Left Vector ( 0, -1, 0 )
 	static const _Vector LeftVector;
-	// Right Vector ( 0, -1, 0 )
+	// Right Vector ( 0, 1, 0 )
 	static const _Vector RightVector;
 
 	FORCEINLINE float operator[](size_t Index)const

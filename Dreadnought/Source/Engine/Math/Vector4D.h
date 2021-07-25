@@ -12,6 +12,7 @@ public:
 public:
 	explicit FORCEINLINE _Vector4(bool bAsPoint = true);
 	explicit FORCEINLINE _Vector4(float x, float y, float z, float w = 1);
+
 	FORCEINLINE _Vector4(const _Vector2& v, float z, float w);
 	FORCEINLINE _Vector4(const _Vector2& v0, const _Vector2& v1);
 	FORCEINLINE _Vector4(const _Vector& v, float w);

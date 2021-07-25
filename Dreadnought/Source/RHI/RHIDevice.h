@@ -43,7 +43,7 @@ struct RHIRenderPassInfo
 
 	RHIRenderPassInfo()
 		: NumRenderTarget(1)
-		, ClearDepth(1.f)
+		, ClearDepth(0.f)
 		, ClearStencil(0)
 		, ClearDepthValid(true)
 		, ClearStencilValid(false)

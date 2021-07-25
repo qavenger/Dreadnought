@@ -45,6 +45,9 @@
     <Filter Include="Source\Engine\Math">
       <UniqueIdentifier>{1c14573a-55e5-4d86-8a67-8445b53e1bac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{35ce71bd-ee40-4239-acc9-191922e71afc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Entry\Entry.cpp">
@@ -318,5 +321,10 @@
     <ClInclude Include="..\Source\RHI\D3D12\D3D12ConstantBuffer.h">
       <Filter>Source\RHI\D3D12</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Shaders\test.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

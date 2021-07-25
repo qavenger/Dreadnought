@@ -26,7 +26,7 @@ VertexOut VS(VertexIn vin)
 {
 	VertexOut vout;
 
-	vout.Position = mul(float4(vin.Position, 1.f), WVP);
+	vout.Position = mul(WVP, float4(vin.Position, 1.f));
 	vout.WorldPosition = vin.Position;
 
 	return vout;
@@ -34,5 +34,13 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-	return float4(pin.WorldPosition, Color.r);
+	float3 L = normalize(float3(.2, .3, 1));
+	//return float4(1,1,1,Color.r);
+	float3 x = ddx(pin.WorldPosition);
+	float3 y = ddy(pin.WorldPosition);
+	float3 n = normalize(cross(x, y));
+
+	float nol = saturate( dot(n, L) );
+
+	return float4(nol, nol, nol, Color.r);
 }

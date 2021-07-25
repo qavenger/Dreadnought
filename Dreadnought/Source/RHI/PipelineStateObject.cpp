@@ -52,7 +52,7 @@ RHIPipelineStateObject::RHIPipelineStateObject()
 	ComputerShader = nullptr;
 	ConstantBuffer = nullptr;
 
-	DepthFunction = EDepthFunction::DF_Less;
+	DepthFunction = EDepthFunction::DF_GreaterEqual;
 	EnableDepthTest = true;
 	EnableDepthWrite = true;
 	EnableStencilTest = false;

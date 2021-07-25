@@ -552,7 +552,7 @@ void D3D12Device::BuildTexture(RHITexture* Tex)
 
 	D3D12_CLEAR_VALUE ClearValue;
 	ClearValue.Format = TextureFormatMap[(uint32)Desc.Format];
-	ClearValue.DepthStencil.Depth = 1.f;
+	ClearValue.DepthStencil.Depth = 0.f;
 	ClearValue.DepthStencil.Stencil = 0;
 
 	//create resource
@@ -674,7 +674,7 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 		PSODesc.GS.pShaderBytecode = GeometryShader->GetShaderCode()->GetBufferPointer();
 		PSODesc.GS.BytecodeLength = GeometryShader->GetShaderCode()->GetBufferSize();
 	}
-	PSODesc.RasterizerState.CullMode = CullModeMap[(uint32)D3DPSO->CullMode];
+	PSODesc.RasterizerState.CullMode = CullModeMap[(uint32)ECullMode::CM_None];
 	PSODesc.RasterizerState.FillMode = FillModeMap[(uint32)D3DPSO->FillMode];
 	PSODesc.RasterizerState.FrontCounterClockwise = false;
 	PSODesc.RasterizerState.DepthBias = 0;

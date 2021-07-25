@@ -101,7 +101,7 @@ public:
 #undef Declare_MemberFunctionBinding
 
 	template<typename T, typename F>
-	static void BindKeyInputEvent(EKeyCode keyCode, EKeyInputState keyState, T* pObj, F pFunc)
+	static void BindKeyInputEvent(EKeyCode keyCode, EKeyInputState keyState, T * pObj, F pFunc)
 	{
 		s_Input->OnKeyInputEvent[(uint8)keyState][(uint8)keyCode].Bind(pObj, pFunc);
 	}

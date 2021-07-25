@@ -56,6 +56,7 @@ struct _Vector;
 struct _Vector4;
 struct _Rotator;
 struct _Quaternion;
+struct _Matrix;
 //typedef _Vector2 float2;
 
 typedef _Vector2 float2;
