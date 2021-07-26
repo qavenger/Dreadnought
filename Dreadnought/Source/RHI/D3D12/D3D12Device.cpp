@@ -679,7 +679,7 @@ void D3D12Device::BuildPipelineStateObject(RHIPipelineStateObject* PSO)
 	PSODesc.RasterizerState.DepthBias = 0;
 	PSODesc.RasterizerState.DepthBiasClamp = 0.f;
 	PSODesc.RasterizerState.SlopeScaledDepthBias = 0.f;
-	PSODesc.RasterizerState.DepthClipEnable = false;
+	PSODesc.RasterizerState.DepthClipEnable = true;
 	PSODesc.RasterizerState.MultisampleEnable = false;
 	PSODesc.RasterizerState.AntialiasedLineEnable = false;
 	PSODesc.RasterizerState.ForcedSampleCount = 0;
