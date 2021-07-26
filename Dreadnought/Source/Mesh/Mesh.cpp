@@ -101,7 +101,7 @@ void Mesh::Draw(IRHIDevice* Device)
 		float3 forward = (CenterPosition - EyePosition);
 		float3 right = float3::UpVector ^ forward;
 		Data.WVP =  LookFromMatrix(EyePosition, forward, float3::UpVector) * 
-					PerspectiveMatrix(GMath::Deg2Rad * 90.0f, 1024 / 720.0f, 0.1, 100.0f);
+					PerspectiveMatrix(GMath::Deg2Rad * 90.0f, 1024 / 720.0f, 0.1, 10.0f);
 		
 		Data.WVP = Data.WVP.GetTransposed();
 		//Data.WVP = Data.WVP.GetTransposed();

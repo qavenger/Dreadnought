@@ -132,10 +132,10 @@ bool _Matrix::operator!=(const _Matrix& m) const
 
 PerspectiveMatrix::PerspectiveMatrix(float FOV, float aspectRatio, float nearZ, float farZ)
 {
-	float xf = (1) / (nearZ - farZ);
+	float xf = (nearZ) / (nearZ - farZ);
 	float x = GMath::Tan(FOV * 0.5f);
 	M[0][0] = 0;				M[0][1] = 0;				M[0][2] = xf;				M[0][3] = 1;
-	M[1][0] = x/aspectRatio;				M[1][1] = 0;				M[1][2] = 0 ;				M[1][3] = 0;
+	M[1][0] = x/aspectRatio;	M[1][1] = 0;				M[1][2] = 0 ;				M[1][3] = 0;
 	M[2][0] = 0;				M[2][1] = x;				M[2][2] = 0 ;				M[2][3] = 0;
 	M[3][0] = 0;				M[3][1] = 0;				M[3][2] = -farZ*xf;			M[3][3] = 0;
 }
