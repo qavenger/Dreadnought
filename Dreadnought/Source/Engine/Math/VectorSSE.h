@@ -4,6 +4,8 @@
 #include <xmmintrin.h>
 #include <emmintrin.h>
 
+#define SIMD_ALIGNMENT (16)
+
 typedef __m128		VectorRegister;
 typedef __m128i		VectorRegisterInt;
 typedef __m128d		VectorRegisterDouble;
@@ -46,6 +48,38 @@ namespace SSE
 
 		_mm_store_ss(&result, x1);
 		return result;
+	}
+
+	FORCEINLINE static int32 TruncToInt(float f)
+	{
+		return _mm_cvtt_ss2si(_mm_set_ss(f));
+	}
+
+	FORCEINLINE static int32 FloorToInt(float f)
+	{
+		// from ue4
+		// Note: unlike the Generic solution and the SSE4 float solution, we implement FloorToInt using a rounding instruction, rather than implementing RoundToInt using a floor instruction.  
+		// We therefore need to do the same times-2 transform (with a slighly different formula) that RoundToInt does; see the note on RoundToInt
+		return _mm_cvt_ss2si(_mm_set_ss(f + f - 0.5f)) >> 1;
+	}
+
+	FORCEINLINE static int32 RoundToInt(float f)
+	{
+		// from ue4
+		// Note: the times-2 is to remove the rounding-to-nearest-even-number behavior that mm_cvt_ss2si uses when the fraction is .5
+		// The formula we uses causes the round instruction to always be applied to a an odd integer when the original value was 0.5, and eliminates the rounding-to-nearest-even-number behavior
+		// Input -> multiply by two and add .5 -> Round to nearest whole -> divide by two and truncate
+		// N -> (2N) + .5 -> 2N (or possibly 2N+1) -> N
+		// N + .5 -> 2N + 1.5 -> (round towards even now always means round up) -> 2N + 2 -> N + 1
+		return _mm_cvt_ss2si(_mm_set_ss(f + f + 0.5f)) >> 1;
+	}
+
+	FORCEINLINE static int32 CeilToInt(float f)
+	{
+		// from ue4
+		// Note: unlike the Generic solution and the SSE4 float solution, we implement CeilToInt using a rounding instruction, rather than a dedicated ceil instruction
+		// We therefore need to do the same times-2 transform (with a slighly different formula) that RoundToInt does; see the note on RoundToInt
+		return -(_mm_cvt_ss2si(_mm_set_ss(-0.5f - (f + f))) >> 1);
 	}
 
 #define ALIGN16 __declspec(align(16))
@@ -514,18 +548,18 @@ namespace SSE
 	FORCEINLINE VectorRegister MakeVectorRegister(uint32 x, uint32 y, uint32 z, uint32 w)
 	{
 		union { VectorRegister v; VectorRegisterInt i; } tmp;
-		tmp.i = _mm_setr_epi32(x, w, z, w);
+		tmp.i = _mm_setr_epi32(x, y, z, w);
 		return tmp.v;
 	}
 
 	FORCEINLINE VectorRegister MakeVectorRegister(float x, float y, float z, float w)
 	{
-		return _mm_setr_ps(x, w, z, w);
+		return _mm_setr_ps(x, y, z, w);
 	}
 
 	FORCEINLINE VectorRegisterInt MakeVectorRegisterInt(uint32 x, uint32 y, uint32 z, uint32 w)
 	{
-		return _mm_setr_epi32(x, w, z, w);
+		return _mm_setr_epi32(x, y, z, w);
 	}
 
 	namespace SSEMathConstant
@@ -623,9 +657,9 @@ namespace SSE
 		return _mm_loadu_ps((float*)ptr);
 	}
 
-#define VectorLoadFloat3(ptr) MakeVectorRegister( (const float*)(ptr)[0], (const float*)(ptr)[1], (const float*)(ptr)[2], 0.0f )
+#define VectorLoadFloat3(ptr) MakeVectorRegister( ((const float*)(ptr))[0], ((const float*)(ptr))[1], ((const float*)(ptr))[2], 0.0f )
 #define VectorLoadFloat3_W0(ptr) VectorLoadFloat3(ptr)
-#define VectorLoadFloat3_W1(ptr) MakeVectorRegister( (const float*)(ptr)[0], (const float*)(ptr)[1], (const float*)(ptr)[2], 1.0f )
+#define VectorLoadFloat3_W1(ptr) MakeVectorRegister( ((const float*)(ptr))[0], ((const float*)(ptr))[1], ((const float*)(ptr))[2], 1.0f )
 
 #define VectorLoadAligned(ptr) _mm_load_ps((const float*)(ptr))
 #define VectorLoadFloat1(ptr) _mm_load1_ps((const float*)(ptr))
@@ -1182,7 +1216,371 @@ namespace SSE
 
 	//TODO: Vectorize
 	FORCEINLINE VectorRegister VectorLog2(const VectorRegister& X);
+
+	namespace SSESinConstants
+	{
+		static const float p = 0.225f;
+		// 16 * sqrt(0.225)
+		static const float a = (16 * 0.47434164902525689979983403166491f);
+		// (1-0.225) / sqrt(0.225)
+		static const float b = (0.775 / 0.47434164902525689979983403166491f);
+
+		static const VectorRegister A = MakeVectorRegister(a, a, a, a);
+		static const VectorRegister B = MakeVectorRegister(b, b, b, b);
+	}
+
+	FORCEINLINE VectorRegister VectorSin(const VectorRegister& x)
+	{
+		//Sine approximation using a squared parabola restrained to f(0) = 0, f(PI) = 0, f(PI/2) = 1.
+	//based on a good discussion here http://forum.devmaster.net/t/fast-and-accurate-sine-cosine/9648
+	//After approx 2.5 million tests comparing to sin(): 
+	//Average error of 0.000128
+	//Max error of 0.001091
+		VectorRegister y = VectorMultiply(x, SSEMathConstant::OneOverTwoPi);
+		y = VectorSubtract(y, VectorFloor(VectorAdd(y, SSEMathConstant::FloatOneHalf)));
+		y = VectorMultiply(SSESinConstants::A, VectorMultiply(y, VectorSubtract(SSEMathConstant::FloatOneHalf, VectorAbs(y))));
+		return VectorMultiply(y, VectorAdd(SSESinConstants::B, VectorAbs(y)));
+	}
+
+	FORCEINLINE VectorRegister VectorCos(const VectorRegister& x)
+	{
+		return VectorSin(VectorAdd(x, SSEMathConstant::PiByTwo));
+	}
+
+	FORCEINLINE void VectorSinCos(VectorRegister* outSin, VectorRegister* outCos, const VectorRegister* inAngles)
+	{
+		// Map to [-pi, pi]
+		// X = A - 2pi * round(A/2pi)
+		// Note the round(), not truncate(). In this case round() can round halfway cases using round-to-nearest-even OR round-to-nearest.
+
+		// Quotient = round(A/2pi)
+		VectorRegister quotient = VectorMultiply(*inAngles, SSEMathConstant::OneOverTwoPi);
+		quotient = _mm_cvtepi32_ps(_mm_cvtps_epi32(quotient));
+		// X = A - 2pi * Quotient
+		VectorRegister x = VectorSubtract(*inAngles, VectorMultiply(SSEMathConstant::TwoPi, quotient));
+
+		// Map in [-pi/2,pi/2]
+		VectorRegister sign = VectorBitwiseAnd(x, SSEMathConstant::SignBit);
+		VectorRegister c = VectorBitwiseOr(SSEMathConstant::Pi, sign);  // pi when x >= 0, -pi when x < 0
+		VectorRegister absx = VectorAbs(x);
+		VectorRegister rflx = VectorSubtract(c, x);
+		VectorRegister comp = VectorCompareGT(absx, SSEMathConstant::PiByTwo);
+		x = VectorSelect(comp, rflx, x);
+		sign = VectorSelect(comp, SSEMathConstant::FloatMinusOne, SSEMathConstant::FloatOne);
+
+		const VectorRegister XSquared = VectorMultiply(x, x);
+		// 11-degree minimax approximation
+		//*ScalarSin = (((((-2.3889859e-08f * y2 + 2.7525562e-06f) * y2 - 0.00019840874f) * y2 + 0.0083333310f) * y2 - 0.16666667f) * y2 + 1.0f) * y;
+		const VectorRegister SinCoeff0 = MakeVectorRegister(1.0f, -0.16666667f, 0.0083333310f, -0.00019840874f);
+		const VectorRegister SinCoeff1 = MakeVectorRegister(2.7525562e-06f, -2.3889859e-08f, /*unused*/ 0.f, /*unused*/ 0.f);
+
+		VectorRegister S;
+		S = VectorReplicate(SinCoeff1, 1);
+		S = VectorMultiplyAdd(XSquared, S, VectorReplicate(SinCoeff1, 0));
+		S = VectorMultiplyAdd(XSquared, S, VectorReplicate(SinCoeff0, 3));
+		S = VectorMultiplyAdd(XSquared, S, VectorReplicate(SinCoeff0, 2));
+		S = VectorMultiplyAdd(XSquared, S, VectorReplicate(SinCoeff0, 1));
+		S = VectorMultiplyAdd(XSquared, S, VectorReplicate(SinCoeff0, 0));
+		*outSin = VectorMultiply(S, x);
+
+		// 10-degree minimax approximation
+		//*ScalarCos = sign * (((((-2.6051615e-07f * y2 + 2.4760495e-05f) * y2 - 0.0013888378f) * y2 + 0.041666638f) * y2 - 0.5f) * y2 + 1.0f);
+		const VectorRegister CosCoeff0 = MakeVectorRegister(1.0f, -0.5f, 0.041666638f, -0.0013888378f);
+		const VectorRegister CosCoeff1 = MakeVectorRegister(2.4760495e-05f, -2.6051615e-07f, /*unused*/ 0.f, /*unused*/ 0.f);
+
+		VectorRegister C;
+		C = VectorReplicate(CosCoeff1, 1);
+		C = VectorMultiplyAdd(XSquared, C, VectorReplicate(CosCoeff1, 0));
+		C = VectorMultiplyAdd(XSquared, C, VectorReplicate(CosCoeff0, 3));
+		C = VectorMultiplyAdd(XSquared, C, VectorReplicate(CosCoeff0, 2));
+		C = VectorMultiplyAdd(XSquared, C, VectorReplicate(CosCoeff0, 1));
+		C = VectorMultiplyAdd(XSquared, C, VectorReplicate(CosCoeff0, 0));
+		*outCos = VectorMultiply(C, sign);
+	}
+
+	FORCEINLINE VectorRegister VectorTan(const VectorRegister& x)
+	{
+		VectorRegister s, c;
+		VectorSinCos(&s, &c, &x);
+		return s / c;
+	}
+
+	FORCEINLINE VectorRegister VectorCot(const VectorRegister& x)
+	{
+		VectorRegister s, c;
+		VectorSinCos(&s, &c, &x);
+		return c / s;
+	}
+
+	//TODO: Vectorize
+	FORCEINLINE VectorRegister VectorASin(const VectorRegister& X)
+	{
+		return MakeVectorRegister(GMath::Asin(VectorGetComponent(X, 0)), GMath::Asin(VectorGetComponent(X, 1)), GMath::Asin(VectorGetComponent(X, 2)), GMath::Asin(VectorGetComponent(X, 3)));
+	}
+
+	//TODO: Vectorize
+	FORCEINLINE VectorRegister VectorACos(const VectorRegister& X)
+	{
+		return MakeVectorRegister(GMath::Acos(VectorGetComponent(X, 0)), GMath::Acos(VectorGetComponent(X, 1)), GMath::Acos(VectorGetComponent(X, 2)), GMath::Acos(VectorGetComponent(X, 3)));
+	}
+
+	//TODO: Vectorize
+	FORCEINLINE VectorRegister VectorATan(const VectorRegister& X)
+	{
+		return MakeVectorRegister(GMath::Atan(VectorGetComponent(X, 0)), GMath::Atan(VectorGetComponent(X, 1)), GMath::Atan(VectorGetComponent(X, 2)), GMath::Atan(VectorGetComponent(X, 3)));
+	}
+
+	//TODO: Vectorize
+	FORCEINLINE VectorRegister VectorATan2(const VectorRegister& X, const VectorRegister& Y)
+	{
+		return MakeVectorRegister(GMath::Atan2(VectorGetComponent(X, 0), VectorGetComponent(Y, 0)),
+			GMath::Atan2(VectorGetComponent(X, 1), VectorGetComponent(Y, 1)),
+			GMath::Atan2(VectorGetComponent(X, 2), VectorGetComponent(Y, 2)),
+			GMath::Atan2(VectorGetComponent(X, 3), VectorGetComponent(Y, 3)));
+	}
+
+
+	FORCEINLINE bool VectorIsAligned(const void* ptr)
+	{
+		return !(PTRINT(ptr) & (SIMD_ALIGNMENT - 1));
+	}
+
+	FORCEINLINE VectorRegister VectorNormalizeAccurate(const VectorRegister& v)
+	{
+		const VectorRegister sqrSum = VectorDot4(v, v);
+		const VectorRegister invLen = VectorReciprocalSqrtAccurate(sqrSum);
+		return v * invLen;
+	}
+
+	FORCEINLINE VectorRegister VectorNormalizeSafe(const VectorRegister& v, const VectorRegister& defaultValue)
+	{
+		VectorRegister rs = VectorDot4(v, v);
+		const VectorRegister NonZeroMask = rs >= SSEMathConstant::SmallLengthThreshold;
+		const VectorRegister invLen = VectorReciprocalSqrtAccurate(rs);
+		rs = v * invLen;
+		return VectorSelect(NonZeroMask, rs, defaultValue);
+	}
+
+	/// <returns>non zero if any elements in v1 are less than in v2, otherwise 0</returns>
+	FORCEINLINE uint32 VectorAnyLessThan(const VectorRegister& v1, const VectorRegister& v2)
+	{
+		return VectorAnyGreaterThan(v2, v1);
+	}
+
+	/// <returns>non zero if all elements in v1 are greater than in v2, otherwise 0</returns>
+	FORCEINLINE uint32 VectorAllGreaterThan(const VectorRegister& v1, const VectorRegister& v2)
+	{
+		return !VectorAnyGreaterThan(v2, v1);
+	}
+
+	/// <returns>non zero if all elements in v1 are less than in v2, otherwise 0</returns>
+	FORCEINLINE uint32 VectorAllLessThan(const VectorRegister& v1, const VectorRegister& v2)
+	{
+		return !VectorAnyGreaterThan(v1, v2);
+	}
 }
+
+/// <returns>smaller value of two vectors each component</returns>
+template<>
+FORCEINLINE static VectorRegister GMath::Min(const VectorRegister a, const VectorRegister b)
+{
+	return VectorMin(a, b);
+}
+
+/// <returns>larger value of two vectors each component</returns>
+template<>
+FORCEINLINE static VectorRegister GMath::Max(const VectorRegister a, const VectorRegister b)
+{
+	return VectorMax(a, b);
+}
+
+template<>
+FORCEINLINE static VectorRegister GMath::Lerp(const VectorRegister& a, const VectorRegister& b, const VectorRegister& alpha)
+{
+	const VectorRegister delta = b - a;
+	return VectorMultiplyAdd(alpha, delta, a);
+}
+
+/// <summary>
+/// 
+/// </summary>
+/// <param name="a">quaternion</param>
+/// <param name="b">quaternion</param>
+/// <returns> a + ( |a*b| > 0 ? 1 : -1 ) * b </returns>
+FORCEINLINE static VectorRegister VectorAccumulateQuaternionShortestPath(const VectorRegister& a, const VectorRegister& b)
+{
+using namespace SSE;
+	const VectorRegister rotDot = VectorDot4(a, b);
+	const VectorRegister quatRotDirMask = rotDot >= VectorZero();
+	const VectorRegister NegativeB = VectorNegate(b);
+	const VectorRegister BiasTimesB = SSE::VectorSelect(quatRotDirMask, b, NegativeB);
+	return VectorAdd(a, BiasTimesB);
+}
+
+FORCEINLINE static VectorRegister VectorNormalizeQuaternion(const VectorRegister& quat)
+{
+	return SSE::VectorNormalizeSafe(quat, SSE::SSEMathConstant::Float0001);
+}
+
+FORCEINLINE static VectorRegister VectorNormalizeRotator(const VectorRegister& rotator)
+{
+	using namespace SSE;
+	VectorRegister v0 = VectorMod(rotator, SSEMathConstant::Float360);
+	VectorRegister v1 = VectorAdd(v0, SSEMathConstant::Float360);
+	VectorRegister v2 = VectorSelect(VectorCompareGE(v0, VectorZero()), v0, v1);
+
+	VectorRegister v3 = VectorSubtract(v2, SSEMathConstant::Float360);
+	return VectorSelect(VectorCompareGT(v2, SSEMathConstant::Float180), v3, v2);
+}
+
+/**
+ * Fast Linear Quaternion Interpolation for quaternions stored in VectorRegisters.
+ * Result is NOT normalized.
+ */
+FORCEINLINE static VectorRegister VectorSlerp(const VectorRegister& a, const VectorRegister& b, const VectorRegister& alpha)
+{
+	using namespace SSE;
+	// Blend rotation
+	//     To ensure the 'shortest route', we make sure the dot product between the both rotations is positive.
+	//     const float Bias = (|A.B| >= 0 ? 1 : -1)
+	//     Rotation = (B * Alpha) + (A * (Bias * (1.f - Alpha)));
+	const VectorRegister Zero = VectorZero();
+
+	const VectorRegister OneMinusAlpha = VectorSubtract(VectorOne(), alpha);
+
+	const VectorRegister RotationDot = VectorDot4(a, b);
+	const VectorRegister QuatRotationDirMask = VectorCompareGE(RotationDot, Zero);
+	const VectorRegister NegativeA = VectorNegate(a);
+	const VectorRegister BiasTimesA = VectorSelect(QuatRotationDirMask, a, NegativeA);
+	const VectorRegister BTimesWeight = VectorMultiply(b, alpha);
+	const VectorRegister UnnormalizedResult = VectorMultiplyAdd(BiasTimesA, OneMinusAlpha, BTimesWeight);
+
+	return UnnormalizedResult;
+}
+
+/**
+ * Bi-Linear Quaternion interpolation for quaternions stored in VectorRegisters.
+ * Result is NOT normalized.
+ */
+FORCEINLINE static VectorRegister VectorBiSlerp(const VectorRegister& P00, const VectorRegister& P10, const VectorRegister& P01, const VectorRegister& P11, const VectorRegister& FracX, const VectorRegister& FracY)
+{
+	return VectorSlerp(
+		VectorSlerp(P00, P10, FracX),
+		VectorSlerp(P01, P11, FracX),
+		FracY);
+}
+
+/**
+ * Inverse quaternion ( -X, -Y, -Z, W)
+ */
+FORCEINLINE static VectorRegister VectorQuaternionInverse(const VectorRegister& NormalizedQuat)
+{
+	return VectorMultiply(SSE::SSEMathConstant::QINV_SIGN_MASK, NormalizedQuat);
+}
+
+/**
+ * Rotate a vector using a unit Quaternion.
+ *
+ * @param Quat Unit Quaternion to use for rotation.
+ * @param VectorW0 Vector to rotate. W component must be zero.
+ * @return Vector after rotation by Quat.
+ */
+FORCEINLINE static VectorRegister VectorQuaternionRotateVector(const VectorRegister& Quat, const VectorRegister& VectorW0)
+{
+	// Q * V * Q.Inverse
+	//const VectorRegister InverseRotation = VectorQuaternionInverse(Quat);
+	//const VectorRegister Temp = VectorQuaternionMultiply2(Quat, VectorW0);
+	//const VectorRegister Rotated = VectorQuaternionMultiply2(Temp, InverseRotation);
+
+	// Equivalence of above can be shown to be:
+	// http://people.csail.mit.edu/bkph/articles/Quaternions.pdf
+	// V' = V + 2w(Q x V) + (2Q x (Q x V))
+	// refactor:
+	// V' = V + w(2(Q x V)) + (Q x (2(Q x V)))
+	// T = 2(Q x V);
+	// V' = V + w*(T) + (Q x T)
+	using namespace SSE;
+
+	const VectorRegister QW = VectorReplicate(Quat, 3);
+	VectorRegister T = VectorCross(Quat, VectorW0);
+	T = VectorAdd(T, T);
+	const VectorRegister VTemp0 = VectorMultiplyAdd(QW, T, VectorW0);
+	const VectorRegister VTemp1 = VectorCross(Quat, T);
+	const VectorRegister Rotated = VectorAdd(VTemp0, VTemp1);
+	return Rotated;
+}
+
+/**
+ * Rotate a vector using the inverse of a unit Quaternion (rotation in the opposite direction).
+ *
+ * @param Quat Unit Quaternion to use for rotation.
+ * @param VectorW0 Vector to rotate. W component must be zero.
+ * @return Vector after rotation by the inverse of Quat.
+ */
+FORCEINLINE static VectorRegister VectorQuaternionInverseRotateVector(const VectorRegister& Quat, const VectorRegister& VectorW0)
+{
+	// Q.Inverse * V * Q
+	//const VectorRegister InverseRotation = VectorQuaternionInverse(Quat);
+	//const VectorRegister Temp = VectorQuaternionMultiply2(InverseRotation, VectorW0);
+	//const VectorRegister Rotated = VectorQuaternionMultiply2(Temp, Quat);
+
+	const VectorRegister QInv = VectorQuaternionInverse(Quat);
+	return VectorQuaternionRotateVector(QInv, VectorW0);
+}
+
+/**
+* Rotate a vector using a pointer to a unit Quaternion.
+*
+* @param Result		Pointer to where the result should be stored
+* @param Quat		Pointer to the unit quaternion (must not be the destination)
+* @param VectorW0	Pointer to the vector (must not be the destination). W component must be zero.
+*/
+FORCEINLINE static void VectorQuaternionRotateVectorPtr(void* __restrict Result, const void* __restrict Quat, const void* __restrict VectorW0)
+{
+	*((VectorRegister*)Result) = VectorQuaternionRotateVector(*((const VectorRegister*)Quat), *((const VectorRegister*)VectorW0));
+}
+
+/**
+* Rotate a vector using the inverse of a unit Quaternion (rotation in the opposite direction).
+*
+* @param Result		Pointer to where the result should be stored
+* @param Quat		Pointer to the unit quaternion (must not be the destination)
+* @param VectorW0	Pointer to the vector (must not be the destination). W component must be zero.
+*/
+FORCEINLINE void VectorQuaternionInverseRotateVectorPtr(void* __restrict Result, const void* __restrict Quat, const void* __restrict VectorW0)
+{
+	*((VectorRegister*)Result) = VectorQuaternionInverseRotateVector(*((const VectorRegister*)Quat), *((const VectorRegister*)VectorW0));
+}
+
+/**
+ * Counts the number of trailing zeros in the bit representation of the value,
+ * counting from least-significant bit to most.
+ *
+ * @param Value the value to determine the number of leading zeros for
+ * @return the number of zeros before the first "on" bit
+ */
+#if defined(_MSC_VER)
+#pragma intrinsic( _BitScanForward )
+FORCEINLINE uint32 appCountTrailingZeros(uint32 Value)
+{
+	if (Value == 0)
+	{
+		return 32;
+	}
+	unsigned long BitIndex;	// 0-based, where the LSB is 0 and MSB is 31
+	_BitScanForward(&BitIndex, Value);	// Scans from LSB to MSB
+	return BitIndex;
+}
+#else // !defined(_MSC_VER)
+FORCEINLINE uint32 appCountTrailingZeros(uint32 Value)
+{
+	if (Value == 0)
+	{
+		return 32;
+	}
+	return __builtin_ffs(Value) - 1;
+}
+#endif // _MSC_VER
 
 
 FORCEINLINE float GMath::RSqrt(const float x)

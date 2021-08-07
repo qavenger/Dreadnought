@@ -83,11 +83,18 @@ struct GMath
 		return Min(Max(x, min), max);
 	}
 	
-	template<typename T>
-	FORCEINLINE static constexpr T Lerp(const T A, const T B, const T Alpha)
+	template<typename T, typename U>
+	FORCEINLINE static constexpr T Lerp(const T& A, const T& B, const U& Alpha)
 	{
-		return (1 - Alpha) * A + Alpha * B;
+		return (T)(A+Alpha * (B-A));
 	}
+
+
+	template<typename U>
+	FORCEINLINE static constexpr _Rotator Lerp(const _Rotator& A, const _Rotator& B, const U& Alpha);
+
+	template<typename U>
+	FORCEINLINE static constexpr _Rotator LerpRange(const _Rotator& A, const _Rotator& B, const U& Alpha);
 
 	template<typename T>
 	FORCEINLINE static constexpr bool IsNan(const T x)
@@ -323,6 +330,14 @@ struct GMath
 	}
 
 	template<typename T>
+	FORCEINLINE static T Trunc(T x)
+	{
+		return trunc(x);
+	}
+
+	FORCEINLINE static float FMod(float X, float Y);
+
+	template<typename T>
 	FORCEINLINE static T LogX(const T base, const T value)
 	{
 		return log(value) / log(base);
@@ -354,4 +369,11 @@ struct GMath
 	}
 #undef FASTASIN_HALF_PI
 
+	static int32 TruncToInt(float f);
+
+	static int32 RoundToInt(float f);
+
+	static int32 FloorToInt(float f);
+
+	static int32 CeilToInt(float f);
 };

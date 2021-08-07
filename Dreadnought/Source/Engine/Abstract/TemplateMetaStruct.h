@@ -201,3 +201,20 @@ struct TIsClass : FalseType{};
 
 template<typename T>
 struct TIsClass < T, TVoidType<char T::*>> : TrueType {};
+
+template<typename T0, typename T1, int Size>
+struct SelectTypeBySize;
+
+template<typename T32BITS, typename T64BITS>
+struct SelectTypeBySize<T32BITS, T64BITS, 4>
+{
+	using TIntPointer = T32BITS;
+};
+
+template<typename T32BITS, typename T64BITS>
+struct SelectTypeBySize<T32BITS, T64BITS, 8>
+{
+	using TIntPointer = T64BITS;
+};
+
+typedef SelectTypeBySize<int32, int64, sizeof(void*)>::TIntPointer PTRINT;

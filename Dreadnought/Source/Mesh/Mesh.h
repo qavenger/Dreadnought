@@ -22,7 +22,7 @@ public:
 	RHIShader*                 PixelShader;
 	RHIPipelineStateObject*    PSO;
 	// tmp
-	float distance = 2;
+	float distance = 0;
 	float height = 0;
 	float heightDirection = 0;
 	float direction = 0;

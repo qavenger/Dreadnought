@@ -91,19 +91,22 @@ void Mesh::Draw(IRHIDevice* Device)
 
 		struct PerObjectData
 		{
-			_Matrix WVP;
+			_Matrix W;
+			_Matrix VP;
 			float3 Color;
 		} Data;
-		//float3 EyePosition(-5, 0, 0);
-		float3 EyePosition(distance*GMath::Cos(angle), distance*GMath::Sin(angle),height);
+		float3 EyePosition(-5, 0, 0);
+		//float3 EyePosition(distance*GMath::Cos(angle), distance*GMath::Sin(angle),height);
 		Data.Color = EyePosition;
 		float3 CenterPosition = float3(0, 0, 0);
 		float3 forward = (CenterPosition - EyePosition);
 		float3 right = float3::UpVector ^ forward;
-		Data.WVP =  LookFromMatrix(EyePosition, forward, float3::UpVector) * 
+		float sangle = (float)gEngine->GetGameTime() * 10;
+		Data.W = TransformMatrix(_Rotator(height*50, distance*50, angle*50).GetClamped(), _Vector::ZeroVector);
+		Data.VP =   LookFromMatrix(EyePosition, forward, float3::UpVector) *
 					PerspectiveMatrix(GMath::Deg2Rad * 90.0f, 1024 / 720.0f, 0.1, 10.0f);
 		
-		Data.WVP = Data.WVP.GetTransposed();
+		//Data.VP = Data.VP.GetTransposed();
 		//Data.WVP = Data.WVP.GetTransposed();
 		/*Data.WVP = _Matrix(	GMath::Cos(gEngine->GetGameTime()), GMath::Sin(gEngine->GetGameTime()), 0, 0,
 							-GMath::Sin(gEngine->GetGameTime()), GMath::Cos(gEngine->GetGameTime()), 0, 0,
@@ -128,7 +131,7 @@ void Mesh::Destroy()
 
 void Mesh::MoveForward()
 {
-	direction = -gEngine->GetDeltaTime();
+	direction = gEngine->GetDeltaTime();
 }
 
 void Mesh::MoveUp()
@@ -150,7 +153,7 @@ void Mesh::Stop()
 
 void Mesh::MoveBackward()
 {
-	direction = gEngine->GetDeltaTime();
+	direction = -gEngine->GetDeltaTime();
 }
 
 void Mesh::MoveRight()

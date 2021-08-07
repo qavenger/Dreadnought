@@ -82,6 +82,23 @@ struct _Matrix
 struct TransformMatrix : public _Matrix
 {
 	TransformMatrix(const _Rotator& rotation, const _Vector& scale, const _Vector& origin);
+	TransformMatrix(const _Rotator& rotation, const _Vector& origin);
+	static _Matrix Make(const _Rotator& rotation, const _Vector& scale, const _Vector& origin);
+	static _Matrix Make(const _Rotator& rotation, const _Vector& origin);
+};
+
+struct RotationMatrix : public TransformMatrix
+{
+	RotationMatrix(const _Rotator& rot);
+	static _Matrix Make(const _Rotator& rot);
+};
+
+struct QuatTransformMatrix : public _Matrix
+{
+	QuatTransformMatrix(const _Quaternion& q, const _Vector& scale, const _Vector& origin);
+	QuatTransformMatrix(const _Quaternion& q, const _Vector& origin);
+	static _Matrix Make(const _Quaternion& q, const _Vector& scale, const _Vector& origin);
+	static _Matrix Make(const _Quaternion& q, const _Vector& origin);
 };
 
 struct LookFromMatrix : public _Matrix

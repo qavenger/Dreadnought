@@ -8,6 +8,45 @@
 #include<Quaternion.h>
 #include<Matrix.h>
 
+
+FORCEINLINE float GMath::FMod(float X, float Y)
+{
+	const float AbsY = fabs(Y);
+	if (AbsY <= SMALL_NUMBER)
+	{
+		return 0;
+	}
+	const float div = X / Y;
+	const float quotient = fabs(div) < FLOAT_NON_FRACTIONAL ? truncf(div) : div;
+	float intPortion = Y * quotient;
+	if (fabsf(intPortion) > fabs(X))
+	{
+		intPortion = X;
+	}
+	const float rs = X - intPortion;
+	return Clamp(rs, -AbsY, AbsY);
+}
+
+FORCEINLINE int32 GMath::TruncToInt(float f)
+{
+	return SSE::TruncToInt(f);
+}
+
+FORCEINLINE int32 GMath::RoundToInt(float f)
+{
+	return SSE::RoundToInt(f);
+}
+
+FORCEINLINE int32 GMath::FloorToInt(float f)
+{
+	return SSE::FloorToInt(f);
+}
+
+FORCEINLINE int32 GMath::CeilToInt(float f)
+{
+	return SSE::CeilToInt(f);
+}
+
 const _Vector _Vector::ZeroVector(0, 0, 0);
 const _Vector _Vector::OneVector(1, 1, 1);
 const _Vector _Vector::UpVector(0, 0, 1);
@@ -22,7 +61,7 @@ const _Vector2 _Vector2::OneVector(1);
 const _Vector2 _Vector2::Unit45DegVector(INV_SQRT_2, INV_SQRT_2);
 
 const _Rotator _Rotator::ZeroRotator(0, 0, 0);
-
+const _Quaternion _Quaternion::Identity{ 0, 0, 0, 1 };
 const _Matrix _Matrix::Identity(true);
 
 FORCEINLINE std::string _Vector2::ToString()const
@@ -32,7 +71,12 @@ FORCEINLINE std::string _Vector2::ToString()const
 
 FORCEINLINE std::string _Rotator::ToString()const
 {
-	return FormatString("Roll=%3.3f Pitch=%3.3f Yaw=%3.3f", Roll,Pitch, Yaw);
+	return FormatString("Roll=%3.3f Pitch=%3.3f Yaw=%3.3f", Roll, Pitch, Yaw);
+}
+
+bool _Rotator::HasNan() const
+{
+	return GMath::IsInf(Roll) || GMath::IsInf(Pitch) || GMath::IsInf(Yaw);
 }
 
 FORCEINLINE _Vector _Vector2::SphericalToUnitCartesian() const
@@ -162,7 +206,7 @@ FORCEINLINE uint32 _Matrix::Hash() const
 	return rs;
 }
 
- _Matrix::_Matrix(const _Vector& x, const _Vector& y, const _Vector& z, const _Vector& w)
+_Matrix::_Matrix(const _Vector& x, const _Vector& y, const _Vector& z, const _Vector& w)
 	:
 	M{
 	x.x, x.y, x.z, 0.0f,
@@ -174,20 +218,20 @@ FORCEINLINE uint32 _Matrix::Hash() const
 _Matrix::_Matrix(const _Vector4& x, const _Vector4& y, const _Vector4& z, const _Vector4& w)
 	:
 	M{
-	x.x, x.y, x.z, x.w, 
-	y.x, y.y, y.z, y.w, 
+	x.x, x.y, x.z, x.w,
+	y.x, y.y, y.z, y.w,
 	z.x, z.y, z.z, z.w,
 	w.x, w.y, w.z, w.w
-	}
+}
 {
 }
 
 _Matrix::_Matrix(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33)
 	:
-	M{	m00,m01,m02,m03,
+	M{ m00,m01,m02,m03,
 		m10,m11,m12,m13,
 		m20,m21,m22,m23,
-		m30,m31,m32,m33	}
+		m30,m31,m32,m33 }
 {
 }
 
@@ -293,25 +337,25 @@ _Matrix _Matrix::GetTransposeAdjoint() const
 float _Matrix::Determinant() const
 {
 	return  M[0][0] * (
-				M[1][1] * (M[2][2] * M[3][3] - M[2][3] * M[3][2]) -
-				M[2][1] * (M[1][2] * M[3][3] - M[1][3] * M[3][2]) +
-				M[3][1] * (M[1][2] * M[2][3] - M[1][3] * M[2][2])
-				) -
-			M[1][0] * (
-				M[0][1] * (M[2][2] * M[3][3] - M[2][3] * M[3][2]) -
-				M[2][1] * (M[0][2] * M[3][3] - M[0][3] * M[3][2]) +
-				M[3][1] * (M[0][2] * M[2][3] - M[0][3] * M[2][2])
-				) +
-			M[2][0] * (
-				M[0][1] * (M[1][2] * M[3][3] - M[1][3] * M[3][2]) -
-				M[1][1] * (M[0][2] * M[3][3] - M[0][3] * M[3][2]) +
-				M[3][1] * (M[0][2] * M[1][3] - M[0][3] * M[1][2])
-				) -
-			M[3][0] * (
-				M[0][1] * (M[1][2] * M[2][3] - M[1][3] * M[2][2]) -
-				M[1][1] * (M[0][2] * M[2][3] - M[0][3] * M[2][2]) +
-				M[2][1] * (M[0][2] * M[1][3] - M[0][3] * M[1][2])
-				);
+		M[1][1] * (M[2][2] * M[3][3] - M[2][3] * M[3][2]) -
+		M[2][1] * (M[1][2] * M[3][3] - M[1][3] * M[3][2]) +
+		M[3][1] * (M[1][2] * M[2][3] - M[1][3] * M[2][2])
+		) -
+		M[1][0] * (
+			M[0][1] * (M[2][2] * M[3][3] - M[2][3] * M[3][2]) -
+			M[2][1] * (M[0][2] * M[3][3] - M[0][3] * M[3][2]) +
+			M[3][1] * (M[0][2] * M[2][3] - M[0][3] * M[2][2])
+			) +
+		M[2][0] * (
+			M[0][1] * (M[1][2] * M[3][3] - M[1][3] * M[3][2]) -
+			M[1][1] * (M[0][2] * M[3][3] - M[0][3] * M[3][2]) +
+			M[3][1] * (M[0][2] * M[1][3] - M[0][3] * M[1][2])
+			) -
+		M[3][0] * (
+			M[0][1] * (M[1][2] * M[2][3] - M[1][3] * M[2][2]) -
+			M[1][1] * (M[0][2] * M[2][3] - M[0][3] * M[2][2]) +
+			M[2][1] * (M[0][2] * M[1][3] - M[0][3] * M[1][2])
+			);
 }
 
 FORCEINLINE float _Matrix::RotDeterminant() const
@@ -444,7 +488,7 @@ void _Matrix::SetAxes(_Vector* XAxis, _Vector* YAxis, _Vector* ZAxis, _Vector* O
 _Vector _Matrix::GetColumn(uint32 index) const
 {
 	assert(index >= 0 && index < 4);
-	return _Vector( M[0][index], M[1][index], M[2][index] );
+	return _Vector(M[0][index], M[1][index], M[2][index]);
 }
 
 void _Matrix::SetColumn(uint32 index, const _Vector& v)
@@ -498,7 +542,7 @@ _Vector _Matrix::ExtractScaling(float epsilon)
 		M[0][1] *= scaleX;
 		M[0][2] *= scaleX;
 	}
-	
+
 	if (sqrSumY > epsilon)
 	{
 		float scaleY = GMath::Sqrt(sqrSumY);
@@ -542,7 +586,7 @@ _Matrix _Matrix::GetMatrixNoTranslation() const
 		M[0][0], M[0][1], M[0][2], M[0][3],
 		M[1][0], M[1][1], M[1][2], M[1][3],
 		M[2][0], M[2][1], M[2][2], M[2][3],
-		0.0f   , 0.0f	, 0.0f	 , M[3][3]
+		0.0f, 0.0f, 0.0f, M[3][3]
 
 	);
 }
@@ -597,9 +641,125 @@ _Rotator _Matrix::ToRotator() const
 	return rs;
 }
 
-TransformMatrix::TransformMatrix(const _Rotator& rotation, const _Vector& scale, const _Vector& origin)
+FORCEINLINE TransformMatrix::TransformMatrix(const _Rotator& rot, const _Vector& scale, const _Vector& origin)
 {
+	using namespace SSE;
+	const VectorRegister angles = MakeVectorRegister(rot.Roll, rot.Pitch, rot.Yaw, 0.0f);
+	const VectorRegister halfAngles = VectorMultiply(angles, SSEMathConstant::DEG_TO_RAD);
+
+	union { VectorRegister v; float f[4]; }sinAngles, cosAngles;
+	VectorSinCos(&sinAngles.v, &cosAngles.v, &halfAngles);
+	const float sr = sinAngles.f[0];
+	const float sp = sinAngles.f[1];
+	const float sy = sinAngles.f[2];
+	const float cr = cosAngles.f[0];
+	const float cp = cosAngles.f[1];
+	const float cy = cosAngles.f[2];
+
+	M[0][0] = scale.z * cy * cp;
+	M[0][1] = scale.z * sy * cp;
+	M[0][2] = scale.z * sp;
+	M[0][3] = 0.0f;
+
+	M[1][0] = scale.z * sr * sp * cy - cr * sy;
+	M[1][1] = scale.z * sr * sp * sy + cr * cy;
+	M[1][2] = -scale.z * sr * cp;
+	M[1][3] = 0.0f;
+
+	M[2][0] = scale.z * -(cr * sp * cy + sr * sy);
+	M[2][1] = scale.z * cy * sr - cr * sp * sy;
+	M[2][2] = scale.z * cr * cp;
+	M[2][3] = 0.0f;
+
+	M[3][0] = origin.x;
+	M[3][1] = origin.y;
+	M[3][2] = origin.z;
+	M[3][3] = 1.0f;
 }
+
+FORCEINLINE TransformMatrix::TransformMatrix(const _Rotator& rot, const _Vector& origin)
+{
+	using namespace SSE;
+	const VectorRegister angles = MakeVectorRegister(rot.Roll, rot.Pitch, rot.Yaw, 0.0f);
+	const VectorRegister halfAngles = VectorMultiply(angles, SSEMathConstant::DEG_TO_RAD);
+
+	union { VectorRegister v; float f[4]; }sinAngles, cosAngles;
+	VectorSinCos(&sinAngles.v, &cosAngles.v, &halfAngles);
+	const float sr = sinAngles.f[0];
+	const float sp = sinAngles.f[1];
+	const float sy = sinAngles.f[2];
+	const float cr = cosAngles.f[0];
+	const float cp = cosAngles.f[1];
+	const float cy = cosAngles.f[2];
+
+	M[0][0] = cy * cp;
+	M[0][1] = sy * cp;
+	M[0][2] = sp;
+	M[0][3] = 0.0f;
+
+	M[1][0] = sr * sp * cy - cr * sy;
+	M[1][1] = sr * sp * sy + cr * cy;
+	M[1][2] = -sr * cp;
+	M[1][3] = 0.0f;
+
+	M[2][0] = -(cr * sp * cy + sr * sy);
+	M[2][1] = cy * sr - cr * sp * sy;
+	M[2][2] = cr * cp;
+	M[2][3] = 0.0f;
+
+	M[3][0] = origin.x;
+	M[3][1] = origin.y;
+	M[3][2] = origin.z;
+	M[3][3] = 1.0f;
+
+}
+
+_Matrix TransformMatrix::Make(const _Rotator& rotation, const _Vector& scale, const _Vector& origin)
+{
+	return TransformMatrix(rotation, scale, origin);
+}
+
+_Matrix TransformMatrix::Make(const _Rotator& rotation, const _Vector& origin)
+{
+	return TransformMatrix(rotation, origin);
+}
+
+RotationMatrix::RotationMatrix(const _Rotator& rot)
+	:
+	TransformMatrix(rot, _Vector::ZeroVector)
+{
+
+}
+
+_Matrix RotationMatrix::Make(const _Rotator& rot)
+{
+	return RotationMatrix(rot);
+}
+
+
+QuatTransformMatrix::QuatTransformMatrix(const _Quaternion& q, const _Vector& scale, const _Vector& origin)
+{
+#if defined(_DEBUG) || defined(DEBUG)
+	//TODO: check quaternion is normalized
+#endif
+	const float x2 = q.x + q.x; const float y2 = q.y + q.y; const float z2 = q.z + q.z;
+	const float xx = q.x * x2; const float xy = q.x * y2; const float xz = q.x * z2;
+	const float yy = q.y * y2; const float yz = q.y * z2; const float zz = q.z * z2;
+	const float wx = q.w * x2; const float wy = q.w * y2; const float wz = q.w * z2;
+
+	M[0][0] = 1.0f - (yy + zz);		M[1][0] = xy - wz;			M[2][0] = xz + wy;			M[3][0] = origin.x;
+	M[0][1] = xy + wz;				M[1][1] = 1.0f - (xx + zz);	M[2][1] = yz + wx;			M[3][1] = origin.y;
+	M[0][2] = xz - wy;				M[1][2] = yz + wx;			M[2][2] = 1.0f - (xx + yy);	M[3][2] = origin.z;
+	M[0][3] = 0.0f;					M[1][3] = 0.0f;				M[2][3] = 0.0f;				M[3][3] = 1.0f;
+}
+
+
+QuatTransformMatrix::QuatTransformMatrix(const _Quaternion& q, const _Vector& origin)
+{
+
+}
+
+
 
 LookFromMatrix::LookFromMatrix(const _Vector& eyePos, const _Vector& lookDir, const _Vector& upVector)
 {
@@ -611,4 +771,113 @@ LookFromMatrix::LookFromMatrix(const _Vector& eyePos, const _Vector& lookDir, co
 	M[1][0] = forward.y;		 M[1][1] = right.y;			M[1][2] = up.y;			M[1][3] = 0;
 	M[2][0] = forward.z;		 M[2][1] = right.z;			M[2][2] = up.z;			M[2][3] = 0;
 	M[3][0] = forward | -eyePos; M[3][1] = right | -eyePos;	M[3][2] = up | -eyePos;	M[3][3] = 1;
+}
+
+FORCEINLINE _Vector _Rotator::ToVector() const
+{
+#if CHECK_NAN
+	if (GMath::Abs(Roll) > FLOAT_NON_FRACTIONAL ||
+		GMath::Abs(Pitch) > FLOAT_NON_FRACTIONAL ||
+		GMath::Abs(Yaw) > FLOAT_NON_FRACTIONAL
+		)
+	{
+	}
+#endif
+	const float pitchNoWinding = GMath::FMod(Pitch, 360);
+	const float yawNoWinding = GMath::FMod(Yaw, 360);
+	float cp, sp, cy, sy;
+	GMath::SinCos(&sp, &cp, GMath::DegreeToRadians(pitchNoWinding));
+	GMath::SinCos(&sy, &cy, GMath::DegreeToRadians(yawNoWinding));
+	_Vector v(cp * cy, cp * sy, sp);
+#if CHECK_NAN
+	if (v.HasNan())
+	{
+		v = _Vector::ForwardVector;
+	}
+#endif
+
+	return v;
+}
+
+_Vector _Rotator::ToEuler() const
+{
+	return _Vector(Roll, Pitch, Yaw);
+}
+
+_Quaternion _Rotator::ToQuaternion() const
+{
+	CheckNan();
+	using namespace SSE;
+	const uint32 neg = uint32(1 << 31);
+	const uint32 pos = uint32(0);
+	const VectorRegister angles = MakeVectorRegister(Roll, Pitch, Yaw, 0.0f);
+	const VectorRegister anglesNoWinding = VectorMod(angles, SSEMathConstant::Float360);
+	const VectorRegister halfAngles = VectorMultiply(anglesNoWinding, SSEMathConstant::DEG_TO_RAD_HALF);
+	VectorRegister sinAngles, cosAngles;
+	VectorSinCos(&sinAngles, &cosAngles, &halfAngles);
+
+	const VectorRegister sr = VectorReplicate(sinAngles, 0);
+	const VectorRegister cr = VectorReplicate(cosAngles, 0);
+
+	const VectorRegister sysycycyTmp = VectorShuffle(sinAngles, cosAngles, 2, 2, 2, 2);
+	const VectorRegister spspcpcp = VectorShuffle(sinAngles, cosAngles, 1, 1, 1, 1);
+	const VectorRegister sycysycy = VectorShuffle(sysycycyTmp, sysycycyTmp, 0, 2, 0, 2);
+	const VectorRegister cpcpspsp = VectorShuffle(cosAngles, sinAngles, 1, 1, 1, 1);
+	const VectorRegister cysycysy = VectorShuffle(sysycycyTmp, sysycycyTmp, 2, 0, 2, 0);
+
+	const VectorRegister signBitsLeft = MakeVectorRegister(pos, neg, pos, pos);
+	const VectorRegister signBitsRight = MakeVectorRegister(neg, neg, neg, pos);
+	const VectorRegister leftTerm = VectorBitwiseXor(signBitsLeft, VectorMultiply(cr, VectorMultiply(spspcpcp, sycysycy)));
+	const VectorRegister rightTerm = VectorBitwiseXor(signBitsRight, VectorMultiply(sr, VectorMultiply(cpcpspsp, cysycysy)));
+	_Quaternion quat;
+	const VectorRegister rs = VectorAdd(leftTerm, rightTerm);
+	VectorStoreAligned(rs, &quat);
+	if (quat.HasNan())
+	{
+		quat = _Quaternion::Identity;
+	}
+	return quat;
+}
+
+bool _Quaternion::HasNan() const
+{
+	return !(GMath::IsFinite(x) && GMath::IsFinite(y) && GMath::IsFinite(z) && GMath::IsFinite(w));
+}
+
+_Vector _Rotator::RotatorVector(const _Vector& v) const
+{
+	return RotationMatrix(*this).TransformVector(v);
+}
+
+_Vector _Rotator::UnrotatorVector(const _Vector& v) const
+{
+	return RotationMatrix(*this).GetTransposed().TransformVector(v);
+}
+
+_Rotator _Rotator::FromEuler(const _Vector& euler)
+{
+	return _Rotator(euler.x, euler.y, euler.z);
+}
+
+FORCEINLINE void _Rotator::Normalize()
+{
+	using namespace SSE;
+	VectorRegister r = VectorLoadFloat3_W0(this);
+	r = VectorNormalizeRotator(r);
+	VectorStoreFloat3(r, this);
+	CheckNan();
+}
+
+/// <returns>lerped angle between a and b, takes the shortest path</returns>
+template<typename U>
+FORCEINLINE constexpr _Rotator GMath::Lerp(const _Rotator& A, const _Rotator& B, const U& Alpha)
+{
+	return A + (B-A).GetNormalized()*Alpha;
+}
+
+/// <returns>lerped angle between a and b, allows interpolation over 180 degrees</returns>
+template<typename U>
+FORCEINLINE constexpr _Rotator GMath::LerpRange(const _Rotator& A, const _Rotator& B, const U& Alpha)
+{
+	return (A + (B-A)*Alpha).GetNormalized();
 }

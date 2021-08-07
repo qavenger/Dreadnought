@@ -108,7 +108,7 @@ const D3D12_INPUT_ELEMENT_DESC* D3D12PipelineStateObject::GetInputLayout() const
 
 uint32 D3D12PipelineStateObject::GetInputLayoutSize() const
 {
-	return InputLayout.size();
+	return (uint32)InputLayout.size();
 }
 
 uint32 D3D12PipelineStateObject::GetShaderConstantBuffersCount() const
