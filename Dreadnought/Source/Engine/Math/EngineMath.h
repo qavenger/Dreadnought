@@ -204,6 +204,21 @@ struct GMath
 		return (6 - 4 * p) * p * p - 1;
 	}
 
+	static float UnwindRadians(float A)
+	{
+		while (A > PI)
+		{
+			A -= TWO_PI;
+		}
+
+		while (A < -PI)
+		{
+			A += TWO_PI;
+		}
+
+		return A;
+	}
+
 	/// <summary>
 	/// Estimated sin and cos phase
 	/// </summary>

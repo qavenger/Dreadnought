@@ -74,6 +74,11 @@ FORCEINLINE std::string _Rotator::ToString()const
 	return FormatString("Roll=%3.3f Pitch=%3.3f Yaw=%3.3f", Roll, Pitch, Yaw);
 }
 
+std::string _Quaternion::ToString() const
+{
+	return FormatString("X=%.9f Y=%.9f Z=%.9f W=%.9f", x, y, z, w);
+}
+
 bool _Rotator::HasNan() const
 {
 	return GMath::IsInf(Roll) || GMath::IsInf(Pitch) || GMath::IsInf(Yaw);
@@ -839,10 +844,12 @@ _Quaternion _Rotator::ToQuaternion() const
 	return quat;
 }
 
+
 bool _Quaternion::HasNan() const
 {
 	return !(GMath::IsFinite(x) && GMath::IsFinite(y) && GMath::IsFinite(z) && GMath::IsFinite(w));
 }
+
 
 _Vector _Rotator::RotatorVector(const _Vector& v) const
 {
@@ -880,4 +887,576 @@ template<typename U>
 FORCEINLINE constexpr _Rotator GMath::LerpRange(const _Rotator& A, const _Rotator& B, const U& Alpha)
 {
 	return (A + (B-A)*Alpha).GetNormalized();
+}
+
+
+FORCEINLINE _Quaternion::_Quaternion(const VectorRegister& v)
+{
+	VectorStoreAligned(v, this);
+	CheckNan();
+}
+
+FORCEINLINE _Quaternion::_Quaternion(const _Matrix& M)
+{
+	if (M.GetScaledAxis(0).IsNearlyZero() || M.GetScaledAxis(1).IsNearlyZero() || M.GetScaledAxis(2).IsNearlyZero())
+	{
+		*this = _Quaternion::Identity;
+		return;
+	}
+
+#if defined(_DEBUG) || defined(DEBUG)
+	if( (GMath::Abs(1 - M.GetScaledAxis(0).LengthSquare()) <= KINDA_SMALL_NUMBER) &&
+		(GMath::Abs(1 - M.GetScaledAxis(1).LengthSquare()) <= KINDA_SMALL_NUMBER) &&
+		(GMath::Abs(1 - M.GetScaledAxis(2).LengthSquare()) <= KINDA_SMALL_NUMBER)
+		)
+	{
+		*this = _Quaternion::Identity;
+		return;
+	}
+#endif
+
+	float s;
+	const float tr = M.M[0][0] + M.M[1][1] + M.M[2][2];
+	if (tr > 0.0f)
+	{
+		float invS = GMath::RSqrt(tr + 1);
+		w = 0.5f * (1 / invS);
+		s = 0.5f * invS;
+		x = (M.M[1][2] - M.M[2][1]) * s;
+		y = (M.M[2][0] - M.M[0][2]) * s;
+		z = (M.M[0][1] - M.M[1][0]) * s;
+	}
+	else
+	{
+		int32 i = 0;
+		if (M.M[1][1] > M.M[0][0]) i = 1;
+		if (M.M[2][2] > M.M[i][i]) i = 2;
+		static const int32 nxt[3] = { 1,2,0 };
+		const int32 j = nxt[i];
+		const int32 k = nxt[j];
+		s = M.M[i][i] - M.M[j][j] - M.M[k][k] + 1.0f;
+		float invS = GMath::RSqrt(s);
+		float qt[4];
+		qt[i] = 0.5f * (1 / invS);
+		s = 0.5f * invS;
+		qt[3] = (M.M[j][k] - M.M[k][j]) * s;
+		qt[j] = (M.M[i][j] - M.M[j][i]) * s;
+		qt[k] = (M.M[i][k] - M.M[k][i]) * s;
+		x = qt[0];
+		y = qt[1];
+		z = qt[2];
+		w = qt[3];
+	}
+	CheckNan();
+}
+
+FORCEINLINE _Quaternion::_Quaternion(const _Rotator& R)
+{
+	*this = R.ToQuaternion();
+	CheckNan();
+}
+
+FORCEINLINE _Quaternion::_Quaternion(const _Vector& axis, float angle)
+{
+	const float half_angle = 0.5f * angle;
+	float s, c;
+	GMath::SinCos(&s, &c, half_angle);
+
+	x = s * axis.x;
+	y = s * axis.y;
+	z = s * axis.z;
+	w = c;
+	CheckNan();
+}
+
+FORCEINLINE _Quaternion _Quaternion::operator+(const _Quaternion& q) const
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorLoadAligned(&q);
+	return _Quaternion(VectorAdd(a,b));
+}
+
+FORCEINLINE _Quaternion _Quaternion::operator+=(const _Quaternion& q)
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorLoadAligned(&q);
+	VectorStoreAligned(VectorAdd(a, b), this);
+	CheckNan();
+	return *this;
+}
+
+FORCEINLINE _Quaternion _Quaternion::operator-(const _Quaternion& q) const
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorLoadAligned(&q);
+	return _Quaternion(VectorSubtract(a, b));
+}
+
+FORCEINLINE _Quaternion _Quaternion::operator-=(const _Quaternion& q)
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorLoadAligned(&q);
+	VectorStoreAligned(VectorSubtract(a, b), this);
+	CheckNan();
+	return *this;
+}
+
+FORCEINLINE bool _Quaternion::Equals(const _Quaternion& q, float epsilon) const
+{
+	using namespace SSE;
+	const VectorRegister epsilonV = VectorLoadFloat1(&epsilon);
+	const VectorRegister a = VectorLoadAligned(this);
+	const VectorRegister b = VectorLoadAligned(&q);
+	const VectorRegister rotSub = VectorAbs(VectorSubtract(a, b));
+	const VectorRegister rotAdd = VectorAbs(VectorAdd(a, b));
+	return !VectorAnyGreaterThan(rotSub, epsilonV) || !VectorAnyGreaterThan(rotAdd, epsilonV);
+}
+
+FORCEINLINE bool _Quaternion::IsIdentity(float epsilon) const
+{
+	return Equals(_Quaternion::Identity, epsilon);
+}
+
+FORCEINLINE _Quaternion _Quaternion::operator*(const _Quaternion& q) const
+{
+	_Quaternion rs;
+	SSE::VectorQuaternionMultiply(&rs, this, &q);
+	rs.CheckNan();
+	return rs;
+}
+
+FORCEINLINE _Quaternion _Quaternion::operator*=(const _Quaternion& q)
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorLoadAligned(&q);
+	VectorRegister rs;
+	SSE::VectorQuaternionMultiply(&rs, &a, &b);
+	VectorStoreAligned(rs, this);
+	CheckNan();
+	return *this;
+}
+
+FORCEINLINE _Vector _Quaternion::RotateVector(const _Vector& v) const
+{
+	const _Vector q(x, y, z);
+	const _Vector t = 2 * (q ^ v);
+	const _Vector rs = v + (w * t) + (q ^ t);
+	return rs;
+}
+
+FORCEINLINE _Vector _Quaternion::UnrotateVector(const _Vector& v) const
+{
+	const _Vector q(-x, -y, -z);
+	const _Vector t = 2 * (q ^ v);
+	const _Vector rs = v + (w * t) + (q ^ t);
+	return rs;
+}
+
+void _Quaternion::ToSwingTwist(const _Vector& inTwistAxis, _Quaternion& outSwing, _Quaternion& outTwist) const
+{
+	_Vector proj = (inTwistAxis | _Vector(x, y, z)) * inTwistAxis;
+	outTwist = _Quaternion(proj.x, proj.y, proj.z, w);
+	if (outTwist.SizeSquared() == 0.0f)
+	{
+		outTwist = _Quaternion::Identity;
+	}
+	else
+	{
+		outTwist.Normalize();
+	}
+	outSwing = *this * outTwist.Inverse();
+}
+
+float _Quaternion::GetTwistAngle(const _Vector& twistAxis) const
+{
+	float xyz = twistAxis | _Vector(x, y, z);
+	return GMath::UnwindRadians(2.0f * GMath::Atan2(xyz, w));
+}
+
+FORCEINLINE _Quaternion _Quaternion::Inverse() const
+{
+	assert(IsNormalized());
+	return _Quaternion(VectorQuaternionInverse(VectorLoadAligned(this)));
+}
+
+void _Quaternion::Normalize(float epsilon)
+{
+	using namespace SSE;
+	const VectorRegister v = VectorLoadAligned(this);
+	const VectorRegister sqrSum = VectorDot4(v, v);
+	const VectorRegister nonZeroMask = VectorCompareGE(sqrSum, VectorLoadFloat1(&epsilon));
+	const VectorRegister invLength = VectorReciprocalSqrtAccurate(sqrSum);
+	const VectorRegister nv = VectorMultiply(invLength, v);
+	VectorRegister rs = VectorSelect(nonZeroMask, nv, SSEMathConstant::Float0001);
+	VectorStoreAligned(rs, this);
+}
+
+_Quaternion _Quaternion::GetNormalized(float epsilon) const
+{
+	_Quaternion rs(*this);
+	rs.Normalize();
+	return rs;
+}
+
+bool _Quaternion::IsNormalized() const
+{
+	using namespace SSE;
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister t = VectorAbs(VectorSubtract(VectorOne(), VectorDot4(a, a)));
+	return !VectorAnyGreaterThan(t, SSEMathConstant::ThreshQuatNormalized);
+}
+
+FORCEINLINE _Vector _Quaternion::operator*(const _Vector& v) const
+{
+	return RotateVector(v);
+}
+
+FORCEINLINE _Matrix _Quaternion::operator*(const _Matrix& m) const
+{
+	using namespace SSE;
+	_Matrix rs;
+	_Quaternion vt, vr;
+	_Quaternion inv = Inverse();
+	for (int32 i = 0; i < 4; ++i)
+	{
+		_Quaternion vq(m.M[i][0], m.M[i][1], m.M[i][2], m.M[i][3]);
+		VectorQuaternionMultiply(&vt, this, &vq);
+		VectorQuaternionMultiply(&vr, &vt, &inv);
+		rs.M[i][0] = vr.x;
+		rs.M[i][1] = vr.y;
+		rs.M[i][2] = vr.z;
+		rs.M[i][3] = vr.w;
+	}
+	return rs;
+}
+
+_Quaternion _Quaternion::operator*=(const float scale)
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorSetFloat1(scale);
+	VectorStoreAligned(VectorMultiply(a, b), this);
+	CheckNan();
+	return *this;
+}
+
+_Quaternion _Quaternion::operator*(const float scale) const
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorSetFloat1(scale);
+	return _Quaternion(VectorMultiply(a, b));
+}
+
+_Quaternion _Quaternion::operator/=(const float scale)
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorSetFloat1(scale);
+	VectorStoreAligned(VectorDivide(a, b), this);
+	CheckNan();
+	return *this;
+}
+
+_Quaternion _Quaternion::operator/(const float scale) const
+{
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorSetFloat1(scale);
+	return _Quaternion(VectorDivide(a, b));
+}
+
+
+void _Quaternion::SetShortestArcWith(const _Quaternion& q)
+{
+	const float dotRs = (q | *this);
+	const float bias = GMath::Select(dotRs, 1.0f, -1.0f);
+
+	x *= bias;
+	y *= bias;
+	z *= bias;
+	w *= bias;
+}
+
+_Quaternion _Quaternion::Log() const
+{
+	_Quaternion rs;
+	rs.w = 0.0f;
+	if (GMath::Abs(w) < 1.0f)
+	{
+		const float angle = GMath::Acos(w);
+		const float sinAngle = GMath::Sin(angle);
+
+		if (GMath::Abs(sinAngle) >= SMALL_NUMBER)
+		{
+			const float scale = angle / sinAngle;
+			rs.x = scale * x;
+			rs.y = scale * y;
+			rs.z = scale * z;
+			return rs;
+		}
+	}
+
+	rs.x = x;
+	rs.y = y;
+	rs.z = z;
+	return rs;
+}
+
+_Quaternion _Quaternion::Exp() const
+{
+	const float angle = GMath::Sqrt(x * x + y * y + z * z);
+	const float sinAngle = GMath::Sin(angle);
+	_Quaternion rs;
+	rs.w = GMath::Cos(angle);
+	if (GMath::Abs(sinAngle) >= SMALL_NUMBER)
+	{
+		const float scale = sinAngle / angle;
+		rs.x = scale * x;
+		rs.y = scale * y;
+		rs.z = scale * z;
+	}
+	else
+	{
+		rs.x = x;
+		rs.y = y;
+		rs.z = z;
+	}
+	return rs;
+}
+
+FORCEINLINE _Vector _Quaternion::GetAxisX() const
+{
+	return RotateVector(_Vector(1, 0, 0));
+}
+
+FORCEINLINE _Vector _Quaternion::GetAxisY() const
+{
+	return RotateVector(_Vector(0, 1, 0));
+}
+
+FORCEINLINE _Vector _Quaternion::GetAxisZ() const
+{
+	return RotateVector(_Vector(0, 0, 1));
+}
+
+FORCEINLINE _Vector _Quaternion::GetForwardVector() const
+{
+	return GetAxisX();
+}
+
+FORCEINLINE _Vector _Quaternion::GetRightVector() const
+{
+	return GetAxisY();
+}
+
+FORCEINLINE _Vector _Quaternion::GetUpVector() const
+{
+	return GetAxisZ();
+}
+
+FORCEINLINE _Vector _Quaternion::ToVector() const
+{
+	return GetAxisX();
+}
+
+FORCEINLINE _Vector _Quaternion::GetRotationAxis() const
+{
+	using namespace SSE;
+	_Vector rs;
+	VectorRegister a = VectorLoadAligned(this);
+	VectorRegister b = VectorNormalizeSafe(VectorSet_W0(a), SSEMathConstant::Float1000);
+	VectorStoreFloat3(b, &rs);
+	return rs;
+}
+
+FORCEINLINE float _Quaternion::AngularDistance(const _Quaternion& q) const
+{
+	float p = x * q.x + y * q.y + z * q.z + w * q.w;
+	return GMath::Acos( 2*p*p - 1 );
+}
+
+FORCEINLINE void _Quaternion::ToAxisAngle(_Vector& axis, float& angle) const
+{
+	axis = GetRotationAxis();
+	angle = GetAngle();
+}
+
+_Rotator _Quaternion::ToRotator() const
+{
+	CheckNan();
+	const float st = z * x - w * y;
+	const float yawY = 2.0f * (w * z + x * y);
+	const float yawX = (1.0f - 2.0f * (y * y + z * z));
+
+	const float threshold_st = 0.4999995f;
+	_Rotator rs;
+	if (st < -threshold_st)
+	{
+		rs.Pitch = -90.0f;
+		rs.Yaw = GMath::Atan2(yawY, yawX) * GMath::Rad2Deg;
+		rs.Roll = _Rotator::NormalizeAngle(-rs.Yaw - (2 * GMath::Atan2(x, w) * GMath::Rad2Deg));
+	}
+	else if (st > threshold_st)
+	{
+		rs.Pitch = 90.0f;
+		rs.Yaw = GMath::Atan2(yawY, yawX) * GMath::Rad2Deg;
+		rs.Roll = _Rotator::NormalizeAngle(rs.Yaw - (2 * GMath::Atan2(x, w) * GMath::Rad2Deg));
+	}
+	else
+	{
+		rs.Pitch = GMath::FastASin(2*st) * GMath::Rad2Deg;
+		rs.Yaw = GMath::Atan2(yawY, yawX) * GMath::Rad2Deg;
+		rs.Roll = GMath::Atan2(-2 * (w * x + y * z), (1 - 2 * (x * x + y + y))) * GMath::Rad2Deg;
+	}
+	return rs;
+}
+
+FORCEINLINE _Quaternion FindBetween_Helper(const _Vector& A, const _Vector& B, float NormAB)
+{
+	float w = NormAB + (A | B);
+	_Quaternion rs;
+	if (w >= 1e-6f * NormAB)
+	{
+		rs = _Quaternion(
+			A.y * B.z - A.z * B.y,
+			A.z * B.x - A.x * B.z,
+			A.x * B.y - A.y * B.x,
+			w);
+	}
+	else
+	{
+		w = 0;
+		rs = GMath::Abs(A.x) > GMath::Abs(A.y) ?
+			_Quaternion(-A.z, 0.0f, A.x, w) :
+			_Quaternion(0.0f, -A.z, A.y, w);
+	}
+	rs.Normalize();
+	return rs;
+}
+
+FORCEINLINE _Quaternion _Quaternion::FindBetweenNormals(const _Vector& v1, const _Vector& v2)
+{
+	return FindBetween_Helper(v1, v2, 1.0f);
+}
+
+FORCEINLINE _Quaternion _Quaternion::FindBetweenVectors(const _Vector& v1, const _Vector& v2)
+{
+	return FindBetween_Helper(
+		v1, 
+		v2, 
+		GMath::Sqrt(v1.LengthSquare() * v2.LengthSquare())
+	);
+}
+
+FORCEINLINE float _Quaternion::Error(const _Quaternion& q1, const _Quaternion& q2)
+{
+	const float cosom = GMath::Abs(q1 | q2);
+	return GMath::Abs(cosom) < 0.9999999f ? GMath::Acos(cosom) * INV_PI : 0.0f;
+}
+
+FORCEINLINE float _Quaternion::ErrorAutoNormalize(const _Quaternion& q1, const _Quaternion& q2)
+{
+	_Quaternion a = q1;
+	a.Normalize();
+	_Quaternion b = q2;
+	b.Normalize();
+	return _Quaternion::Error(a,b);
+}
+
+_Quaternion _Quaternion::FastLerp(const _Quaternion& A, const _Quaternion& B, const float Alpha)
+{
+	const float dotRs = A | B;
+	const float bias = GMath::Select(dotRs, 1.0f, -1.0f);
+	return (B * Alpha) + (A * (bias * (1.0f - Alpha)));
+}
+
+_Quaternion _Quaternion::FastBilerp(const _Quaternion& p00, const _Quaternion& p01, const _Quaternion& p10, const _Quaternion& p11, const float FracX, const float FracY)
+{
+	return _Quaternion::FastLerp(
+		_Quaternion::FastLerp(p00, p01, FracX),
+		_Quaternion::FastLerp(p10, p11, FracX),
+		FracY
+	);
+}
+
+_Quaternion _Quaternion::Slerp_NoNormalization(const _Quaternion& q1, const _Quaternion& q2, float slerp)
+{
+	const float rawCosom = q1 | q2;
+	const float cosom = GMath::Select(rawCosom, rawCosom, -rawCosom);
+	float scale0, scale1;
+	if (cosom < 0.9999f)
+	{
+		const float omega = GMath::Acos(cosom);
+		const float invSin = 1.0f / GMath::Sin(omega);
+		scale0 = GMath::Sin((1.0f - slerp) * omega) * invSin;
+		scale1 = GMath::Sin(slerp * omega) * invSin;
+	}
+	else
+	{
+		scale0 = 1.0f - slerp;
+		scale1 = slerp;
+	}
+
+	scale1 = GMath::Select(rawCosom, scale1, -scale1);
+	_Quaternion rs;
+	rs.x = scale0 * q1.x + scale1 * q2.x;
+	rs.y = scale0 * q1.y + scale1 * q2.y;
+	rs.z = scale0 * q1.z + scale1 * q2.z;
+	rs.w = scale0 * q1.w + scale1 * q2.w;
+	return rs;
+}
+
+_Quaternion _Quaternion::SlerpFullPath_NoNormalization(const _Quaternion& q1, const _Quaternion& q2, float slerp)
+{
+	const float cosAngle = GMath::Clamp(q1 | q2, -1.0f, 1.0f);
+	const float angle = GMath::Acos(cosAngle);
+	if (GMath::Abs(angle) < KINDA_SMALL_NUMBER)
+	{
+		return q1;
+	}
+	const float sinAngle = GMath::Sin(angle);
+	const float invSinAngle = 1.0f / sinAngle;
+
+	const float scale0 = GMath::Sin((1.0 - slerp) * angle) * invSinAngle;
+	const float scale1 = GMath::Sin(slerp * angle) * invSinAngle;
+	return q1*scale0 + q2*scale1;
+}
+
+_Quaternion _Quaternion::Squad(const _Quaternion& q1, const _Quaternion& t1, const _Quaternion& q2, const _Quaternion& t2, float alpha)
+{
+	const _Quaternion a = _Quaternion::Slerp_NoNormalization(q1, q2, alpha);
+	const _Quaternion b = _Quaternion::SlerpFullPath_NoNormalization(t1, t2, alpha);
+	return _Quaternion::SlerpFullPath(a, b, 2.0f * alpha * (1.0f-alpha));
+}
+
+_Quaternion _Quaternion::SquadFullPath(const _Quaternion& q1, const _Quaternion& t1, const _Quaternion& q2, const _Quaternion& t2, float alpha)
+{
+	const _Quaternion a = _Quaternion::SlerpFullPath_NoNormalization(q1, q2, alpha);
+	const _Quaternion b = _Quaternion::SlerpFullPath_NoNormalization(t1, t2, alpha);
+	return _Quaternion::SlerpFullPath(a, b, 2.0f * alpha * (1.0f - alpha));
+}
+
+void _Quaternion::CalcTangents(const _Quaternion& prevP, const _Quaternion& p, const _Quaternion& nextP, float tension, _Quaternion& outTan)
+{
+	const _Quaternion invP = p.Inverse();
+	const _Quaternion part1 = (invP * prevP).Log();
+	const _Quaternion part2 = (invP * nextP).Log();
+	const _Quaternion preExp = (part1 + part2) * -0.5f;
+	outTan = p * preExp.Exp();
+}
+
+FORCEINLINE bool _Quaternion::operator==(const _Quaternion& q) const
+{
+	const VectorRegister a = VectorLoadAligned(this);
+	const VectorRegister b = VectorLoadAligned(&q);
+	return VectorMaskBits(VectorCompareEQ(a,b)) == 0x0f;
+}
+
+FORCEINLINE bool _Quaternion::operator!=(const _Quaternion& q) const
+{
+	const VectorRegister a = VectorLoadAligned(this);
+	const VectorRegister b = VectorLoadAligned(&q);
+	return VectorMaskBits(VectorCompareNE(a, b)) != 0x00;
+}
+
+_Quaternion _Quaternion::FromEuler(const _Vector& euler)
+{
+	return _Rotator::FromEuler(euler).ToQuaternion();
 }
